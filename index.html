@@ -2038,6 +2038,128 @@ const CARD_DB = {
     skillMult:2.5, skillType:'aoe',
     isBoss:true, bossSize:2, // v0.3：改為 2×2
   },
+  // v0.6：新增卡牌（10 張）
+  'berserker': {
+    id:'berserker', name:'狂戰士', icon:'🪓', rarity:'R', cardType:'unit',
+    race:'獸人', job:'戰士', cost:3,
+    hp:85, patk:16, matk:0, pdef:4, mdef:2, spd:60, acc:75, crit:15, critDmg:220,
+    move:2, range:1, color:'#7a3a1a', dmgType:'physical',
+    skill:'狂暴', skillDesc:'增加50%攻擊和30%暴擊率，持續5秒',
+    passive:'嗜血', passiveDesc:'擊殺敵人恢復30% HP',
+    skillMult:1.5, skillType:'melee',
+  },
+  'paladin': {
+    id:'paladin', name:'聖騎士', icon:'⚜️', rarity:'SR', cardType:'unit',
+    race:'人類', job:'坦克', cost:4,
+    hp:110, patk:12, matk:8, pdef:18, mdef:15, spd:50, acc:85, crit:5, critDmg:140,
+    move:2, range:1, color:'#5a5a2a', dmgType:'physical',
+    skill:'聖光審判', skillDesc:'對單體造成180%傷害並治療自身20% HP',
+    passive:'聖光守護', passiveDesc:'受到致命傷害時觸發無敵1秒（冷卻30秒）',
+    skillMult:1.8, skillType:'melee',
+  },
+  'ranger': {
+    id:'ranger', name:'遊俠', icon:'🏹', rarity:'R', cardType:'unit',
+    race:'精靈', job:'射手', cost:2,
+    hp:42, patk:12, matk:0, pdef:3, mdef:4, spd:80, acc:90, crit:18, critDmg:190,
+    move:3, range:4, color:'#3a6a3a', dmgType:'physical',
+    skill:'多重射擊', skillDesc:'對目標連續射擊3次，每次造成60%傷害',
+    passive:'獵人印記', passiveDesc:'攻擊標記敵人，持續5秒，隊友對標記目標傷害+15%',
+    skillMult:0.6, skillType:'ranged', skillHits:3,
+  },
+  'battle-mage': {
+    id:'battle-mage', name:'戰鬥法師', icon:'🔮', rarity:'SR', cardType:'unit',
+    race:'人類', job:'法師', cost:3,
+    hp:55, patk:8, matk:18, pdef:6, mdef:12, spd:65, acc:88, crit:10, critDmg:160,
+    move:2, range:3, color:'#4a2a6a', dmgType:'magic',
+    skill:'魔法爆發', skillDesc:'對周圍造成150%魔法傷害',
+    passive:'魔力護盾', passiveDesc:'受到攻擊時獲得等同於傷害20%的護盾',
+    skillMult:1.5, skillType:'aoe',
+  },
+  'shadow-blade': {
+    id:'shadow-blade', name:'暗影劍客', icon:'🗡️', rarity:'SR', cardType:'unit',
+    race:'暗夜精靈', job:'刺客', cost:3,
+    hp:48, patk:15, matk:0, pdef:3, mdef:5, spd:95, acc:92, crit:30, critDmg:240,
+    move:3, range:1, color:'#2a2a4a', dmgType:'physical',
+    skill:'影襲', skillDesc:'瞬移到目標背後造成200%暴擊傷害',
+    passive:'暗影步', passiveDesc:'每次暴擊後速度+10%（最多3層）',
+    skillMult:2.0, skillType:'melee',
+  },
+  'frost-knight': {
+    id:'frost-knight', name:'寒冰騎士', icon:'🧊', rarity:'R', cardType:'unit',
+    race:'人類', job:'坦克', cost:3,
+    hp:95, patk:10, matk:6, pdef:14, mdef:10, spd:48, acc:80, crit:5, critDmg:130,
+    move:2, range:1, color:'#2a4a6a', dmgType:'physical',
+    skill:'寒冰壁壘', skillDesc:'獲得50% HP的護盾並凍結周圍敵人2秒',
+    passive:'凍氣', passiveDesc:'受到近戰攻擊時減速攻擊者20%',
+    skillMult:0, skillType:'shield',
+  },
+  'oracle': {
+    id:'oracle', name:'先知', icon:'🔯', rarity:'SR', cardType:'unit',
+    race:'人類', job:'牧師', cost:3,
+    hp:45, patk:0, matk:12, pdef:4, mdef:14, spd:60, acc:90, crit:5, critDmg:140,
+    move:2, range:4, color:'#6a5a2a', dmgType:'magic',
+    skill:'神聖祝福', skillDesc:'使友方全體獲得15% HP護盾並加速20%',
+    passive:'預言', passiveDesc:'每10秒隨機復活一個死亡友軍（50% HP）',
+    skillMult:0, skillType:'aoe',
+  },
+  'demon-hunter': {
+    id:'demon-hunter', name:'惡魔獵手', icon:'😈', rarity:'SR', cardType:'unit',
+    race:'半魔', job:'射手', cost:4,
+    hp:60, patk:18, matk:10, pdef:5, mdef:8, spd:85, acc:95, crit:20, critDmg:210,
+    move:3, range:4, color:'#5a1a3a', dmgType:'physical',
+    skill:'惡魔之眼', skillDesc:'鎖定敵方最強單位造成220%傷害並減攻30%',
+    passive:'獵魔', passiveDesc:'對 BOSS 和英雄單位傷害+50%',
+    skillMult:2.2, skillType:'ranged',
+  },
+  'earth-shaman': {
+    id:'earth-shaman', name:'大地薩滿', icon:'🌍', rarity:'R', cardType:'unit',
+    race:'獸人', job:'法師', cost:3,
+    hp:58, patk:4, matk:14, pdef:8, mdef:10, spd:55, acc:85, crit:5, critDmg:140,
+    move:2, range:3, color:'#4a3a2a', dmgType:'magic',
+    skill:'大地之怒', skillDesc:'召喚岩石砸向3×3區域造成140%傷害並暈眩1秒',
+    passive:'大地祝福', passiveDesc:'友方全體物防+10%',
+    skillMult:1.4, skillType:'aoe',
+  },
+  'void-walker': {
+    id:'void-walker', name:'虛空行者', icon:'🌀', rarity:'SSR', cardType:'hero',
+    race:'虛空生物', job:'法師', cost:5,
+    hp:65, patk:0, matk:25, pdef:6, mdef:16, spd:75, acc:98, crit:15, critDmg:200,
+    move:2, range:5, color:'#1a1a2a', dmgType:'magic',
+    skill:'虛空裂縫', skillDesc:'對直線5格造成250%魔法傷害並流放目標3秒',
+    passive:'虛空之力', passiveDesc:'每次施法增加5%魔攻（最多10層）',
+    skillMult:2.5, skillType:'ranged',
+  },
+  // v0.6：新增 BOSS（3 個）
+  'boss-frost-titan': {
+    id:'boss-frost-titan', name:'寒冰泰坦', icon:'❄️', rarity:'BOSS', cardType:'boss',
+    race:'巨人', job:'泰坦', cost:0,
+    hp:1800, patk:30, matk:30, pdef:28, mdef:22, spd:18, acc:85, crit:8, critDmg:170,
+    move:1, range:3, color:'#1a3a5a', dmgType:'magic',
+    skill:'極寒風暴', skillDesc:'對全場造成180%魔法傷害並凍結3秒',
+    passive:'永凍領域', passiveDesc:'周圍敵人速度-30%、攻擊-20%',
+    skillMult:1.8, skillType:'aoe',
+    isBoss:true, bossSize:2,
+  },
+  'boss-thunder-behemoth': {
+    id:'boss-thunder-behemoth', name:'雷霆巨獸', icon:'⚡', rarity:'BOSS', cardType:'boss',
+    race:'魔獸', job:'巨獸', cost:0,
+    hp:2000, patk:38, matk:25, pdef:22, mdef:20, spd:22, acc:90, crit:12, critDmg:190,
+    move:1, range:4, color:'#3a2a5a', dmgType:'physical',
+    skill:'雷霆萬鈞', skillDesc:'召喚閃電鏈，跳躍5次，每次造成150%傷害',
+    passive:'雷電之心', passiveDesc:'受到傷害時反彈30%魔法傷害',
+    skillMult:1.5, skillType:'ranged', skillHits:5,
+    isBoss:true, bossSize:2,
+  },
+  'boss-void-emperor': {
+    id:'boss-void-emperor', name:'虛空帝王', icon:'👁️', rarity:'BOSS', cardType:'boss',
+    race:'虛空', job:'帝王', cost:0,
+    hp:2500, patk:20, matk:45, pdef:18, mdef:35, spd:30, acc:98, crit:18, critDmg:220,
+    move:1, range:5, color:'#0a0a1a', dmgType:'magic',
+    skill:'虛空湮滅', skillDesc:'對最遠5個敵人造成300%魔法傷害並沉默5秒',
+    passive:'虛空之主', passiveDesc:'每秒恢復3% HP，魔防+50%',
+    skillMult:3.0, skillType:'aoe',
+    isBoss:true, bossSize:2,
+  },
 };
 
 // 骷髏士兵（臨時單位）
@@ -2269,6 +2391,53 @@ const BOSS_RAIDS = [
     reward:{gold:800,essence:80},
     // unlockStage:'3-10',  // v0.3：測試時先解鎖
   },
+  // v0.6：新增 BOSS 副本（3 個）
+  {
+    id:'raid-frost-titan',
+    name:'寒冰泰坦之戰',
+    boss:'boss-frost-titan',
+    bossPosition:{x:7,y:2},
+    supporters:[],
+    obstacles:[
+      {x:1,y:4,type:'ice'},
+      {x:1,y:6,type:'ice'},
+      {x:3,y:5,type:'ice'},
+      {x:5,y:3,type:'ice'},
+      {x:5,y:7,type:'ice'},
+    ],
+    reward:{gold:1000,essence:100},
+    unlockStage:'4-10',
+  },
+  {
+    id:'raid-thunder-behemoth',
+    name:'雷霆巨獸之戰',
+    boss:'boss-thunder-behemoth',
+    bossPosition:{x:7,y:2},
+    supporters:[],
+    obstacles:[
+      {x:2,y:2,type:'rock'},
+      {x:2,y:8,type:'rock'},
+      {x:4,y:5,type:'rock'},
+    ],
+    reward:{gold:1200,essence:120},
+    unlockStage:'5-10',
+  },
+  {
+    id:'raid-void-emperor',
+    name:'虛空帝王之戰',
+    boss:'boss-void-emperor',
+    bossPosition:{x:7,y:2},
+    supporters:[],
+    obstacles:[
+      {x:1,y:1,type:'void'},
+      {x:1,y:9,type:'void'},
+      {x:3,y:5,type:'void'},
+      {x:5,y:3,type:'void'},
+      {x:5,y:7,type:'void'},
+    ],
+    reward:{gold:1500,essence:150},
+    unlockStage:'6-10',
+  },
 ];
 
 // v0.3：章節定義
@@ -2393,7 +2562,7 @@ const CHAPTERS = [
 // 遊戲狀態
 // ============================================================
 let G = {
-  player: { level:1, exp:0, gold:999999, essence:9999, stamina:999, wins:0, losses:0, currentStage:'1-1' },
+  player: { level:1, exp:0, gold:500, essence:100, stamina:10, wins:0, losses:0, currentStage:'1-1' },
   collection: {}, // cardId -> count
   deck: [],       // 30張 cardId
   stageCleared: {},

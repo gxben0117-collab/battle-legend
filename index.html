@@ -841,6 +841,16 @@ body {
   color: var(--text-dim);
   margin-top: 2px;
 }
+/* v0.3：能量不足的卡片 */
+.hand-card.disabled {
+  opacity: 0.5;
+  filter: grayscale(0.6);
+  cursor: not-allowed !important;
+}
+.hand-card.disabled:hover {
+  transform: translateY(0) !important;
+  border-color: var(--border) !important;
+}
 
 /* N/R/SR/SSR 邊框 */
 .hand-card.rarity-N { border-color: var(--n-col); }
@@ -1463,6 +1473,8 @@ body {
         <button class="tactic-btn active" id="tactic-free" onclick="setTactic('free')">⚔ 自由</button>
         <button class="tactic-btn" id="tactic-charge" onclick="setTactic('charge')">🏃 突擊</button>
         <button class="tactic-btn" id="tactic-defend" onclick="setTactic('defend')">🛡 防守</button>
+        <!-- v0.3：手動/自動切換 -->
+        <button class="tactic-btn" id="btn-auto-toggle" onclick="toggleAutoPlay()" style="margin-top:6px;background:#2a4a2a;">🎮 自動</button>
       </div>
       <div class="ctrl-btns">
         <div style="display:flex;flex-direction:column;gap:3px;">
@@ -1726,22 +1738,22 @@ const CARD_DB = {
   'boss-shadow-lord': {
     id:'boss-shadow-lord', name:'暗影領主', icon:'👹', rarity:'BOSS', cardType:'boss',
     race:'惡魔', job:'領主', cost:0,
-    hp:2000, patk:30, matk:30, pdef:25, mdef:25, spd:20, acc:90, crit:10, critDmg:180,
+    hp:1200, patk:28, matk:28, pdef:20, mdef:20, spd:20, acc:90, crit:10, critDmg:180,
     move:1, range:3, color:'#2a0a1a', dmgType:'magic',
     skill:'暗影衝擊波', skillDesc:'對周圍3×3造成200%魔法傷害',
     passive:'暗影之力', passiveDesc:'每損失25% HP，攻擊+20%',
     skillMult:2.0, skillType:'aoe',
-    isBoss:true, bossSize:4,
+    isBoss:true, bossSize:2, // v0.3：改為 2×2
   },
   'boss-inferno-dragon': {
     id:'boss-inferno-dragon', name:'烈焰龍王', icon:'🐉', rarity:'BOSS', cardType:'boss',
     race:'龍族', job:'龍王', cost:0,
-    hp:2500, patk:35, matk:40, pdef:30, mdef:20, spd:25, acc:95, crit:15, critDmg:200,
+    hp:1500, patk:32, matk:35, pdef:25, mdef:18, spd:25, acc:95, crit:15, critDmg:200,
     move:1, range:4, color:'#4a0a0a', dmgType:'magic',
     skill:'龍炎吐息', skillDesc:'對前方直線5格造成250%魔法傷害',
     passive:'龍威', passiveDesc:'周圍敵人攻擊-15%',
     skillMult:2.5, skillType:'aoe',
-    isBoss:true, bossSize:4,
+    isBoss:true, bossSize:2, // v0.3：改為 2×2
   },
 };
 
@@ -1951,7 +1963,7 @@ const BOSS_RAIDS = [
     id:'raid-shadow-lord',
     name:'暗影領主之戰',
     boss:'boss-shadow-lord',
-    bossPosition:{x:6,y:1},  // BOSS 左上角位置（佔4×4：x=6~9, y=1~4）
+    bossPosition:{x:7,y:2},  // v0.3：BOSS 左上角位置（佔 2×2：x=7~8, y=2~3）
     supporters:[],  // 無小怪
     obstacles:[
       {x:2,y:3,type:'statue'},
@@ -1964,7 +1976,7 @@ const BOSS_RAIDS = [
     id:'raid-inferno-dragon',
     name:'烈焰龍王之戰',
     boss:'boss-inferno-dragon',
-    bossPosition:{x:6,y:1},  // BOSS 左上角位置（佔4×4：x=6~9, y=1~4）
+    bossPosition:{x:7,y:2},  // v0.3：BOSS 左上角位置（佔 2×2：x=7~8, y=2~3）
     supporters:[],
     obstacles:[
       {x:2,y:3,type:'rock'},
@@ -2413,6 +2425,7 @@ function createBattleState(stage, raid = null) {
     lastTime: null,
     animFrameId: null,
     skillCooldowns: {},
+    autoPlay: true, // v0.3：自動/手動模式（true=自動出牌，false=手動點擊）
     particles: [],
     unitIdCounter: 0,
     obstacles: stage.obstacles || [], // v0.2：地形障礙
@@ -3288,6 +3301,9 @@ function findFreeCellNear(target, isMy) {
 // AI 打牌（我方自動）
 // ============================================================
 function aiPlayCard() {
+  // v0.3：只在自動模式下才自動出牌
+  if (!B.autoPlay) return;
+
   if (B.hand.length === 0) return;
   // 每 3 秒嘗試打牌（根據倍速調整）
   if (!B._lastPlay) B._lastPlay = 0;
@@ -3302,15 +3318,20 @@ function aiPlayCard() {
   if (playable.length === 0) return;
 
   const picked = playable[Math.floor(Math.random() * playable.length)];
-  const card = CARD_DB[picked];
-  if (!card || card.cost > B.energy) return; // 二次檢查
+  playCardById(picked);
+}
+
+// v0.3：打出指定卡片（手動/自動共用）
+function playCardById(cardId) {
+  const card = CARD_DB[cardId];
+  if (!card || card.cost > B.energy) return;
 
   const freeCell = findFreeCell(true);
   if (!freeCell) return;
 
   B.energy -= card.cost;
-  const idx = B.hand.indexOf(picked);
-  B.hand.splice(idx, 1);
+  const idx = B.hand.indexOf(cardId);
+  if (idx >= 0) B.hand.splice(idx, 1);
   drawCard(B);
 
   const u = makeUnit('my'+B.unitIdCounter++, card, freeCell.x, freeCell.y, true, false);
@@ -3377,6 +3398,11 @@ function renderHand() {
     if (!card) return;
     const div = document.createElement('div');
     div.className = `hand-card rarity-${card.rarity}`;
+
+    // v0.3：能量不足時添加 disabled 樣式
+    const canPlay = card.cost <= B.energy;
+    if (!canPlay) div.classList.add('disabled');
+
     // v0.2：顯示物攻或魔攻
     const atkStat = card.dmgType === 'physical' ? `物攻${card.patk}` : `魔攻${card.matk}`;
     div.innerHTML = `
@@ -3384,6 +3410,15 @@ function renderHand() {
       <div class="card-icon">${card.icon}</div>
       <div class="card-name">${card.name}</div>
       <div class="card-stats">HP${card.hp} ${atkStat}</div>`;
+
+    // v0.3：手動模式下可點擊
+    if (!B.autoPlay && canPlay) {
+      div.style.cursor = 'pointer';
+      div.onclick = () => playCardById(cardId);
+      div.onmouseenter = () => div.style.transform = 'translateY(-4px)';
+      div.onmouseleave = () => div.style.transform = 'translateY(0)';
+    }
+
     hs.appendChild(div);
   });
 }
@@ -3406,6 +3441,22 @@ function setSpeed(n) {
     ind.textContent = `⚡ ${n}×`;
   } else {
     ind.style.display = 'none';
+  }
+}
+
+// v0.3：切換手動/自動模式
+function toggleAutoPlay() {
+  if (!B) return;
+  B.autoPlay = !B.autoPlay;
+  const btn = document.getElementById('btn-auto-toggle');
+  if (B.autoPlay) {
+    btn.textContent = '🎮 自動';
+    btn.style.background = '#2a4a2a';
+    showToast('自動出牌：開啟');
+  } else {
+    btn.textContent = '👆 手動';
+    btn.style.background = '#4a2a2a';
+    showToast('手動出牌：點擊手牌出戰');
   }
 }
 

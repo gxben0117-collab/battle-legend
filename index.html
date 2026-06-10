@@ -3116,7 +3116,7 @@ function isCellWalkable(x, y, u) {
 }
 
 // BFS 找下一步（返回往目標方向的第一步座標）
-function bfsNextStep(u, tx, ty) {
+function bfsNextStep(u, tx, ty, targetUnit = null) {
   if (u.x === tx && u.y === ty) return null;
   const visited = new Set();
   const queue = [{ x: u.x, y: u.y, path: [] }];
@@ -3132,8 +3132,23 @@ function bfsNextStep(u, tx, ty) {
       if (visited.has(key)) continue;
       visited.add(key);
 
-      // 目標格可能有敵人（攻擊目標），允許抵達旁邊一格
-      const isGoal = (nx === tx && ny === ty);
+      // v0.3：檢查是否到達目標（或目標附近）
+      let isGoal = (nx === tx && ny === ty);
+
+      // v0.3：如果目標是 BOSS，檢查是否到達 BOSS 任意格子
+      if (!isGoal && targetUnit && targetUnit.isBoss && targetUnit.bossSize) {
+        const size = targetUnit.bossSize;
+        for (let dx = 0; dx < size; dx++) {
+          for (let dy = 0; dy < size; dy++) {
+            if (nx === targetUnit.x + dx && ny === targetUnit.y + dy) {
+              isGoal = true;
+              break;
+            }
+          }
+          if (isGoal) break;
+        }
+      }
+
       if (isGoal) {
         return cur.path.length > 0 ? cur.path[0] : { x: nx, y: ny };
       }
@@ -3176,8 +3191,8 @@ function moveToward(u, target) {
     }
   }
 
-  // BFS 找往目標的下一步
-  let step = bfsNextStep(u, targetX, targetY);
+  // v0.3：BFS 找往目標的下一步（傳遞 target 以便識別 BOSS）
+  let step = bfsNextStep(u, targetX, targetY, target);
 
   if (!step) {
     // 完全堵死：卡住計數++，超過門檻換最近的可達敵人
@@ -3203,7 +3218,7 @@ function moveToward(u, target) {
               }
             }
           }
-          return { e, step: bfsNextStep(u, ex, ey) };
+          return { e, step: bfsNextStep(u, ex, ey, e) };
         })
         .filter(r => r.step !== null)
         .sort((a, b) => {

@@ -170,18 +170,35 @@ body {
   letter-spacing: 2px;
   margin-right: 8px;
 }
+/* v0.6：資源徽章優化 */
 .resource-badge {
   display: flex;
   align-items: center;
-  gap: 5px;
-  background: var(--bg-card);
+  gap: 6px;
+  background: linear-gradient(135deg, var(--bg-card) 0%, rgba(74,90,106,0.5) 100%);
   border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 4px 10px;
+  border-radius: 6px;
+  padding: 6px 12px;
   font-size: 13px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: all 0.2s;
 }
-.resource-icon { font-size: 14px; }
-.resource-val { color: var(--gold-bright); font-weight: 700; }
+.resource-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  border-color: var(--border-gold);
+}
+.resource-icon {
+  font-size: 16px;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+}
+.resource-val {
+  color: var(--gold-bright);
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  min-width: 50px;
+  text-align: right;
+}
 .hub-nav { margin-left: auto; display: flex; gap: 6px; }
 
 .hub-body {
@@ -315,14 +332,43 @@ body {
   box-shadow: none;
   border-color: var(--border);
 }
+/* v0.6：章節卡片漸變背景美化 */
+.chapter-card:not(.boss-chapter):not(.locked) {
+  background: linear-gradient(135deg,
+    var(--bg-panel) 0%,
+    rgba(74, 90, 106, 0.3) 50%,
+    var(--bg-panel) 100%);
+  position: relative;
+  overflow: hidden;
+}
+.chapter-card:not(.boss-chapter):not(.locked)::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.chapter-card:not(.boss-chapter):not(.locked):hover::before {
+  opacity: 1;
+}
 .chapter-card-icon {
   font-size: 48px;
   line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  transition: transform 0.3s;
+}
+.chapter-card:hover .chapter-card-icon {
+  transform: scale(1.1) translateY(-2px);
 }
 .chapter-card-title {
   font-size: 16px;
   font-weight: 700;
   color: var(--text);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 .chapter-card-subtitle {
   font-size: 12px;
@@ -332,15 +378,22 @@ body {
   font-size: 11px;
   color: var(--gold-bright);
   margin-top: 4px;
+  font-weight: 600;
 }
 /* BOSS 副本章節卡片 */
 .chapter-card.boss-chapter {
-  background: linear-gradient(135deg, #2a0a0e 0%, #4a1018 100%);
+  background: linear-gradient(135deg, #2a0a0e 0%, #4a1018 50%, #2a0a0e 100%);
   border: 2px solid #cc2233;
+  box-shadow: 0 0 20px rgba(204,34,51,0.3);
+  animation: boss-glow 3s ease-in-out infinite;
+}
+@keyframes boss-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(204,34,51,0.3); }
+  50% { box-shadow: 0 0 30px rgba(255,68,102,0.5); }
 }
 .chapter-card.boss-chapter:hover {
   border-color: #ff4466;
-  box-shadow: 0 4px 12px rgba(255,68,102,0.4);
+  box-shadow: 0 4px 20px rgba(255,68,102,0.6);
 }
 .chapter-card.boss-chapter .chapter-card-title {
   color: #ff4466;
@@ -839,13 +892,37 @@ body {
   border-radius: 3px;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  transition: background 0.2s;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  position: relative;
+  overflow: hidden;
+}
+.energy-pip::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+  transition: left 0.5s;
 }
 .energy-pip.filled {
-  background: var(--energy-blue);
+  background: linear-gradient(135deg, #2a7acc 0%, var(--energy-blue) 50%, #5ab4ff 100%);
   border-color: #5ab4ff;
-  box-shadow: 0 0 8px rgba(58,180,255,0.4);
+  box-shadow: 0 0 12px rgba(58,180,255,0.6), inset 0 1px 2px rgba(255,255,255,0.3);
+  transform: scale(1.05);
+}
+.energy-pip.filled::before {
+  left: 100%;
+}
+.energy-pip.filled {
+  animation: energy-pulse 2s ease-in-out infinite;
+}
+@keyframes energy-pulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(58,180,255,0.6); }
+  50% { box-shadow: 0 0 18px rgba(58,180,255,0.8); }
+}
 }
 
 /* 手牌 */

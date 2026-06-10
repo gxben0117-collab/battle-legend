@@ -276,6 +276,76 @@ body {
   box-shadow: none;
 }
 
+/* v0.3：章節選擇 Grid */
+.chapter-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+.chapter-card {
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.chapter-card:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-gold);
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+.chapter-card.locked {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: var(--bg-dark);
+}
+.chapter-card.locked:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--border);
+}
+.chapter-card-icon {
+  font-size: 48px;
+  line-height: 1;
+}
+.chapter-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+.chapter-card-subtitle {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.chapter-card-progress {
+  font-size: 11px;
+  color: var(--gold-bright);
+  margin-top: 4px;
+}
+/* BOSS 副本章節卡片 */
+.chapter-card.boss-chapter {
+  background: linear-gradient(135deg, #2a0a0e 0%, #4a1018 100%);
+  border: 2px solid #cc2233;
+}
+.chapter-card.boss-chapter:hover {
+  border-color: #ff4466;
+  box-shadow: 0 4px 12px rgba(255,68,102,0.4);
+}
+.chapter-card.boss-chapter .chapter-card-title {
+  color: #ff4466;
+}
+
 /* ===== 戰鬥畫面 ===== */
 #screen-battle {
   flex-direction: column;
@@ -1313,16 +1383,19 @@ body {
 <!-- 關卡選擇 -->
 <div id="screen-stage" class="screen" style="flex-direction:column;background:var(--bg-dark);">
   <div class="hub-header">
-    <button class="btn btn-secondary btn-sm" onclick="showScreen('hub')">← 返回</button>
-    <span class="hub-title">選擇關卡</span>
+    <button class="btn btn-secondary btn-sm" id="stage-back-btn" onclick="showScreen('hub')">← 返回</button>
+    <span class="hub-title" id="stage-screen-title">選擇章節</span>
   </div>
   <div style="flex:1;padding:20px;overflow-y:auto;">
-    <div style="margin-bottom:16px;font-size:12px;color:var(--text-dim);">第一章：王國邊境</div>
-    <div class="stage-list" id="stage-list-main" style="max-width:400px;"></div>
+    <!-- v0.3：章節選擇視圖 -->
+    <div id="chapter-selection-view">
+      <div class="chapter-grid" id="chapter-grid"></div>
+    </div>
 
-    <!-- v0.3：BOSS 副本入口 -->
-    <div style="margin-top:24px;margin-bottom:16px;font-size:12px;color:var(--text-dim);">🐉 BOSS 副本</div>
-    <div class="stage-list" id="boss-raid-list" style="max-width:400px;"></div>
+    <!-- v0.3：關卡列表視圖（點擊章節後顯示）-->
+    <div id="stage-list-view" style="display:none;">
+      <div class="stage-list" id="stage-list-main" style="max-width:600px;"></div>
+    </div>
   </div>
 </div>
 
@@ -1879,6 +1952,124 @@ const BOSS_RAIDS = [
   },
 ];
 
+// v0.3：章節定義
+const CHAPTERS = [
+  {
+    id: 'chapter-1',
+    number: 1,
+    name: '第一章',
+    subtitle: '王國邊境',
+    icon: '⚔️',
+    stagePrefix: '1-',
+    unlocked: true,
+  },
+  {
+    id: 'chapter-2',
+    number: 2,
+    name: '第二章',
+    subtitle: '暗影森林',
+    icon: '🌲',
+    stagePrefix: '2-',
+    unlockStage: '1-10',
+  },
+  {
+    id: 'chapter-3',
+    number: 3,
+    name: '第三章',
+    subtitle: '烈焰高地',
+    icon: '🔥',
+    stagePrefix: '3-',
+    unlockStage: '2-10',
+  },
+  {
+    id: 'chapter-4',
+    number: 4,
+    name: '第四章',
+    subtitle: '冰霜雪原',
+    icon: '❄️',
+    stagePrefix: '4-',
+    unlockStage: '3-10',
+    locked: true,
+  },
+  {
+    id: 'chapter-5',
+    number: 5,
+    name: '第五章',
+    subtitle: '雷鳴峽谷',
+    icon: '⚡',
+    stagePrefix: '5-',
+    unlockStage: '4-10',
+    locked: true,
+  },
+  {
+    id: 'chapter-6',
+    number: 6,
+    name: '第六章',
+    subtitle: '星辰神殿',
+    icon: '✨',
+    stagePrefix: '6-',
+    unlockStage: '5-10',
+    locked: true,
+  },
+  {
+    id: 'chapter-7',
+    number: 7,
+    name: '第七章',
+    subtitle: '深淵裂谷',
+    icon: '🌑',
+    stagePrefix: '7-',
+    unlockStage: '6-10',
+    locked: true,
+  },
+  {
+    id: 'chapter-8',
+    number: 8,
+    name: '第八章',
+    subtitle: '天空之城',
+    icon: '☁️',
+    stagePrefix: '8-',
+    unlockStage: '7-10',
+    locked: true,
+  },
+  {
+    id: 'chapter-9',
+    number: 9,
+    name: '第九章',
+    subtitle: '時空之門',
+    icon: '🌀',
+    stagePrefix: '9-',
+    unlockStage: '8-10',
+    locked: true,
+  },
+  {
+    id: 'chapter-10',
+    number: 10,
+    name: '第十章',
+    subtitle: '最終決戰',
+    icon: '👑',
+    stagePrefix: '10-',
+    unlockStage: '9-10',
+    locked: true,
+  },
+  {
+    id: 'chapter-boss',
+    name: 'BOSS 副本',
+    subtitle: '挑戰強敵',
+    icon: '🐉',
+    type: 'boss',
+    unlockStage: '2-10',
+  },
+  {
+    id: 'chapter-event',
+    name: '活動副本',
+    subtitle: '限時挑戰',
+    icon: '🎊',
+    type: 'event',
+    locked: true,
+  },
+];
+
+
 // ============================================================
 // 遊戲狀態
 // ============================================================
@@ -1892,6 +2083,9 @@ let G = {
 
 // 戰鬥狀態
 let B = null;
+
+// v0.3：當前選擇的章節
+let currentChapter = null;
 
 // ============================================================
 // 存檔
@@ -1986,32 +2180,111 @@ function renderStageListHub() {
   });
 }
 
+// v0.3：渲染關卡選擇畫面（章節選擇）
 function renderStageScreen() {
+  // 重置為章節選擇視圖
+  currentChapter = null;
+  document.getElementById('chapter-selection-view').style.display = 'block';
+  document.getElementById('stage-list-view').style.display = 'none';
+  document.getElementById('stage-screen-title').textContent = '選擇章節';
+  document.getElementById('stage-back-btn').onclick = () => showScreen('hub');
+
+  renderChapterSelection();
+}
+
+// v0.3：渲染章節選擇
+function renderChapterSelection() {
+  const el = document.getElementById('chapter-grid');
+  el.innerHTML = '';
+
+  CHAPTERS.forEach(chapter => {
+    // 檢查是否解鎖
+    let locked = chapter.locked || false;
+    if (!locked && chapter.unlockStage && !G.stageCleared[chapter.unlockStage]) {
+      locked = true;
+    }
+    if (chapter.unlocked) locked = false;
+
+    // 計算進度（已通關 / 總關卡）
+    let progress = '';
+    if (chapter.stagePrefix && !locked) {
+      const chapterStages = STAGES.filter(s => s.id.startsWith(chapter.stagePrefix));
+      const cleared = chapterStages.filter(s => G.stageCleared[s.id]).length;
+      progress = `${cleared}/${chapterStages.length}`;
+    }
+
+    const card = document.createElement('div');
+    card.className = 'chapter-card' + (locked ? ' locked' : '');
+    if (chapter.type === 'boss') card.classList.add('boss-chapter');
+
+    card.innerHTML = `
+      <div class="chapter-card-icon">${chapter.icon}</div>
+      <div class="chapter-card-title">${chapter.name}</div>
+      <div class="chapter-card-subtitle">${chapter.subtitle}</div>
+      ${progress ? `<div class="chapter-card-progress">${progress}</div>` : ''}
+      ${locked ? '<div class="chapter-card-progress">🔒 未解鎖</div>' : ''}
+    `;
+
+    if (!locked) {
+      card.onclick = () => enterChapter(chapter);
+    }
+
+    el.appendChild(card);
+  });
+}
+
+// v0.3：進入章節（顯示關卡列表）
+function enterChapter(chapter) {
+  currentChapter = chapter;
+
+  // 切換視圖
+  document.getElementById('chapter-selection-view').style.display = 'none';
+  document.getElementById('stage-list-view').style.display = 'block';
+  document.getElementById('stage-screen-title').textContent = `${chapter.name}：${chapter.subtitle}`;
+  document.getElementById('stage-back-btn').onclick = () => renderStageScreen();
+
+  // 渲染關卡列表
+  if (chapter.type === 'boss') {
+    renderBossRaidList();
+  } else {
+    renderChapterStageList(chapter);
+  }
+}
+
+// v0.3：渲染章節的關卡列表
+function renderChapterStageList(chapter) {
   const el = document.getElementById('stage-list-main');
   el.innerHTML = '';
-  STAGES.forEach((s,i) => {
+
+  const chapterStages = STAGES.filter(s => s.id.startsWith(chapter.stagePrefix));
+
+  chapterStages.forEach((s, i) => {
     const cleared = G.stageCleared[s.id];
-    const locked = i > 0 && !G.stageCleared[STAGES[i-1].id] && i !== 0;
+    const locked = i > 0 && !G.stageCleared[chapterStages[i - 1].id];
+
     const div = document.createElement('div');
-    div.className = 'stage-item' + (locked?' locked':'');
+    div.className = 'stage-item' + (locked ? ' locked' : '');
     div.innerHTML = `
       <span class="stage-num">${s.id}</span>
       <span class="stage-name">${s.name}</span>
       <span class="stage-type">[${s.type}]</span>
       <span style="font-size:10px;color:var(--text-dim)">💰${s.reward.gold}</span>
-      <span class="stage-stars">${cleared?'★★★':''}</span>`;
-    if (!locked) div.onclick = () => { showScreen('hub'); startBattle(s.id); };
+      <span class="stage-stars">${cleared ? '★★★' : ''}</span>`;
+
+    if (!locked) {
+      div.onclick = () => {
+        showScreen('hub');
+        startBattle(s.id);
+      };
+    }
+
     el.appendChild(div);
   });
-
-  // v0.3：渲染 BOSS 副本列表
-  renderBossRaidList();
 }
 
 // v0.3：渲染 BOSS 副本列表
 function renderBossRaidList() {
-  const el = document.getElementById('boss-raid-list');
-  if (!el) return;
+  const el = document.getElementById('stage-list-main');
   el.innerHTML = '';
 
   BOSS_RAIDS.forEach(raid => {
@@ -2031,7 +2304,10 @@ function renderBossRaidList() {
       <span class="stage-stars">${locked ? '🔒' : ''}</span>`;
 
     if (!locked) {
-      div.onclick = () => { showScreen('hub'); startBattle(raid.id, true); };
+      div.onclick = () => {
+        showScreen('hub');
+        startBattle(raid.id, true);
+      };
       div.style.background = 'linear-gradient(135deg, #2a0a0e 0%, #4a1018 100%)';
       div.style.borderColor = '#cc2233';
     }

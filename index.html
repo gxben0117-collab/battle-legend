@@ -851,6 +851,27 @@ body {
   transform: translateY(0) !important;
   border-color: var(--border) !important;
 }
+/* v0.4：手動模式下可點擊的卡片 */
+.hand-card.clickable {
+  box-shadow: 0 2px 8px rgba(74,222,128,0.3);
+  border-width: 2px;
+}
+.hand-card.clickable::after {
+  content: '點擊出戰';
+  position: absolute;
+  bottom: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  color: #4ade80;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+.hand-card.clickable:hover::after {
+  opacity: 1;
+}
 
 /* N/R/SR/SSR 邊框 */
 .hand-card.rarity-N { border-color: var(--n-col); }
@@ -873,6 +894,37 @@ body {
 }
 .tactic-btn.active { background: var(--energy-blue); border-color: #5ab4ff; color: #fff; }
 .tactic-btn:hover { background: var(--bg-hover); }
+
+/* v0.4：手動/自動切換按鈕（加大、加粗、動畫） */
+#btn-auto-toggle {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  padding: 8px 12px !important;
+  border: 2px solid !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  animation: pulse-glow 2s infinite;
+}
+#btn-auto-toggle.auto-mode {
+  background: linear-gradient(135deg, #2a5a2a, #1a4a1a) !important;
+  border-color: #4ade80 !important;
+  color: #4ade80 !important;
+}
+#btn-auto-toggle.manual-mode {
+  background: linear-gradient(135deg, #5a2a2a, #4a1a1a) !important;
+  border-color: #fb923c !important;
+  color: #fb923c !important;
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+  50% { box-shadow: 0 0 16px rgba(74,222,128,0.6); }
+}
+#btn-auto-toggle.manual-mode {
+  animation: pulse-glow-orange 2s infinite;
+}
+@keyframes pulse-glow-orange {
+  0%, 100% { box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+  50% { box-shadow: 0 0 16px rgba(251,146,60,0.6); }
+}
 
 .ctrl-btns { display: flex; gap: 6px; flex-direction: column; }
 .ctrl-btn {
@@ -1473,8 +1525,8 @@ body {
         <button class="tactic-btn active" id="tactic-free" onclick="setTactic('free')">⚔ 自由</button>
         <button class="tactic-btn" id="tactic-charge" onclick="setTactic('charge')">🏃 突擊</button>
         <button class="tactic-btn" id="tactic-defend" onclick="setTactic('defend')">🛡 防守</button>
-        <!-- v0.3：手動/自動切換 -->
-        <button class="tactic-btn" id="btn-auto-toggle" onclick="toggleAutoPlay()" style="margin-top:6px;background:#2a4a2a;">🎮 自動</button>
+        <!-- v0.4：手動/自動切換按鈕（加大加粗） -->
+        <button class="tactic-btn auto-mode" id="btn-auto-toggle" onclick="toggleAutoPlay()">🎮 自動出牌</button>
       </div>
       <div class="ctrl-btns">
         <div style="display:flex;flex-direction:column;gap:3px;">
@@ -3132,20 +3184,30 @@ function bfsNextStep(u, tx, ty, targetUnit = null) {
       if (visited.has(key)) continue;
       visited.add(key);
 
-      // v0.3：檢查是否到達目標（或目標附近）
-      let isGoal = (nx === tx && ny === ty);
+      // v0.4：檢查是否到達目標
+      // 對於 BOSS，檢查是否到達 BOSS 旁邊（鄰接任意格子）
+      let isGoal = false;
 
-      // v0.3：如果目標是 BOSS，檢查是否到達 BOSS 任意格子
-      if (!isGoal && targetUnit && targetUnit.isBoss && targetUnit.bossSize) {
+      if (targetUnit && targetUnit.isBoss && targetUnit.bossSize) {
+        // BOSS：檢查當前格子是否與 BOSS 任意格子相鄰（射程內）
         const size = targetUnit.bossSize;
         for (let dx = 0; dx < size; dx++) {
           for (let dy = 0; dy < size; dy++) {
-            if (nx === targetUnit.x + dx && ny === targetUnit.y + dy) {
+            const bx = targetUnit.x + dx;
+            const by = targetUnit.y + dy;
+            const distToBoss = Math.abs(nx - bx) + Math.abs(ny - by);
+            if (distToBoss <= u.range) {
               isGoal = true;
               break;
             }
           }
           if (isGoal) break;
+        }
+      } else {
+        // 普通單位：到達目標格子或其射程內
+        const distToTarget = Math.abs(nx - tx) + Math.abs(ny - ty);
+        if (distToTarget <= u.range) {
+          isGoal = true;
         }
       }
 
@@ -3414,7 +3476,7 @@ function renderHand() {
     const div = document.createElement('div');
     div.className = `hand-card rarity-${card.rarity}`;
 
-    // v0.3：能量不足時添加 disabled 樣式
+    // v0.4：能量不足時添加 disabled 樣式
     const canPlay = card.cost <= B.energy;
     if (!canPlay) div.classList.add('disabled');
 
@@ -3426,12 +3488,28 @@ function renderHand() {
       <div class="card-name">${card.name}</div>
       <div class="card-stats">HP${card.hp} ${atkStat}</div>`;
 
-    // v0.3：手動模式下可點擊
-    if (!B.autoPlay && canPlay) {
-      div.style.cursor = 'pointer';
-      div.onclick = () => playCardById(cardId);
-      div.onmouseenter = () => div.style.transform = 'translateY(-4px)';
-      div.onmouseleave = () => div.style.transform = 'translateY(0)';
+    // v0.4：手動模式下可點擊（優化視覺反饋）
+    if (!B.autoPlay) {
+      if (canPlay) {
+        div.style.cursor = 'pointer';
+        div.classList.add('clickable');
+        div.onclick = () => {
+          playCardById(cardId);
+          // 點擊特效
+          div.style.transform = 'scale(0.9)';
+          setTimeout(() => div.style.transform = '', 100);
+        };
+        div.onmouseenter = () => {
+          div.style.transform = 'translateY(-8px) scale(1.05)';
+          div.style.boxShadow = '0 8px 16px rgba(0,0,0,0.4)';
+        };
+        div.onmouseleave = () => {
+          div.style.transform = '';
+          div.style.boxShadow = '';
+        };
+      } else {
+        div.style.cursor = 'not-allowed';
+      }
     }
 
     hs.appendChild(div);
@@ -3459,20 +3537,21 @@ function setSpeed(n) {
   }
 }
 
-// v0.3：切換手動/自動模式
+// v0.4：切換手動/自動模式（優化視覺效果）
 function toggleAutoPlay() {
   if (!B) return;
   B.autoPlay = !B.autoPlay;
   const btn = document.getElementById('btn-auto-toggle');
   if (B.autoPlay) {
-    btn.textContent = '🎮 自動';
-    btn.style.background = '#2a4a2a';
-    showToast('自動出牌：開啟');
+    btn.textContent = '🎮 自動出牌';
+    btn.className = 'tactic-btn auto-mode';
+    showToast('✅ 自動出牌模式');
   } else {
-    btn.textContent = '👆 手動';
-    btn.style.background = '#4a2a2a';
-    showToast('手動出牌：點擊手牌出戰');
+    btn.textContent = '👆 手動出牌';
+    btn.className = 'tactic-btn manual-mode';
+    showToast('✅ 手動出牌模式（點擊手牌）');
   }
+  renderHand(); // 刷新手牌顯示
 }
 
 // ============================================================

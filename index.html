@@ -2452,51 +2452,48 @@ const BOSS_RAIDS = [
     id:'raid-shadow-lord',
     name:'暗影領主之戰',
     boss:'boss-shadow-lord',
-    bossPosition:{x:3,y:0},  // v0.7：9×7 戰場，BOSS 在上方中央（佔 2×2：x=3~4, y=0~1）
+    bossPosition:{x:3,y:0},  // v0.7.3：9×9 戰場，BOSS 在上方（佔 2×2：x=3~4, y=0~1）
     supporters:[
-      {card:'warrior',x:1,y:1},
-      {card:'warrior',x:6,y:1},
-    ],  // v0.6.2：添加開場小兵
+      {card:'warrior',x:2,y:1},
+      {card:'warrior',x:5,y:1},
+    ],
     obstacles:[
-      {x:1,y:3,type:'statue'},
-      {x:6,y:3,type:'statue'},
+      {x:1,y:4,type:'statue'},
+      {x:6,y:4,type:'statue'},
     ],
     reward:{gold:500,essence:50},
-    // unlockStage:'2-10',  // v0.3：測試時先解鎖
   },
   {
     id:'raid-inferno-dragon',
     name:'烈焰龍王之戰',
     boss:'boss-inferno-dragon',
-    bossPosition:{x:3,y:0},  // v0.7：9×7 戰場，BOSS 在上方中央
+    bossPosition:{x:3,y:0},
     supporters:[
-      {card:'mage',x:1,y:1},
-      {card:'mage',x:6,y:1},
-    ],  // v0.6.2：添加開場小兵
+      {card:'mage',x:2,y:1},
+      {card:'mage',x:5,y:1},
+    ],
     obstacles:[
-      {x:2,y:3,type:'rock'},
-      {x:5,y:3,type:'rock'},
-      {x:4,y:4,type:'water'},
+      {x:2,y:4,type:'rock'},
+      {x:5,y:4,type:'rock'},
+      {x:4,y:5,type:'water'},
     ],
     reward:{gold:800,essence:80},
-    // unlockStage:'3-10',  // v0.3：測試時先解鎖
   },
-  // v0.6：新增 BOSS 副本（3 個）
   {
     id:'raid-frost-titan',
     name:'寒冰泰坦之戰',
     boss:'boss-frost-titan',
     bossPosition:{x:3,y:0},
     supporters:[
-      {card:'tank',x:1,y:1},
-      {card:'tank',x:6,y:1},
+      {card:'tank',x:2,y:1},
+      {card:'tank',x:5,y:1},
       {card:'archer',x:4,y:2},
-    ],  // v0.6.2：添加開場小兵
+    ],
     obstacles:[
-      {x:1,y:4,type:'ice'},
-      {x:6,y:4,type:'ice'},
-      {x:2,y:5,type:'ice'},
-      {x:5,y:5,type:'ice'},
+      {x:1,y:5,type:'ice'},
+      {x:6,y:5,type:'ice'},
+      {x:2,y:6,type:'ice'},
+      {x:5,y:6,type:'ice'},
     ],
     reward:{gold:1000,essence:100},
     unlockStage:'4-10',
@@ -2507,14 +2504,14 @@ const BOSS_RAIDS = [
     boss:'boss-thunder-behemoth',
     bossPosition:{x:3,y:0},
     supporters:[
-      {card:'warrior',x:1,y:1},
-      {card:'warrior',x:6,y:1},
+      {card:'warrior',x:2,y:1},
+      {card:'warrior',x:5,y:1},
       {card:'priest',x:4,y:2},
-    ],  // v0.6.2：添加開場小兵
+    ],
     obstacles:[
-      {x:1,y:3,type:'rock'},
-      {x:6,y:3,type:'rock'},
-      {x:4,y:4,type:'rock'},
+      {x:1,y:4,type:'rock'},
+      {x:6,y:4,type:'rock'},
+      {x:4,y:5,type:'rock'},
     ],
     reward:{gold:1200,essence:120},
     unlockStage:'5-10',
@@ -2525,15 +2522,15 @@ const BOSS_RAIDS = [
     boss:'boss-void-emperor',
     bossPosition:{x:3,y:0},
     supporters:[
-      {card:'necro',x:1,y:1},
-      {card:'necro',x:6,y:1},
+      {card:'necro',x:2,y:1},
+      {card:'necro',x:5,y:1},
       {card:'mage',x:2,y:2},
       {card:'mage',x:5,y:2},
-    ],  // v0.6.2：添加開場小兵（最終 BOSS 多 1 個）
+    ],
     obstacles:[
-      {x:0,y:3,type:'void'},
-      {x:7,y:3,type:'void'},
-      {x:4,y:4,type:'void'},
+      {x:0,y:4,type:'void'},
+      {x:7,y:4,type:'void'},
+      {x:4,y:5,type:'void'},
     ],
     reward:{gold:1500,essence:150},
     unlockStage:'6-10',
@@ -3101,7 +3098,7 @@ function createBattleState(stage, raid = null) {
   for (let i = 0; i < 5; i++) drawCard(state);
 
   // v0.2：放我方主堡（靜態建築，永不移動）
-  // v0.7：9×7 戰場，主堡在下方中央 (4,6) - 我方陣地
+  // v0.7.3：9×9 戰場，主堡在下方中央 (4,8)
   state.units.push(makeUnit('cmdr_my', {
     id:'fortress',
     name:'我方主堡',
@@ -3112,14 +3109,14 @@ function createBattleState(stage, raid = null) {
     range:0, move:0,
     skillType:'none',
     color:'#2a4a8a'
-  }, 4, 6, true, true));
+  }, 4, 8, true, true));
 
   if (raid) {
     // v0.3：BOSS 副本模式 - 無敵方主堡，創建 BOSS
     createBoss(state, raid.boss, raid.bossPosition);
   } else {
     // v0.2：放敵方主堡（靜態建築，永不移動）
-    // v0.7：9×7 戰場，主堡在上方中央 (4,0) - 敵方陣地
+    // v0.7.3：9×9 戰場，主堡在上方中央 (4,0)
     state.units.push(makeUnit('cmdr_enemy', {
       id:'fortress',
       name:'敵方主堡',
@@ -3155,8 +3152,8 @@ function createBattleState(stage, raid = null) {
   const usedIdxs = startCards.map(s => s.idx).sort((a,b)=>b-a);
   usedIdxs.forEach(idx => state.deck.splice(idx, 1));
 
-  // v0.7.2：開場位置（我方下方中間區域）
-  const startPositions = [ {x:3,y:5}, {x:4,y:5}, {x:5,y:5} ];
+  // v0.7.3：9×9 戰場開場位置（我方中下 3×3 區域）
+  const startPositions = [ {x:3,y:7}, {x:4,y:7}, {x:5,y:7} ];
   startCards.forEach((sc, i) => {
     const pos = startPositions[i];
     const u = makeUnit('my' + state.unitIdCounter++, CARD_DB[sc.cardId], pos.x, pos.y, true, false);
@@ -3294,20 +3291,20 @@ function applySynergies() {
 function setupBattlefield() {
   const bf = document.getElementById('battlefield');
   bf.innerHTML = '';
-  // v0.7.2：修正為真正的 長9寬7（橫9列、豎7行）
-  for (let row = 0; row < 7; row++) {
+  // v0.7.3：改回 9×9 戰場
+  for (let row = 0; row < 9; row++) {
     for (let col = 0; col < 9; col++) {
       const cell = document.createElement('div');
       cell.id = `cell-${col}-${row}`;
       cell.className = 'cell';
-      // v0.7.2：重新設計陣地
-      // 我方陣地：下方3行 × 中間3列（x=3~5, y=4~6）
-      if (col >= 3 && col <= 5 && row >= 4) cell.classList.add('my-zone');
-      // 敵方陣地：上方3行 × 中間3列（x=3~5, y=0~2）
+      // v0.7.3：陣地改為中上 3×3 和中下 3×3
+      // 我方陣地：中下 3×3（x=3~5, y=6~8）
+      if (col >= 3 && col <= 5 && row >= 6) cell.classList.add('my-zone');
+      // 敵方陣地：中上 3×3（x=3~5, y=0~2）
       else if (col >= 3 && col <= 5 && row <= 2) cell.classList.add('enemy-zone');
       else cell.classList.add('neutral-zone');
-      // 主堡位置：我方 (4,6) 下方、敵方 (4,0) 上方
-      if ((col === 4 && row === 6) || (col === 4 && row === 0)) cell.classList.add('commander-cell');
+      // 主堡位置：我方 (4,8) 下方中央、敵方 (4,0) 上方中央
+      if ((col === 4 && row === 8) || (col === 4 && row === 0)) cell.classList.add('commander-cell');
 
       // v0.2：渲染障礙物
       if (B.obstacles) {
@@ -3375,7 +3372,7 @@ function placeUnit(u) {
   }
 
   // v0.3：修復 - 直接使用格子坐標計算位置，不依賴 getBoundingClientRect
-  const cellSize = 72; // v0.7：9×7 戰場格子大小（增大以適應螢幕）
+  const cellSize = 64; // v0.7.3：9×9 戰場格子大小
   const borderSize = 1; // 格子邊框
   let left = u.x * (cellSize + borderSize) + 3; // +3 居中調整
   let top = u.y * (cellSize + borderSize) + 3;
@@ -3781,10 +3778,10 @@ function killUnit(unit) {
 
 // v0.2：檢查某格是否可通行（邊界、指揮官格、障礙物、其他單位）
 function isCellWalkable(x, y, u) {
-  // v0.7：9×7 戰場邊界檢查
-  if (x < 0 || x > 8 || y < 0 || y > 6) return false;
-  // 主堡位置：(4,6) 我方和 (4,0) 敵方
-  if (!u.isCommander && ((x===4&&y===6)||(x===4&&y===0))) return false;
+  // v0.7.3：9×9 戰場邊界檢查
+  if (x < 0 || x > 8 || y < 0 || y > 8) return false;
+  // 主堡位置：(4,8) 我方和 (4,0) 敵方
+  if (!u.isCommander && ((x===4&&y===8)||(x===4&&y===0))) return false;
   // v0.2：檢查障礙物
   if (B.obstacles && B.obstacles.some(obs => obs.x === x && obs.y === y)) return false;
   // v0.3：檢查 BOSS 佔據的格子
@@ -3976,14 +3973,14 @@ function moveUnitTo(u, nx, ny) {
 }
 
 function findFreeCell(isMy) {
-  // v0.7.2：長9寬7 戰場
-  // 我方陣地：x=3~5, y=4~6（下方3×3）
-  // 敵方陣地：x=3~5, y=0~2（上方3×3）
+  // v0.7.3：9×9 戰場
+  // 我方陣地：中下 3×3（x=3~5, y=6~8）
+  // 敵方陣地：中上 3×3（x=3~5, y=0~2）
   const cols = [3, 4, 5];
-  const rows = isMy ? [5, 4, 6] : [1, 2, 0];
+  const rows = isMy ? [7, 6, 8] : [1, 2, 0];
   for (const row of rows) {
     for (const col of cols) {
-      const isMyCmd = col===4 && row===6;
+      const isMyCmd = col===4 && row===8;
       const isEnemyCmd = col===4 && row===0;
       if (!isMyCmd && !isEnemyCmd && !B.units.some(u=>u.alive&&u.x===col&&u.y===row)) {
         return { x:col, y:row };

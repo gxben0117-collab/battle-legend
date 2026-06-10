@@ -480,8 +480,8 @@ body {
 
 .battlefield {
   display: grid;
-  grid-template-columns: repeat(9, 64px);
-  grid-template-rows: repeat(9, 64px);
+  grid-template-columns: repeat(9, 56px);
+  grid-template-rows: repeat(9, 56px);
   gap: 2px;
   position: relative;
   z-index: 1;
@@ -555,7 +555,7 @@ body {
 /* ===== 單位卡片 ===== */
 .unit {
   position: absolute;
-  width: 60px; height: 60px;
+  width: 52px; height: 52px;
   border-radius: 4px;
   display: flex;
   flex-direction: column;
@@ -3375,7 +3375,7 @@ function placeUnit(u) {
   }
 
   // v0.3：修復 - 直接使用格子坐標計算位置，不依賴 getBoundingClientRect
-  const cellSize = 64; // v0.7.3：9×9 戰場格子大小
+  const cellSize = 56; // v0.7.3：9×9 戰場格子大小（縮小以適應畫面）
   const borderSize = 1; // 格子邊框
   let left = u.x * (cellSize + borderSize) + 3; // +3 居中調整
   let top = u.y * (cellSize + borderSize) + 3;

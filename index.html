@@ -258,6 +258,24 @@ body {
 .stage-type { font-size: 10px; color: var(--text-dim); }
 .stage-stars { color: var(--gold-bright); font-size: 12px; }
 
+/* v0.3：BOSS 副本樣式 */
+.stage-item.boss-raid-item {
+  background: linear-gradient(135deg, #2a0a0e 0%, #4a1018 100%);
+  border: 2px solid #cc2233;
+  box-shadow: 0 0 10px rgba(204,34,51,0.3);
+}
+.stage-item.boss-raid-item:hover {
+  background: linear-gradient(135deg, #3a0a1e 0%, #5a1028 100%);
+  border-color: #ff4466;
+  box-shadow: 0 0 20px rgba(255,68,102,0.5);
+  transform: scale(1.02);
+}
+.stage-item.boss-raid-item.locked {
+  background: var(--bg-card);
+  border-color: var(--border);
+  box-shadow: none;
+}
+
 /* ===== 戰鬥畫面 ===== */
 #screen-battle {
   flex-direction: column;
@@ -510,6 +528,35 @@ body {
 .my-unit .unit-name { color: #8ab8ff; }
 .enemy-unit .unit-name { color: #ff8a8a; }
 .commander-unit .unit-name { color: var(--gold-bright); }
+
+/* v0.3：BOSS 樣式 */
+.unit.boss-unit {
+  border: 3px solid #ff2244;
+  background: linear-gradient(145deg, #3a0a0a 0%, #5a1010 60%, #7a1515 100%);
+  box-shadow:
+    0 0 0 2px rgba(255,34,68,0.5),
+    0 0 20px rgba(255,34,68,0.4),
+    0 0 40px rgba(255,34,68,0.3),
+    inset 0 2px 0 rgba(255,100,100,0.3);
+  animation: boss-pulse 2s ease-in-out infinite;
+}
+@keyframes boss-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 2px rgba(255,34,68,0.5), 0 0 20px rgba(255,34,68,0.4), 0 0 40px rgba(255,34,68,0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 2px rgba(255,34,68,0.7), 0 0 30px rgba(255,34,68,0.6), 0 0 60px rgba(255,34,68,0.5);
+  }
+}
+.unit.boss-unit .unit-icon {
+  font-size: 80px;
+  filter: drop-shadow(0 0 10px rgba(255,50,50,0.8));
+}
+.unit.boss-unit .unit-name {
+  color: #ff4466;
+  font-weight: 800;
+  text-shadow: 0 0 10px rgba(255,50,50,0.8);
+}
 
 /* v0.2：HP 條強化（常駐、護盾條、低血閃爍） */
 .unit-hp-bar {
@@ -1232,6 +1279,10 @@ body {
   <div style="flex:1;padding:20px;overflow-y:auto;">
     <div style="margin-bottom:16px;font-size:12px;color:var(--text-dim);">第一章：王國邊境</div>
     <div class="stage-list" id="stage-list-main" style="max-width:400px;"></div>
+
+    <!-- v0.3：BOSS 副本入口 -->
+    <div style="margin-top:24px;margin-bottom:16px;font-size:12px;color:var(--text-dim);">🐉 BOSS 副本</div>
+    <div class="stage-list" id="boss-raid-list" style="max-width:400px;"></div>
   </div>
 </div>
 
@@ -1534,6 +1585,27 @@ const CARD_DB = {
     passive:'烈焰', passiveDesc:'攻擊附帶燃燒(每秒3% HP持續2秒)',
     skillMult:1.8, skillType:'aoe',
   },
+  // v0.3：BOSS 卡牌
+  'boss-shadow-lord': {
+    id:'boss-shadow-lord', name:'暗影領主', icon:'👹', rarity:'BOSS', cardType:'boss',
+    race:'惡魔', job:'領主', cost:0,
+    hp:2000, patk:30, matk:30, pdef:25, mdef:25, spd:20, acc:90, crit:10, critDmg:180,
+    move:1, range:3, color:'#2a0a1a', dmgType:'magic',
+    skill:'暗影衝擊波', skillDesc:'對周圍3×3造成200%魔法傷害',
+    passive:'暗影之力', passiveDesc:'每損失25% HP，攻擊+20%',
+    skillMult:2.0, skillType:'aoe',
+    isBoss:true, bossSize:4,
+  },
+  'boss-inferno-dragon': {
+    id:'boss-inferno-dragon', name:'烈焰龍王', icon:'🐉', rarity:'BOSS', cardType:'boss',
+    race:'龍族', job:'龍王', cost:0,
+    hp:2500, patk:35, matk:40, pdef:30, mdef:20, spd:25, acc:95, crit:15, critDmg:200,
+    move:1, range:4, color:'#4a0a0a', dmgType:'magic',
+    skill:'龍炎吐息', skillDesc:'對前方直線5格造成250%魔法傷害',
+    passive:'龍威', passiveDesc:'周圍敵人攻擊-15%',
+    skillMult:2.5, skillType:'aoe',
+    isBoss:true, bossSize:4,
+  },
 };
 
 // 骷髏士兵（臨時單位）
@@ -1736,6 +1808,37 @@ const STAGES = [
   },
 ];
 
+// v0.3：BOSS 副本
+const BOSS_RAIDS = [
+  {
+    id:'raid-shadow-lord',
+    name:'暗影領主之戰',
+    boss:'boss-shadow-lord',
+    bossPosition:{x:6,y:1},  // BOSS 左上角位置（佔4×4：x=6~9, y=1~4）
+    supporters:[],  // 無小怪
+    obstacles:[
+      {x:2,y:3,type:'statue'},
+      {x:2,y:7,type:'statue'},
+    ],
+    reward:{gold:500,essence:50},
+    unlockStage:'2-10',
+  },
+  {
+    id:'raid-inferno-dragon',
+    name:'烈焰龍王之戰',
+    boss:'boss-inferno-dragon',
+    bossPosition:{x:6,y:1},  // BOSS 左上角位置（佔4×4：x=6~9, y=1~4）
+    supporters:[],
+    obstacles:[
+      {x:2,y:3,type:'rock'},
+      {x:2,y:7,type:'rock'},
+      {x:4,y:5,type:'water'},
+    ],
+    reward:{gold:800,essence:80},
+    unlockStage:'3-10',
+  },
+];
+
 // ============================================================
 // 遊戲狀態
 // ============================================================
@@ -1860,19 +1963,74 @@ function renderStageScreen() {
     if (!locked) div.onclick = () => { showScreen('hub'); startBattle(s.id); };
     el.appendChild(div);
   });
+
+  // v0.3：渲染 BOSS 副本列表
+  renderBossRaidList();
+}
+
+// v0.3：渲染 BOSS 副本列表
+function renderBossRaidList() {
+  const el = document.getElementById('boss-raid-list');
+  if (!el) return;
+  el.innerHTML = '';
+
+  BOSS_RAIDS.forEach(raid => {
+    const bossCard = CARD_DB[raid.boss];
+    if (!bossCard) return;
+
+    // 檢查是否解鎖（需要通關對應關卡）
+    const locked = raid.unlockStage && !G.stageCleared[raid.unlockStage];
+
+    const div = document.createElement('div');
+    div.className = 'stage-item boss-raid-item' + (locked ? ' locked' : '');
+    div.innerHTML = `
+      <span class="stage-num" style="font-size:24px;">${bossCard.icon}</span>
+      <span class="stage-name" style="color:#ff4466;">${raid.name}</span>
+      <span class="stage-type" style="color:#ff4466;">[BOSS]</span>
+      <span style="font-size:10px;color:var(--gold-bright)">💰${raid.reward.gold} ⭐${raid.reward.essence}</span>
+      <span class="stage-stars">${locked ? '🔒' : ''}</span>`;
+
+    if (!locked) {
+      div.onclick = () => { showScreen('hub'); startBattle(raid.id, true); };
+      div.style.background = 'linear-gradient(135deg, #2a0a0e 0%, #4a1018 100%)';
+      div.style.borderColor = '#cc2233';
+    }
+
+    el.appendChild(div);
+  });
 }
 
 // ============================================================
 // 戰鬥系統
 // ============================================================
-function startBattle(stageId) {
-  const stage = STAGES.find(s => s.id === stageId);
-  if (!stage) return;
+function startBattle(stageId, isBossRaid = false) {
+  let stage;
+  let raid = null;
+
+  if (isBossRaid) {
+    // v0.3：BOSS 副本模式
+    raid = BOSS_RAIDS.find(r => r.id === stageId);
+    if (!raid) return;
+    // 構造假的 stage 對象
+    stage = {
+      id: raid.id,
+      name: raid.name,
+      type: 'Boss',
+      enemy: [],  // BOSS 副本不用普通敵人，用特殊邏輯
+      obstacles: raid.obstacles || [],
+      reward: raid.reward,
+    };
+  } else {
+    // 普通關卡
+    stage = STAGES.find(s => s.id === stageId);
+    if (!stage) return;
+  }
+
   // [測試模式] 體力無限
   // G.player.stamina--;
   saveGame();
 
-  B = createBattleState(stage);
+  B = createBattleState(stage, raid);
   showScreen('battle');
   setupBattlefield();
   applySynergies(); // v0.2：計算並應用羈絆
@@ -1881,7 +2039,7 @@ function startBattle(stageId) {
   startBattleLoop();
 }
 
-function createBattleState(stage) {
+function createBattleState(stage, raid = null) {
   const state = {
     stage,
     units: [],
@@ -1904,6 +2062,10 @@ function createBattleState(stage) {
     particles: [],
     unitIdCounter: 0,
     obstacles: stage.obstacles || [], // v0.2：地形障礙
+    // v0.3：BOSS 副本模式標記
+    isBossRaid: !!raid,
+    bossRaid: raid,
+    bossOccupiedCells: [],  // BOSS 佔據的格子
   };
 
   // 洗牌
@@ -1916,6 +2078,7 @@ function createBattleState(stage) {
   for (let i = 0; i < 5; i++) drawCard(state);
 
   // v0.2：放我方主堡（靜態建築，永不移動）
+  // v0.3：10×10 戰場，主堡在 (0,9)
   state.units.push(makeUnit('cmdr_my', {
     id:'fortress',
     name:'我方主堡',
@@ -1926,28 +2089,34 @@ function createBattleState(stage) {
     range:0, move:0,
     skillType:'none',
     color:'#2a4a8a'
-  }, 0, 8, true, true));
+  }, 0, 9, true, true));
 
-  // v0.2：放敵方主堡（靜態建築，永不移動）
-  state.units.push(makeUnit('cmdr_enemy', {
-    id:'fortress',
-    name:'敵方主堡',
-    icon:'🚩',
-    hp:100,
-    patk:0, matk:0, pdef:0, mdef:0,
-    spd:0, acc:0, crit:0, critDmg:100,
-    range:0, move:0,
-    skillType:'none',
-    color:'#8a2a2a'
-  }, 8, 0, false, true));
+  if (raid) {
+    // v0.3：BOSS 副本模式 - 無敵方主堡，創建 BOSS
+    createBoss(state, raid.boss, raid.bossPosition);
+  } else {
+    // v0.2：放敵方主堡（靜態建築，永不移動）
+    // v0.3：10×10 戰場，主堡在 (9,0)
+    state.units.push(makeUnit('cmdr_enemy', {
+      id:'fortress',
+      name:'敵方主堡',
+      icon:'🚩',
+      hp:100,
+      patk:0, matk:0, pdef:0, mdef:0,
+      spd:0, acc:0, crit:0, critDmg:100,
+      range:0, move:0,
+      skillType:'none',
+      color:'#8a2a2a'
+    }, 9, 0, false, true));
 
-  // 放敵方單位
-  stage.enemy.forEach((e, i) => {
-    const template = CARD_DB[e.card];
-    const u = makeUnit('e' + i, template, e.x, e.y, false, false);
-    if (e.hp) { u.hp = e.hp; u.maxHp = e.hp; }
-    state.units.push(u);
-  });
+    // 放敵方單位
+    stage.enemy.forEach((e, i) => {
+      const template = CARD_DB[e.card];
+      const u = makeUnit('e' + i, template, e.x, e.y, false, false);
+      if (e.hp) { u.hp = e.hp; u.maxHp = e.hp; }
+      state.units.push(u);
+    });
+  }
 
   // 開場組：放最多3張低成本卡
   let startCost = 0;
@@ -1963,8 +2132,8 @@ function createBattleState(stage) {
   const usedIdxs = startCards.map(s => s.idx).sort((a,b)=>b-a);
   usedIdxs.forEach(idx => state.deck.splice(idx, 1));
 
-  // 部署開場
-  const startPositions = [ {x:1,y:8}, {x:2,y:8}, {x:1,y:7} ];
+  // v0.3：10×10 戰場開場位置
+  const startPositions = [ {x:1,y:9}, {x:2,y:9}, {x:1,y:8} ];
   startCards.forEach((sc, i) => {
     const pos = startPositions[i];
     const u = makeUnit('my' + state.unitIdCounter++, CARD_DB[sc.cardId], pos.x, pos.y, true, false);
@@ -1972,6 +2141,33 @@ function createBattleState(stage) {
   });
 
   return state;
+}
+
+// v0.3：創建 BOSS（方案 B：真正的 4×4 單位）
+function createBoss(state, bossCardId, topLeftPos) {
+  const bossCard = CARD_DB[bossCardId];
+  if (!bossCard || !bossCard.isBoss) return;
+
+  const size = bossCard.bossSize || 4;
+
+  // 創建 BOSS 主體（左上角位置）
+  const boss = makeUnit('boss-main', bossCard, topLeftPos.x, topLeftPos.y, false, false);
+  boss.isBoss = true;
+  boss.bossSize = size;
+  boss.bossTopLeft = {x: topLeftPos.x, y: topLeftPos.y};
+
+  state.units.push(boss);
+
+  // 標記 BOSS 佔據的所有格子（4×4）
+  for (let dx = 0; dx < size; dx++) {
+    for (let dy = 0; dy < size; dy++) {
+      const x = topLeftPos.x + dx;
+      const y = topLeftPos.y + dy;
+      if (x >= 0 && x < 10 && y >= 0 && y < 10) {
+        state.bossOccupiedCells.push({x, y, boss: boss});
+      }
+    }
+  }
 }
 
 function makeUnit(uid, template, x, y, isMy, isCommander) {
@@ -2120,6 +2316,12 @@ function placeUnit(u) {
     el = document.createElement('div');
     el.id = 'unit-' + u.uid;
     el.className = 'unit ' + (u.isMy ? 'my-unit' : 'enemy-unit') + (u.isCommander ? ' commander-unit' : '');
+
+    // v0.3：BOSS 特殊處理
+    if (u.isBoss) {
+      el.classList.add('boss-unit');
+    }
+
     const shortName = u.name
       .replace('聖光','').replace('狂野','').replace('翠林','')
       .replace('星穹','').replace('影刃','').replace('鐵壁','')
@@ -2140,8 +2342,18 @@ function placeUnit(u) {
   // v0.2.3：計算並設置絕對位置（含動畫過渡）
   const cellRect = cell.getBoundingClientRect();
   const bfRect = document.getElementById('battlefield').getBoundingClientRect();
-  const left = cellRect.left - bfRect.left + 3; // +3 居中調整
-  const top = cellRect.top - bfRect.top + 3;
+  let left = cellRect.left - bfRect.left + 3; // +3 居中調整
+  let top = cellRect.top - bfRect.top + 3;
+
+  // v0.3：BOSS 佔據 4×4，放大顯示
+  if (u.isBoss && u.bossSize) {
+    const size = u.bossSize;
+    const cellSize = 64; // v0.3：10×10 戰場格子大小
+    el.style.width = (cellSize * size) + 'px';
+    el.style.height = (cellSize * size) + 'px';
+    el.style.fontSize = '80px'; // 放大圖示
+    el.style.zIndex = '15'; // 提高層級
+  }
 
   el.style.left = left + 'px';
   el.style.top = top + 'px';
@@ -2218,9 +2430,20 @@ function startBattleLoop() {
     // Canvas 特效
     renderCanvas(dt);
 
-    // 勝負判定
+    // v0.3：勝負判定（支持 BOSS 副本模式）
     if (B.myCommander.hp <= 0) { endBattle('lose'); return; }
-    if (B.enemyCommander.hp <= 0) { endBattle('win'); return; }
+
+    if (B.isBossRaid) {
+      // BOSS 副本模式：擊敗 BOSS 獲勝
+      const boss = B.units.find(u => u.isBoss && u.alive);
+      if (!boss || boss.hp <= 0) {
+        endBattle('win');
+        return;
+      }
+    } else {
+      // 普通戰鬥：摧毀敵方主堡獲勝
+      if (B.enemyCommander.hp <= 0) { endBattle('win'); return; }
+    }
 
     B.animFrameId = requestAnimationFrame(loop);
   }
@@ -2453,6 +2676,11 @@ function isCellWalkable(x, y, u) {
   if (!u.isCommander && ((x===0&&y===9)||(x===9&&y===0))) return false;
   // v0.2：檢查障礙物
   if (B.obstacles && B.obstacles.some(obs => obs.x === x && obs.y === y)) return false;
+  // v0.3：檢查 BOSS 佔據的格子
+  if (B.bossOccupiedCells && B.bossOccupiedCells.length > 0) {
+    const bossCell = B.bossOccupiedCells.find(cell => cell.x === x && cell.y === y);
+    if (bossCell && bossCell.boss.uid !== u.uid) return false;
+  }
   if (B.units.some(o => o.alive && o.uid !== u.uid && o.x === x && o.y === y)) return false;
   return true;
 }
@@ -2538,11 +2766,38 @@ function moveToward(u, target) {
 }
 
 function moveUnitTo(u, nx, ny) {
-  const oldCell = document.getElementById(`cell-${u.x}-${u.y}`);
-  if (oldCell && u.el && oldCell.contains(u.el)) oldCell.removeChild(u.el);
-  u.x = nx; u.y = ny;
-  const newCell = document.getElementById(`cell-${u.x}-${u.y}`);
-  if (newCell && u.el) newCell.appendChild(u.el);
+  // v0.3：BOSS 移動時更新佔據的格子
+  if (u.isBoss && u.bossSize) {
+    // 清除舊的佔據格子
+    B.bossOccupiedCells = B.bossOccupiedCells.filter(cell => cell.boss.uid !== u.uid);
+
+    // 更新 BOSS 位置
+    u.x = nx;
+    u.y = ny;
+    u.bossTopLeft = {x: nx, y: ny};
+
+    // 添加新的佔據格子
+    const size = u.bossSize;
+    for (let dx = 0; dx < size; dx++) {
+      for (let dy = 0; dy < size; dy++) {
+        const x = nx + dx;
+        const y = ny + dy;
+        if (x >= 0 && x < 10 && y >= 0 && y < 10) {
+          B.bossOccupiedCells.push({x, y, boss: u});
+        }
+      }
+    }
+
+    // 更新視覺位置
+    placeUnit(u);
+  } else {
+    // 普通單位移動
+    const oldCell = document.getElementById(`cell-${u.x}-${u.y}`);
+    if (oldCell && u.el && oldCell.contains(u.el)) oldCell.removeChild(u.el);
+    u.x = nx; u.y = ny;
+    const newCell = document.getElementById(`cell-${u.x}-${u.y}`);
+    if (newCell && u.el) newCell.appendChild(u.el);
+  }
 }
 
 function findFreeCell(isMy) {

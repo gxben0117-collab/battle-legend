@@ -919,11 +919,6 @@ body {
   align-items: center;
   gap: 2px;
 }
-.deck-card-row-count {
-  color: var(--text-dim);
-  font-size: 11px;
-  font-weight: 600;
-}
 .deck-card-remove {
   cursor: pointer;
   color: #c0392b;
@@ -2735,14 +2730,17 @@ function renderDeckSidebar() {
   el.innerHTML = '';
   document.getElementById('deck-count').textContent = tempDeck.length;
 
-  // 統計每張卡的數量
-  const counts = {};
-  tempDeck.forEach(c => counts[c] = (counts[c]||0)+1);
+  // 統計每張卡的數量和索引
+  const cardGroups = {};
+  tempDeck.forEach((cardId, index) => {
+    if (!cardGroups[cardId]) cardGroups[cardId] = [];
+    cardGroups[cardId].push(index);
+  });
 
   // 按稀有度和名稱排序
-  const sortedCards = Object.entries(counts).sort((a, b) => {
-    const cardA = CARD_DB[a[0]];
-    const cardB = CARD_DB[b[0]];
+  const sortedCardIds = Object.keys(cardGroups).sort((a, b) => {
+    const cardA = CARD_DB[a];
+    const cardB = CARD_DB[b];
     const rarityOrder = {N: 0, R: 1, SR: 2, SSR: 3};
     if (rarityOrder[cardA.rarity] !== rarityOrder[cardB.rarity]) {
       return rarityOrder[cardA.rarity] - rarityOrder[cardB.rarity];
@@ -2750,12 +2748,12 @@ function renderDeckSidebar() {
     return cardA.name.localeCompare(cardB.name);
   });
 
-  sortedCards.forEach(([cardId, cnt]) => {
+  // 展開顯示每張卡（不合併）
+  sortedCardIds.forEach(cardId => {
     const card = CARD_DB[cardId];
     if (!card) return;
 
-    const row = document.createElement('div');
-    row.className = 'deck-card-row';
+    const count = cardGroups[cardId].length;
 
     // 稀有度顏色
     let rarityColor = '';
@@ -2764,14 +2762,19 @@ function renderDeckSidebar() {
     else if (card.rarity === 'SR') rarityColor = 'color: var(--sr-col)';
     else if (card.rarity === 'SSR') rarityColor = 'color: var(--ssr-col)';
 
-    row.innerHTML = `
-      <span class="deck-card-row-icon">${card.icon}</span>
-      <span class="deck-card-row-rarity" style="${rarityColor}">[${card.rarity}]</span>
-      <span class="deck-card-row-name">${card.name}</span>
-      <span class="deck-card-row-cost">(${card.cost}💧)</span>
-      <span class="deck-card-row-count">x${cnt}</span>
-      <span class="deck-card-remove" onclick="removeFromDeck('${cardId}')">✕</span>`;
-    el.appendChild(row);
+    // 為每張卡創建獨立的行
+    for (let i = 0; i < count; i++) {
+      const row = document.createElement('div');
+      row.className = 'deck-card-row';
+
+      row.innerHTML = `
+        <span class="deck-card-row-icon">${card.icon}</span>
+        <span class="deck-card-row-rarity" style="${rarityColor}">[${card.rarity}]</span>
+        <span class="deck-card-row-name">${card.name}</span>
+        <span class="deck-card-row-cost">(${card.cost}💧)</span>
+        <span class="deck-card-remove" onclick="removeFromDeck('${cardId}')">✕</span>`;
+      el.appendChild(row);
+    }
   });
 }
 

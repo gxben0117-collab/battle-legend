@@ -3156,12 +3156,11 @@ function moveUnitTo(u, nx, ny) {
     // 更新視覺位置
     placeUnit(u);
   } else {
-    // 普通單位移動
-    const oldCell = document.getElementById(`cell-${u.x}-${u.y}`);
-    if (oldCell && u.el && oldCell.contains(u.el)) oldCell.removeChild(u.el);
-    u.x = nx; u.y = ny;
-    const newCell = document.getElementById(`cell-${u.x}-${u.y}`);
-    if (newCell && u.el) newCell.appendChild(u.el);
+    // v0.3：普通單位移動（使用絕對定位）
+    u.x = nx;
+    u.y = ny;
+    // 更新視覺位置
+    placeUnit(u);
   }
 }
 

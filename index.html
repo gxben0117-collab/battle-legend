@@ -801,6 +801,13 @@ body {
   50% { opacity: 0.7; }
 }
 
+/* v0.7：攻擊特效動畫 */
+@keyframes slash-fade {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(45deg) scale(0.5); }
+  50% { opacity: 1; transform: translate(-50%, -50%) rotate(45deg) scale(1.2); }
+  100% { opacity: 0; transform: translate(-50%, -50%) rotate(45deg) scale(0.8); }
+}
+
 /* v0.2：護盾條（疊在 HP 條上方） */
 .unit-shield-bar {
   position: absolute;
@@ -3588,6 +3595,9 @@ function getDistanceToUnit(from, to) {
 }
 
 function attack(attacker, target) {
+  // v0.7：添加攻擊特效
+  showAttackEffect(attacker, target);
+
   const hitRoll = Math.random() * 100;
   if (hitRoll >= attacker.acc) {
     showFloatNumber(target, 'MISS', 'miss');
@@ -4243,6 +4253,101 @@ function showFloatNumber(u, text, type) {
   div.style.top = (rect.top - mainRect.top - 5) + 'px';
   document.querySelector('.battle-main').appendChild(div);
   setTimeout(() => div.remove(), 800);
+}
+
+// v0.7：攻擊特效（近戰揮刀、遠程箭矢、魔法彈）
+function showAttackEffect(attacker, target) {
+  if (!attacker.el || !target.el) return;
+
+  const mainRect = document.querySelector('.battle-main').getBoundingClientRect();
+  const fromRect = attacker.el.getBoundingClientRect();
+  const toRect = target.el.getBoundingClientRect();
+
+  const fromX = fromRect.left - mainRect.left + fromRect.width / 2;
+  const fromY = fromRect.top - mainRect.top + fromRect.height / 2;
+  const toX = toRect.left - mainRect.left + toRect.width / 2;
+  const toY = toRect.top - mainRect.top + toRect.height / 2;
+
+  const dist = Math.hypot(toX - fromX, toY - fromY);
+
+  // 判斷攻擊類型
+  if (attacker.range <= 1) {
+    // 近戰：揮刀特效
+    showMeleeSlash(fromX, fromY, toX, toY);
+  } else if (attacker.dmgType === 'physical') {
+    // 遠程物理：箭矢特效
+    showArrowEffect(fromX, fromY, toX, toY);
+  } else {
+    // 魔法：火球特效
+    showMagicBolt(fromX, fromY, toX, toY);
+  }
+}
+
+// 近戰揮刀特效
+function showMeleeSlash(fromX, fromY, toX, toY) {
+  const div = document.createElement('div');
+  div.style.position = 'absolute';
+  div.style.left = toX + 'px';
+  div.style.top = toY + 'px';
+  div.style.fontSize = '48px';
+  div.style.pointerEvents = 'none';
+  div.style.zIndex = '1000';
+  div.textContent = '⚔️';
+  div.style.transform = 'translate(-50%, -50%) rotate(45deg)';
+  div.style.animation = 'slash-fade 0.3s ease-out';
+
+  document.querySelector('.battle-main').appendChild(div);
+  setTimeout(() => div.remove(), 300);
+}
+
+// 弓箭特效
+function showArrowEffect(fromX, fromY, toX, toY) {
+  const div = document.createElement('div');
+  div.style.position = 'absolute';
+  div.style.left = fromX + 'px';
+  div.style.top = fromY + 'px';
+  div.style.fontSize = '24px';
+  div.style.pointerEvents = 'none';
+  div.style.zIndex = '1000';
+  div.textContent = '🏹';
+
+  const angle = Math.atan2(toY - fromY, toX - fromX) * 180 / Math.PI;
+  div.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+  div.style.transition = 'all 0.3s linear';
+
+  document.querySelector('.battle-main').appendChild(div);
+
+  setTimeout(() => {
+    div.style.left = toX + 'px';
+    div.style.top = toY + 'px';
+  }, 10);
+
+  setTimeout(() => div.remove(), 350);
+}
+
+// 魔法彈特效
+function showMagicBolt(fromX, fromY, toX, toY) {
+  const div = document.createElement('div');
+  div.style.position = 'absolute';
+  div.style.left = fromX + 'px';
+  div.style.top = fromY + 'px';
+  div.style.fontSize = '32px';
+  div.style.pointerEvents = 'none';
+  div.style.zIndex = '1000';
+  div.textContent = '🔥';
+  div.style.transform = 'translate(-50%, -50%)';
+  div.style.transition = 'all 0.4s ease-out';
+
+  document.querySelector('.battle-main').appendChild(div);
+
+  setTimeout(() => {
+    div.style.left = toX + 'px';
+    div.style.top = toY + 'px';
+    div.style.transform = 'translate(-50%, -50%) scale(1.5)';
+    div.style.opacity = '0';
+  }, 10);
+
+  setTimeout(() => div.remove(), 450);
 }
 
 // ============================================================

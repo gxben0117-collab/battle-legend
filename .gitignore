@@ -1,0 +1,31 @@
+# 系統文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 編輯器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 備份文件
+*.backup
+*.bak
+*.tmp
+
+# 日誌文件
+*.log
+
+# Node modules（如果未來添加構建工具）
+node_modules/
+npm-debug.log*
+
+# 本地開發文件
+.env
+.env.local
+
+# 暫存文件
+tmp/
+temp/

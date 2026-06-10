@@ -3515,7 +3515,8 @@ function unitAction(u) {
 
   if (dist <= u.range) {
     // 在射程內：攻擊
-    const useSkill = u.skillCd <= 0 && u.skillType !== 'none' && Math.random() < 0.25;
+    // v0.7：提高技能釋放機率從 25% 到 50%
+    const useSkill = u.skillCd <= 0 && u.skillType !== 'none' && Math.random() < 0.5;
     if (useSkill) {
       executeSkill(u, target, allies, enemies);
       u.skillCd = u.maxSkillCd;

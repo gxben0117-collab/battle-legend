@@ -3294,19 +3294,20 @@ function applySynergies() {
 function setupBattlefield() {
   const bf = document.getElementById('battlefield');
   bf.innerHTML = '';
-  for (let row = 0; row < 10; row++) {
-    for (let col = 0; col < 10; col++) {
+  // v0.7：改為 9×7 戰場
+  for (let row = 0; row < 7; row++) {
+    for (let col = 0; col < 9; col++) {
       const cell = document.createElement('div');
       cell.id = `cell-${col}-${row}`;
       cell.className = 'cell';
-      // v0.3：10×10 戰場
-      // 我方陣地：左下 3x3（x=0~2, y=7~9）
-      if (col <= 2 && row >= 7) cell.classList.add('my-zone');
-      // 敵方陣地：右上 3x3（x=7~9, y=0~2）
-      else if (col >= 7 && row <= 2) cell.classList.add('enemy-zone');
+      // v0.7：9×7 戰場陣地
+      // 我方陣地：下方 2×3（x=3~5, y=5~6）
+      if (col >= 3 && col <= 5 && row >= 5) cell.classList.add('my-zone');
+      // 敵方陣地：上方 2×3（x=3~5, y=0~1）
+      else if (col >= 3 && col <= 5 && row <= 1) cell.classList.add('enemy-zone');
       else cell.classList.add('neutral-zone');
-      // 主堡位置：左下角 (0,9) 和右上角 (9,0)
-      if ((col === 0 && row === 9) || (col === 9 && row === 0)) cell.classList.add('commander-cell');
+      // 主堡位置：下方中央 (4,6) 和上方中央 (4,0)
+      if ((col === 4 && row === 6) || (col === 4 && row === 0)) cell.classList.add('commander-cell');
 
       // v0.2：渲染障礙物
       if (B.obstacles) {
@@ -3362,7 +3363,7 @@ function placeUnit(u) {
     el.innerHTML = `
       <span class="unit-icon">${u.icon}</span>
       <span class="unit-name">${shortName}</span>
-      <span class="unit-hp-text" id="uhp-text-${u.uid}">100%</span>
+      <span class="unit-hp-text" id="uhp-text-${u.uid}">${Math.round(u.hp)}/${u.maxHp}</span>
       <div class="unit-hp-bar"><div class="unit-hp-fill" id="uhp-${u.uid}"></div></div>
       <div class="unit-shield-bar"><div class="unit-shield-fill" id="ushield-${u.uid}"></div></div>
       <div class="unit-atb-bar"><div class="unit-atb-fill" id="uatb-${u.uid}"></div></div>`;
@@ -3407,10 +3408,10 @@ function updateUnitBar(u) {
     if (pct < 30) hpEl.classList.add('low'); else hpEl.classList.remove('low');
   }
 
-  // v0.3：更新 HP 百分比文字
+  // v0.7.1：更新 HP 真實數值文字
   if (hpTextEl) {
-    const pct = Math.ceil(u.hp / u.maxHp * 100);
-    hpTextEl.textContent = pct + '%';
+    hpTextEl.textContent = `${Math.round(u.hp)}/${u.maxHp}`;
+    const pct = u.hp / u.maxHp * 100;
     if (pct < 30) {
       hpTextEl.classList.add('low');
     } else {
@@ -4256,7 +4257,7 @@ function showFloatNumber(u, text, type) {
   setTimeout(() => div.remove(), 800);
 }
 
-// v0.7：攻擊特效（近戰揮刀、遠程箭矢、魔法彈）
+// v0.7：攻擊特效（近戰揮刀、遠程光球）
 function showAttackEffect(attacker, target) {
   if (!attacker.el || !target.el) return;
 
@@ -4269,17 +4270,12 @@ function showAttackEffect(attacker, target) {
   const toX = toRect.left - mainRect.left + toRect.width / 2;
   const toY = toRect.top - mainRect.top + toRect.height / 2;
 
-  const dist = Math.hypot(toX - fromX, toY - fromY);
-
-  // 判斷攻擊類型
+  // v0.7.1：簡化特效邏輯
   if (attacker.range <= 1) {
-    // 近戰：揮刀特效
+    // 近戰：統一揮刀特效
     showMeleeSlash(fromX, fromY, toX, toY);
-  } else if (attacker.dmgType === 'physical') {
-    // 遠程物理：箭矢特效
-    showArrowEffect(fromX, fromY, toX, toY);
   } else {
-    // 魔法：火球特效
+    // 遠程：統一光球特效（不分物理魔法）
     showMagicBolt(fromX, fromY, toX, toY);
   }
 }

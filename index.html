@@ -819,12 +819,13 @@ body {
 }
 .deck-body {
   flex: 1;
-  display: grid;
-  grid-template-columns: 1fr 280px;
+  display: flex;
+  flex-direction: column;
   gap: 0;
   overflow: hidden;
 }
 .card-collection {
+  height: 50%;
   padding: 16px;
   overflow-y: auto;
   display: grid;
@@ -832,6 +833,8 @@ body {
   gap: 12px;
   align-content: start;
   justify-items: center;
+  border-bottom: 2px solid var(--border);
+  background: var(--bg-dark);
 }
 .collect-card {
   width: 80px;
@@ -865,38 +868,74 @@ body {
 }
 
 .deck-sidebar {
+  height: 50%;
   background: var(--bg-panel);
-  border-left: 1px solid var(--border);
   padding: 16px;
   overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+  align-content: start;
 }
 .deck-sidebar-title {
-  font-size: 11px;
+  grid-column: 1 / -1;
+  font-size: 12px;
   letter-spacing: 3px;
   color: var(--gold-dim);
   text-transform: uppercase;
   border-bottom: 1px solid var(--border);
   padding-bottom: 8px;
+  margin-bottom: 4px;
 }
 .deck-card-row {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 6px;
+  gap: 8px;
+  padding: 8px 10px;
   background: var(--bg-card);
-  border-radius: 3px;
+  border-radius: 4px;
   border: 1px solid var(--border);
-  font-size: 11px;
+  font-size: 12px;
+  transition: all 0.15s;
 }
-.deck-card-row-icon { font-size: 14px; }
-.deck-card-row-name { flex: 1; }
-.deck-card-row-cost { color: var(--energy-blue); font-weight: 700; font-size: 10px; }
+.deck-card-row:hover {
+  background: var(--bg-dark);
+  border-color: var(--border-gold);
+}
+.deck-card-row-icon { font-size: 18px; }
+.deck-card-row-rarity {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 4px;
+  border-radius: 2px;
+  background: var(--bg-dark);
+}
+.deck-card-row-name { flex: 1; font-weight: 600; }
+.deck-card-row-cost {
+  color: var(--energy-blue);
+  font-weight: 700;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.deck-card-row-count {
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 600;
+}
 .deck-card-remove {
-  cursor: pointer; color: #c0392b; font-size: 12px;
-  line-height: 1; padding: 0 2px;
+  cursor: pointer;
+  color: #c0392b;
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 4px;
+  transition: all 0.15s;
+}
+.deck-card-remove:hover {
+  color: #e74c3c;
+  transform: scale(1.2);
+}
 }
 .deck-card-remove:hover { color: #e74c3c; }
 .deck-count-label {
@@ -2295,18 +2334,22 @@ function findFreeCellNear(target, isMy) {
 // AI 打牌（我方自動）
 // ============================================================
 function aiPlayCard() {
-  if (B.hand.length === 0 || B.energy < 2) return;
-  // 每秒嘗試
+  if (B.hand.length === 0) return;
+  // 每 3 秒嘗試打牌（根據倍速調整）
   if (!B._lastPlay) B._lastPlay = 0;
   if (performance.now() - B._lastPlay < 3000 / B.speed) return;
   B._lastPlay = performance.now();
 
-  const playable = B.hand.filter(c => CARD_DB[c] && CARD_DB[c].cost <= B.energy);
+  // 只打出能量足夠的卡片
+  const playable = B.hand.filter(c => {
+    const card = CARD_DB[c];
+    return card && card.cost <= B.energy;
+  });
   if (playable.length === 0) return;
 
   const picked = playable[Math.floor(Math.random() * playable.length)];
   const card = CARD_DB[picked];
-  if (!card) return;
+  if (!card || card.cost > B.energy) return; // 二次檢查
 
   const freeCell = findFreeCell(true);
   if (!freeCell) return;
@@ -2692,18 +2735,43 @@ function renderDeckSidebar() {
   el.innerHTML = '';
   document.getElementById('deck-count').textContent = tempDeck.length;
 
-  // 統計
+  // 統計每張卡的數量
   const counts = {};
   tempDeck.forEach(c => counts[c] = (counts[c]||0)+1);
-  Object.entries(counts).forEach(([cardId, cnt]) => {
+
+  // 按稀有度和名稱排序
+  const sortedCards = Object.entries(counts).sort((a, b) => {
+    const cardA = CARD_DB[a[0]];
+    const cardB = CARD_DB[b[0]];
+    const rarityOrder = {N: 0, R: 1, SR: 2, SSR: 3};
+    if (rarityOrder[cardA.rarity] !== rarityOrder[cardB.rarity]) {
+      return rarityOrder[cardA.rarity] - rarityOrder[cardB.rarity];
+    }
+    return cardA.name.localeCompare(cardB.name);
+  });
+
+  sortedCards.forEach(([cardId, cnt]) => {
     const card = CARD_DB[cardId];
     if (!card) return;
-    for (let i = 0; i < cnt; i++) {
-      const row = document.createElement('div');
-      row.className = 'deck-card-row';
-      row.innerHTML = `<span class="deck-card-row-icon">${card.icon}</span><span class="deck-card-row-name">${card.name}</span><span class="deck-card-row-cost">${card.cost}</span><span class="deck-card-remove" onclick="removeFromDeck('${cardId}')">✕</span>`;
-      el.appendChild(row);
-    }
+
+    const row = document.createElement('div');
+    row.className = 'deck-card-row';
+
+    // 稀有度顏色
+    let rarityColor = '';
+    if (card.rarity === 'N') rarityColor = 'color: var(--n-col)';
+    else if (card.rarity === 'R') rarityColor = 'color: var(--r-col)';
+    else if (card.rarity === 'SR') rarityColor = 'color: var(--sr-col)';
+    else if (card.rarity === 'SSR') rarityColor = 'color: var(--ssr-col)';
+
+    row.innerHTML = `
+      <span class="deck-card-row-icon">${card.icon}</span>
+      <span class="deck-card-row-rarity" style="${rarityColor}">[${card.rarity}]</span>
+      <span class="deck-card-row-name">${card.name}</span>
+      <span class="deck-card-row-cost">(${card.cost}💧)</span>
+      <span class="deck-card-row-count">x${cnt}</span>
+      <span class="deck-card-remove" onclick="removeFromDeck('${cardId}')">✕</span>`;
+    el.appendChild(row);
   });
 }
 

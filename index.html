@@ -3155,8 +3155,8 @@ function createBattleState(stage, raid = null) {
   const usedIdxs = startCards.map(s => s.idx).sort((a,b)=>b-a);
   usedIdxs.forEach(idx => state.deck.splice(idx, 1));
 
-  // v0.7：9×7 戰場開場位置（我方下方 2×3 區域，分散排列）
-  const startPositions = [ {x:3,y:5}, {x:5,y:5}, {x:4,y:6} ];
+  // v0.7.2：開場位置（我方下方中間區域）
+  const startPositions = [ {x:3,y:5}, {x:4,y:5}, {x:5,y:5} ];
   startCards.forEach((sc, i) => {
     const pos = startPositions[i];
     const u = makeUnit('my' + state.unitIdCounter++, CARD_DB[sc.cardId], pos.x, pos.y, true, false);
@@ -3294,19 +3294,19 @@ function applySynergies() {
 function setupBattlefield() {
   const bf = document.getElementById('battlefield');
   bf.innerHTML = '';
-  // v0.7：改為 9×7 戰場
+  // v0.7.2：修正為真正的 長9寬7（橫9列、豎7行）
   for (let row = 0; row < 7; row++) {
     for (let col = 0; col < 9; col++) {
       const cell = document.createElement('div');
       cell.id = `cell-${col}-${row}`;
       cell.className = 'cell';
-      // v0.7：9×7 戰場陣地
-      // 我方陣地：下方 2×3（x=3~5, y=5~6）
-      if (col >= 3 && col <= 5 && row >= 5) cell.classList.add('my-zone');
-      // 敵方陣地：上方 2×3（x=3~5, y=0~1）
-      else if (col >= 3 && col <= 5 && row <= 1) cell.classList.add('enemy-zone');
+      // v0.7.2：重新設計陣地
+      // 我方陣地：下方3行 × 中間3列（x=3~5, y=4~6）
+      if (col >= 3 && col <= 5 && row >= 4) cell.classList.add('my-zone');
+      // 敵方陣地：上方3行 × 中間3列（x=3~5, y=0~2）
+      else if (col >= 3 && col <= 5 && row <= 2) cell.classList.add('enemy-zone');
       else cell.classList.add('neutral-zone');
-      // 主堡位置：下方中央 (4,6) 和上方中央 (4,0)
+      // 主堡位置：我方 (4,6) 下方、敵方 (4,0) 上方
       if ((col === 4 && row === 6) || (col === 4 && row === 0)) cell.classList.add('commander-cell');
 
       // v0.2：渲染障礙物
@@ -3976,11 +3976,11 @@ function moveUnitTo(u, nx, ny) {
 }
 
 function findFreeCell(isMy) {
-  // v0.7：9×7 戰場
-  // 我方陣地：x=3~5, y=5~6（下方 2×3）
-  // 敵方陣地：x=3~5, y=0~1（上方 2×3）
+  // v0.7.2：長9寬7 戰場
+  // 我方陣地：x=3~5, y=4~6（下方3×3）
+  // 敵方陣地：x=3~5, y=0~2（上方3×3）
   const cols = [3, 4, 5];
-  const rows = isMy ? [5, 6] : [1, 0];
+  const rows = isMy ? [5, 4, 6] : [1, 2, 0];
   for (const row of rows) {
     for (const col of cols) {
       const isMyCmd = col===4 && row===6;

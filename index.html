@@ -599,6 +599,30 @@ body {
 .enemy-unit .unit-name { color: #ff8a8a; }
 .commander-unit .unit-name { color: var(--gold-bright); }
 
+/* v0.3：HP 百分比文字顯示 */
+.unit-hp-text {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 9px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 0 3px rgba(0,0,0,0.8), 0 1px 2px rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.5);
+  padding: 1px 3px;
+  border-radius: 2px;
+  line-height: 1;
+  z-index: 5;
+}
+.unit-hp-text.low {
+  color: #ff4444;
+  animation: hp-blink 0.8s infinite;
+}
+@keyframes hp-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
 /* v0.3：BOSS 樣式 */
 .unit.boss-unit {
   border: 3px solid #ff2244;
@@ -2645,6 +2669,7 @@ function placeUnit(u) {
     el.innerHTML = `
       <span class="unit-icon">${u.icon}</span>
       <span class="unit-name">${shortName}</span>
+      <span class="unit-hp-text" id="uhp-text-${u.uid}">100%</span>
       <div class="unit-hp-bar"><div class="unit-hp-fill" id="uhp-${u.uid}"></div></div>
       <div class="unit-shield-bar"><div class="unit-shield-fill" id="ushield-${u.uid}"></div></div>
       <div class="unit-atb-bar"><div class="unit-atb-fill" id="uatb-${u.uid}"></div></div>`;
@@ -2681,11 +2706,25 @@ function updateUnitBar(u) {
   const hpEl = document.getElementById('uhp-' + u.uid);
   const shieldEl = document.getElementById('ushield-' + u.uid);
   const atbEl = document.getElementById('uatb-' + u.uid);
+  const hpTextEl = document.getElementById('uhp-text-' + u.uid);
+
   if (hpEl) {
     const pct = u.hp / u.maxHp * 100;
     hpEl.style.width = pct + '%';
     if (pct < 30) hpEl.classList.add('low'); else hpEl.classList.remove('low');
   }
+
+  // v0.3：更新 HP 百分比文字
+  if (hpTextEl) {
+    const pct = Math.ceil(u.hp / u.maxHp * 100);
+    hpTextEl.textContent = pct + '%';
+    if (pct < 30) {
+      hpTextEl.classList.add('low');
+    } else {
+      hpTextEl.classList.remove('low');
+    }
+  }
+
   // v0.2：護盾條更新
   if (shieldEl) {
     const shieldPct = u.shield > 0 ? Math.min(100, (u.shield / u.maxHp) * 100) : 0;

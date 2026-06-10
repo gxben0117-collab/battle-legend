@@ -2831,10 +2831,11 @@ function unitAction(u) {
   let target = findTarget(u, enemies);
   if (!target) return;
 
-  const dist = Math.abs(u.x - target.x) + Math.abs(u.y - target.y);
+  // v0.3：使用 getDistanceToUnit 計算距離（考慮 BOSS 4×4）
+  const dist = getDistanceToUnit(u, target);
 
   if (dist <= u.range) {
-    // 攻擊
+    // 在射程內：攻擊
     const useSkill = u.skillCd <= 0 && u.skillType !== 'none' && Math.random() < 0.25;
     if (useSkill) {
       executeSkill(u, target, allies, enemies);
@@ -2843,8 +2844,34 @@ function unitAction(u) {
       attack(u, target);
     }
   } else {
-    // 移動
-    moveToward(u, target);
+    // 不在射程內：嘗試移動
+    const moved = moveToward(u, target);
+
+    // v0.3：如果移動失敗且有遠程能力，嘗試攻擊範圍內的其他敵人
+    if (!moved && u.range > 1) {
+      const inRangeEnemies = enemies.filter(e => {
+        const d = getDistanceToUnit(u, e);
+        return d <= u.range;
+      });
+
+      if (inRangeEnemies.length > 0) {
+        // 找最近的射程內敵人
+        const closestInRange = inRangeEnemies.reduce((a, b) => {
+          const da = getDistanceToUnit(u, a);
+          const db = getDistanceToUnit(u, b);
+          return da < db ? a : b;
+        });
+
+        // 攻擊它
+        const useSkill = u.skillCd <= 0 && u.skillType !== 'none' && Math.random() < 0.25;
+        if (useSkill) {
+          executeSkill(u, closestInRange, allies, enemies);
+          u.skillCd = u.maxSkillCd;
+        } else {
+          attack(u, closestInRange);
+        }
+      }
+    }
   }
 }
 
@@ -3173,7 +3200,7 @@ function moveToward(u, target) {
         });
       if (reachable.length > 0) step = reachable[0].step;
     }
-    if (!step) return;
+    if (!step) return false; // v0.3：返回移動失敗
   } else {
     // 正常移動：重置卡住計數
     u._stuckCount = 0;
@@ -3182,7 +3209,7 @@ function moveToward(u, target) {
   // 確認下一步不被佔（BFS已過濾，但雙重確認）
   if (!isCellWalkable(step.x, step.y, u)) {
     u._stuckCount++;
-    return;
+    return false; // v0.3：返回移動失敗
   }
 
   // 記錄位置，若與上次相同也算卡住
@@ -3192,6 +3219,7 @@ function moveToward(u, target) {
   u._lastPos = { x: step.x, y: step.y };
 
   moveUnitTo(u, step.x, step.y);
+  return true; // v0.3：返回移動成功
 }
 
 function moveUnitTo(u, nx, ny) {

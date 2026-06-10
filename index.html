@@ -3186,6 +3186,23 @@ function startBattle(stageId, isBossRaid = false) {
   applySynergies(); // v0.2：計算並應用羈絆
   renderHand();
   renderEnergy();
+
+  // v0.7.4：綁定新佈局的按鈕事件
+  document.getElementById('btn-auto').onclick = () => {
+    B.isAuto = true;
+    document.getElementById('btn-auto').classList.add('active');
+    document.getElementById('btn-manual').classList.remove('active');
+  };
+  document.getElementById('btn-manual').onclick = () => {
+    B.isAuto = false;
+    document.getElementById('btn-manual').classList.add('active');
+    document.getElementById('btn-auto').classList.remove('active');
+  };
+  document.getElementById('btn-speed-1').onclick = () => setSpeed(1);
+  document.getElementById('btn-speed-2').onclick = () => setSpeed(2);
+  document.getElementById('btn-speed-3').onclick = () => setSpeed(3);
+  document.getElementById('btn-retreat').onclick = () => exitBattle();
+
   startBattleLoop();
 }
 
@@ -4218,12 +4235,21 @@ function updateTimer() {
 }
 
 function renderEnergy() {
+  // v0.7.4：新佈局 - 更新能量顯示
+  const energyEl = document.getElementById('energy');
+  if (energyEl) {
+    energyEl.textContent = `${B.energy}/${B.maxEnergy}`;
+  }
+
+  // 舊版能量點（如果存在）
   const pips = document.getElementById('energy-pips');
-  pips.innerHTML = '';
-  for (let i = 0; i < B.maxEnergy; i++) {
-    const pip = document.createElement('div');
-    pip.className = 'energy-pip' + (i < B.energy ? ' filled' : '');
-    pips.appendChild(pip);
+  if (pips) {
+    pips.innerHTML = '';
+    for (let i = 0; i < B.maxEnergy; i++) {
+      const pip = document.createElement('div');
+      pip.className = 'energy-pip' + (i < B.energy ? ' filled' : '');
+      pips.appendChild(pip);
+    }
   }
 
   // 更新能量倒數計時
@@ -4235,7 +4261,8 @@ function renderEnergy() {
 }
 
 function renderHand() {
-  const hs = document.getElementById('hand-section');
+  const hs = document.getElementById('hand');
+  if (!hs) return; // v0.7.4：防止找不到元素
   hs.innerHTML = '';
   B.hand.slice(0, 6).forEach(cardId => {
     const card = CARD_DB[cardId];
@@ -4291,16 +4318,21 @@ function setTactic(t) {
 
 function setSpeed(n) {
   B.speed = n;
-  [1, 2, 4].forEach(v => {
-    const btn = document.getElementById('spd-' + v);
-    if (btn) btn.classList.toggle('active', v === n);
+  // v0.7.4：支援新舊兩種按鈕 ID
+  [1, 2, 3, 4].forEach(v => {
+    const oldBtn = document.getElementById('spd-' + v);
+    if (oldBtn) oldBtn.classList.toggle('active', v === n);
+    const newBtn = document.getElementById('btn-speed-' + v);
+    if (newBtn) newBtn.classList.toggle('active', v === n);
   });
   const ind = document.getElementById('speed-indicator');
-  if (n > 1) {
-    ind.style.display = 'block';
-    ind.textContent = `⚡ ${n}×`;
-  } else {
-    ind.style.display = 'none';
+  if (ind) {
+    if (n > 1) {
+      ind.style.display = 'block';
+      ind.textContent = `⚡ ${n}×`;
+    } else {
+      ind.style.display = 'none';
+    }
   }
 }
 

@@ -2655,18 +2655,17 @@ function placeUnit(u) {
     u.el = el;
   }
 
-  // v0.2.3：計算並設置絕對位置（含動畫過渡）
-  const cellRect = cell.getBoundingClientRect();
-  const bfRect = document.getElementById('battlefield').getBoundingClientRect();
-  let left = cellRect.left - bfRect.left + 3; // +3 居中調整
-  let top = cellRect.top - bfRect.top + 3;
+  // v0.3：修復 - 直接使用格子坐標計算位置，不依賴 getBoundingClientRect
+  const cellSize = 64; // 10×10 戰場格子大小
+  const borderSize = 1; // 格子邊框
+  let left = u.x * (cellSize + borderSize) + 3; // +3 居中調整
+  let top = u.y * (cellSize + borderSize) + 3;
 
   // v0.3：BOSS 佔據 4×4，放大顯示
   if (u.isBoss && u.bossSize) {
     const size = u.bossSize;
-    const cellSize = 64; // v0.3：10×10 戰場格子大小
-    el.style.width = (cellSize * size) + 'px';
-    el.style.height = (cellSize * size) + 'px';
+    el.style.width = (cellSize * size + borderSize * (size - 1)) + 'px';
+    el.style.height = (cellSize * size + borderSize * (size - 1)) + 'px';
     el.style.fontSize = '80px'; // 放大圖示
     el.style.zIndex = '15'; // 提高層級
   }

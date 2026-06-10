@@ -401,7 +401,10 @@ body {
   justify-content: center;
   cursor: default;
   z-index: 5;
-  transition: transform 0.12s;
+  /* v0.2.3：平滑移動動畫 */
+  transition: left 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              top 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.12s;
   overflow: visible;
   /* 角落剪裁感 */
   clip-path: polygon(6px 0%, 100% 0%, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0% 100%, 0% 6px);
@@ -1832,12 +1835,12 @@ function setupBattlefield() {
 function placeUnit(u) {
   const cell = document.getElementById(`cell-${u.x}-${u.y}`);
   if (!cell) return;
+
   let el = document.getElementById('unit-' + u.uid);
   if (!el) {
     el = document.createElement('div');
     el.id = 'unit-' + u.uid;
     el.className = 'unit ' + (u.isMy ? 'my-unit' : 'enemy-unit') + (u.isCommander ? ' commander-unit' : '');
-    // 不用 inline background，改用 CSS 統一控制
     const shortName = u.name
       .replace('聖光','').replace('狂野','').replace('翠林','')
       .replace('星穹','').replace('影刃','').replace('鐵壁','')
@@ -1848,9 +1851,22 @@ function placeUnit(u) {
       <div class="unit-hp-bar"><div class="unit-hp-fill" id="uhp-${u.uid}"></div></div>
       <div class="unit-shield-bar"><div class="unit-shield-fill" id="ushield-${u.uid}"></div></div>
       <div class="unit-atb-bar"><div class="unit-atb-fill" id="uatb-${u.uid}"></div></div>`;
+
+    // v0.2.3：使用絕對定位實現平滑移動
+    const battlefield = document.getElementById('battlefield');
+    battlefield.appendChild(el);
     u.el = el;
   }
-  cell.appendChild(el);
+
+  // v0.2.3：計算並設置絕對位置（含動畫過渡）
+  const cellRect = cell.getBoundingClientRect();
+  const bfRect = document.getElementById('battlefield').getBoundingClientRect();
+  const left = cellRect.left - bfRect.left + 3; // +3 居中調整
+  const top = cellRect.top - bfRect.top + 3;
+
+  el.style.left = left + 'px';
+  el.style.top = top + 'px';
+
   u.el = el;
   updateUnitBar(u);
 }

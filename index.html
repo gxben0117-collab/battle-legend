@@ -461,7 +461,37 @@ body {
 .battle-timer { font-size: 18px; font-weight: 700; color: var(--gold-bright); }
 .battle-turn { font-size: 10px; color: var(--text-dim); }
 
-/* 戰場主區 */
+/* v0.7.4：新佈局 - 左中右三欄 */
+.battle-content {
+  flex: 1;
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  overflow: hidden;
+}
+
+/* 左側：手牌區 */
+.battle-left {
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.hand-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  padding: 8px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+/* 中間：戰場主區 */
 .battle-main {
   flex: 1;
   display: flex;
@@ -470,6 +500,109 @@ body {
   position: relative;
   overflow: hidden;
 }
+
+/* 右側：能量+控制 */
+.battle-right {
+  width: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.energy-display {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px;
+  text-align: center;
+}
+
+.energy-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+
+.energy-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--energy-blue);
+}
+
+.control-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ctrl-btn {
+  padding: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-white);
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.ctrl-btn:hover {
+  background: var(--bg-panel);
+  border-color: var(--energy-blue);
+}
+
+.ctrl-btn.active {
+  background: var(--energy-blue);
+  border-color: var(--energy-blue);
+  color: #fff;
+}
+
+.speed-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.speed-btn {
+  flex: 1;
+  padding: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-white);
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.speed-btn:hover {
+  background: var(--bg-panel);
+}
+
+.speed-btn.active {
+  background: var(--gold-bright);
+  border-color: var(--gold-bright);
+  color: #000;
+  font-weight: 700;
+}
+
+.retreat-btn {
+  padding: 10px;
+  background: var(--bg-card);
+  border: 1px solid #c0392b;
+  border-radius: 4px;
+  color: #e74c3c;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.retreat-btn:hover {
+  background: #c0392b;
+  color: #fff;
+}
+
+/* 舊的戰場主區樣式保留 */
 
 #battleCanvas {
   position: absolute;
@@ -480,8 +613,8 @@ body {
 
 .battlefield {
   display: grid;
-  grid-template-columns: repeat(9, 56px);
-  grid-template-rows: repeat(9, 56px);
+  grid-template-columns: repeat(9, 64px);
+  grid-template-rows: repeat(9, 64px);
   gap: 2px;
   position: relative;
   z-index: 1;
@@ -555,7 +688,7 @@ body {
 /* ===== 單位卡片 ===== */
 .unit {
   position: absolute;
-  width: 52px; height: 52px;
+  width: 60px; height: 60px;
   border-radius: 4px;
   display: flex;
   flex-direction: column;
@@ -1744,7 +1877,7 @@ body {
     </div>
     <div class="battle-info">
       <div class="battle-timer" id="battle-timer">00:00</div>
-      <div class="battle-turn" id="battle-round">ROUND 1</div>
+      <div class="battle-round" id="battle-round">ROUND 1</div>
     </div>
     <div class="commander-bar">
       <div class="hp-bar-wrap">
@@ -1755,41 +1888,41 @@ body {
     </div>
   </div>
 
-  <div class="battle-main">
-    <canvas id="battleCanvas"></canvas>
-    <div class="battlefield" id="battlefield"></div>
-    <div class="speed-indicator" id="speed-indicator" style="display:none">⚡ 1×</div>
-  </div>
+  <!-- v0.7.4：新佈局 - 左中右三欄 -->
+  <div class="battle-content">
+    <!-- 左側：手牌區 -->
+    <div class="battle-left">
+      <div class="hand-area" id="hand"></div>
+    </div>
 
-  <div class="battle-bottom">
-    <div class="battle-bottom-row">
-      <div class="energy-section">
-        <span class="energy-label">能量 <span id="energy-timer" style="font-size:11px;color:var(--energy-blue);">2.0s</span></span>
-        <div class="energy-pips" id="energy-pips"></div>
+    <!-- 中間：戰場 -->
+    <div class="battle-main">
+      <canvas id="battleCanvas"></canvas>
+      <div class="battlefield" id="battlefield"></div>
+      <div class="speed-indicator" id="speed-indicator" style="display:none">⚡ 1×</div>
+    </div>
+
+    <!-- 右側：能量+控制 -->
+    <div class="battle-right">
+      <div class="energy-display">
+        <div class="energy-label">⚡ 能量</div>
+        <div class="energy-value" id="energy">10/10</div>
       </div>
-      <div class="hand-section" id="hand-section"></div>
-      <div class="tactic-btns">
-        <button class="tactic-btn active" id="tactic-free" onclick="setTactic('free')">⚔ 自由</button>
-        <button class="tactic-btn" id="tactic-charge" onclick="setTactic('charge')">🏃 突擊</button>
-        <button class="tactic-btn" id="tactic-defend" onclick="setTactic('defend')">🛡 防守</button>
-        <!-- v0.4：手動/自動切換按鈕（加大加粗） -->
-        <button class="tactic-btn auto-mode" id="btn-auto-toggle" onclick="toggleAutoPlay()">🎮 自動出牌</button>
+      <div class="control-buttons">
+        <button id="btn-auto" class="ctrl-btn">🤖 自動</button>
+        <button id="btn-manual" class="ctrl-btn active">👆 手動</button>
       </div>
-      <div class="ctrl-btns">
-        <div style="display:flex;flex-direction:column;gap:3px;">
-          <div style="font-size:9px;color:var(--text-dim);text-align:center;letter-spacing:1px;">速度</div>
-          <div class="speed-btns">
-            <button class="speed-btn active" id="spd-1" onclick="setSpeed(1)">×1</button>
-            <button class="speed-btn" id="spd-2" onclick="setSpeed(2)">×2</button>
-            <button class="speed-btn x4" id="spd-4" onclick="setSpeed(4)">×4</button>
-          </div>
-        </div>
-        <button class="ctrl-btn" onclick="exitBattle()">🚪 撤退</button>
+      <div class="speed-controls">
+        <button id="btn-speed-1" class="speed-btn active">1×</button>
+        <button id="btn-speed-2" class="speed-btn">2×</button>
+        <button id="btn-speed-3" class="speed-btn">3×</button>
       </div>
+      <button id="btn-retreat" class="retreat-btn">🏳️ 撤退</button>
     </div>
   </div>
+</div>
 
-  <!-- 結算 -->
+<!-- 結算 -->
   <div id="screen-result">
     <div class="result-box">
       <div class="result-title" id="result-title">勝利</div>
@@ -3370,7 +3503,7 @@ function placeUnit(u) {
   }
 
   // v0.3：修復 - 直接使用格子坐標計算位置，不依賴 getBoundingClientRect
-  const cellSize = 56; // v0.7.3：9×9 戰場格子大小（縮小以適應畫面）
+  const cellSize = 64; // v0.7.4：9×9 戰場格子大小（左右佈局可以更大）
   const borderSize = 1; // 格子邊框
   let left = u.x * (cellSize + borderSize) + 3; // +3 居中調整
   let top = u.y * (cellSize + borderSize) + 3;

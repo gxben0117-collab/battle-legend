@@ -2,7 +2,7 @@
 
 > 一款基於 HTML5 的戰術自走棋遊戲
 
-[![Version](https://img.shields.io/badge/version-0.6.1-blue.svg)](https://github.com/gxben0117-collab/battle-legend)
+[![Version](https://img.shields.io/badge/version-0.6.2-blue.svg)](https://github.com/gxben0117-collab/battle-legend)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Live Demo](https://img.shields.io/badge/demo-live-brightgreen.svg)](https://gxben0117-collab.github.io/battle-legend)
 
@@ -186,15 +186,15 @@
 
 ## 📊 遊戲數據
 
-### v0.6 版本統計
+### v0.6.2 版本統計
 
 - 🎴 **卡牌總數**：31 張（26 張可用 + 5 張 BOSS）
 - 🗺️ **關卡總數**：100 關（10 章）
-- 🐉 **BOSS 副本**：5 個
+- 🐉 **BOSS 副本**：5 個（均帶開場小兵）
 - ⚔️ **裝備總數**：13 件
 - ⚡ **羈絆類型**：7 種（5 種族 + 2 職業）
-- 💻 **代碼行數**：約 4,800 行
-- 📦 **文件大小**：155 KB
+- 💻 **代碼行數**：約 4,981 行
+- 📦 **文件大小**：158 KB
 
 ### 開發進度
 
@@ -203,7 +203,8 @@
 - ✅ v0.3：BOSS 副本系統
 - ✅ v0.4：BOSS 2×2 + 手動/自動模式
 - ✅ v0.5：完整裝備系統
-- ✅ v0.6：新增 10 張卡牌 + 3 個 BOSS（當前版本）
+- ✅ v0.6：新增 10 張卡牌 + 3 個 BOSS
+- ✅ v0.6.2：Bug 修復 + BOSS 小兵（當前版本）
 - 🚧 v0.7：技能樹系統（規劃中）
 
 ---
@@ -233,6 +234,21 @@
 ---
 
 ## 📝 更新日誌
+
+### v0.6.2（2025-01-11）
+
+**Bug 修復**：
+- 🐛 修復跨章節解鎖邏輯（通關 1-10 後正確解鎖 2-1）
+- ⚡ 修復能量恢復受倍速影響的問題（現在始終每 2 秒 +1）
+- 💬 添加手動模式提示訊息（能量不足、戰場已滿）
+
+**功能增強**：
+- ⚔️ BOSS 副本添加開場小兵（增加挑戰難度）
+  - 暗影領主：2 個戰士
+  - 烈焰龍王：2 個法師
+  - 寒冰泰坦：2 個坦克 + 1 個弓手
+  - 雷霆巨獸：2 個戰士 + 1 個牧師
+  - 虛空帝王：2 個死靈術士 + 2 個法師
 
 ### v0.6.1（2025-01-10）
 

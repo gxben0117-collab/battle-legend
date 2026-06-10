@@ -2446,7 +2446,10 @@ const BOSS_RAIDS = [
     name:'暗影領主之戰',
     boss:'boss-shadow-lord',
     bossPosition:{x:7,y:2},  // v0.3：BOSS 左上角位置（佔 2×2：x=7~8, y=2~3）
-    supporters:[],  // 無小怪
+    supporters:[
+      {card:'warrior',x:6,y:1},
+      {card:'warrior',x:6,y:5},
+    ],  // v0.6.2：添加開場小兵
     obstacles:[
       {x:2,y:3,type:'statue'},
       {x:2,y:7,type:'statue'},
@@ -2459,7 +2462,10 @@ const BOSS_RAIDS = [
     name:'烈焰龍王之戰',
     boss:'boss-inferno-dragon',
     bossPosition:{x:7,y:2},  // v0.3：BOSS 左上角位置（佔 2×2：x=7~8, y=2~3）
-    supporters:[],
+    supporters:[
+      {card:'mage',x:6,y:1},
+      {card:'mage',x:6,y:5},
+    ],  // v0.6.2：添加開場小兵
     obstacles:[
       {x:2,y:3,type:'rock'},
       {x:2,y:7,type:'rock'},
@@ -2474,7 +2480,11 @@ const BOSS_RAIDS = [
     name:'寒冰泰坦之戰',
     boss:'boss-frost-titan',
     bossPosition:{x:7,y:2},
-    supporters:[],
+    supporters:[
+      {card:'tank',x:6,y:1},
+      {card:'tank',x:6,y:5},
+      {card:'archer',x:5,y:3},
+    ],  // v0.6.2：添加開場小兵
     obstacles:[
       {x:1,y:4,type:'ice'},
       {x:1,y:6,type:'ice'},
@@ -2490,7 +2500,11 @@ const BOSS_RAIDS = [
     name:'雷霆巨獸之戰',
     boss:'boss-thunder-behemoth',
     bossPosition:{x:7,y:2},
-    supporters:[],
+    supporters:[
+      {card:'warrior',x:6,y:1},
+      {card:'warrior',x:6,y:5},
+      {card:'priest',x:5,y:3},
+    ],  // v0.6.2：添加開場小兵
     obstacles:[
       {x:2,y:2,type:'rock'},
       {x:2,y:8,type:'rock'},
@@ -2504,7 +2518,12 @@ const BOSS_RAIDS = [
     name:'虛空帝王之戰',
     boss:'boss-void-emperor',
     bossPosition:{x:7,y:2},
-    supporters:[],
+    supporters:[
+      {card:'necro',x:6,y:1},
+      {card:'necro',x:6,y:5},
+      {card:'mage',x:5,y:2},
+      {card:'mage',x:5,y:4},
+    ],  // v0.6.2：添加開場小兵（最終 BOSS 多 1 個）
     obstacles:[
       {x:1,y:1,type:'void'},
       {x:1,y:9,type:'void'},

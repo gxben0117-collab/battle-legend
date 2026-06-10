@@ -2445,14 +2445,14 @@ const BOSS_RAIDS = [
     id:'raid-shadow-lord',
     name:'暗影領主之戰',
     boss:'boss-shadow-lord',
-    bossPosition:{x:7,y:2},  // v0.3：BOSS 左上角位置（佔 2×2：x=7~8, y=2~3）
+    bossPosition:{x:3,y:0},  // v0.7：9×7 戰場，BOSS 在上方中央（佔 2×2：x=3~4, y=0~1）
     supporters:[
+      {card:'warrior',x:1,y:1},
       {card:'warrior',x:6,y:1},
-      {card:'warrior',x:6,y:5},
     ],  // v0.6.2：添加開場小兵
     obstacles:[
-      {x:2,y:3,type:'statue'},
-      {x:2,y:7,type:'statue'},
+      {x:1,y:3,type:'statue'},
+      {x:6,y:3,type:'statue'},
     ],
     reward:{gold:500,essence:50},
     // unlockStage:'2-10',  // v0.3：測試時先解鎖
@@ -2461,15 +2461,15 @@ const BOSS_RAIDS = [
     id:'raid-inferno-dragon',
     name:'烈焰龍王之戰',
     boss:'boss-inferno-dragon',
-    bossPosition:{x:7,y:2},  // v0.3：BOSS 左上角位置（佔 2×2：x=7~8, y=2~3）
+    bossPosition:{x:3,y:0},  // v0.7：9×7 戰場，BOSS 在上方中央
     supporters:[
+      {card:'mage',x:1,y:1},
       {card:'mage',x:6,y:1},
-      {card:'mage',x:6,y:5},
     ],  // v0.6.2：添加開場小兵
     obstacles:[
       {x:2,y:3,type:'rock'},
-      {x:2,y:7,type:'rock'},
-      {x:4,y:5,type:'water'},
+      {x:5,y:3,type:'rock'},
+      {x:4,y:4,type:'water'},
     ],
     reward:{gold:800,essence:80},
     // unlockStage:'3-10',  // v0.3：測試時先解鎖
@@ -2479,18 +2479,17 @@ const BOSS_RAIDS = [
     id:'raid-frost-titan',
     name:'寒冰泰坦之戰',
     boss:'boss-frost-titan',
-    bossPosition:{x:7,y:2},
+    bossPosition:{x:3,y:0},
     supporters:[
+      {card:'tank',x:1,y:1},
       {card:'tank',x:6,y:1},
-      {card:'tank',x:6,y:5},
-      {card:'archer',x:5,y:3},
+      {card:'archer',x:4,y:2},
     ],  // v0.6.2：添加開場小兵
     obstacles:[
       {x:1,y:4,type:'ice'},
-      {x:1,y:6,type:'ice'},
-      {x:3,y:5,type:'ice'},
-      {x:5,y:3,type:'ice'},
-      {x:5,y:7,type:'ice'},
+      {x:6,y:4,type:'ice'},
+      {x:2,y:5,type:'ice'},
+      {x:5,y:5,type:'ice'},
     ],
     reward:{gold:1000,essence:100},
     unlockStage:'4-10',
@@ -2499,16 +2498,16 @@ const BOSS_RAIDS = [
     id:'raid-thunder-behemoth',
     name:'雷霆巨獸之戰',
     boss:'boss-thunder-behemoth',
-    bossPosition:{x:7,y:2},
+    bossPosition:{x:3,y:0},
     supporters:[
+      {card:'warrior',x:1,y:1},
       {card:'warrior',x:6,y:1},
-      {card:'warrior',x:6,y:5},
-      {card:'priest',x:5,y:3},
+      {card:'priest',x:4,y:2},
     ],  // v0.6.2：添加開場小兵
     obstacles:[
-      {x:2,y:2,type:'rock'},
-      {x:2,y:8,type:'rock'},
-      {x:4,y:5,type:'rock'},
+      {x:1,y:3,type:'rock'},
+      {x:6,y:3,type:'rock'},
+      {x:4,y:4,type:'rock'},
     ],
     reward:{gold:1200,essence:120},
     unlockStage:'5-10',
@@ -2517,19 +2516,17 @@ const BOSS_RAIDS = [
     id:'raid-void-emperor',
     name:'虛空帝王之戰',
     boss:'boss-void-emperor',
-    bossPosition:{x:7,y:2},
+    bossPosition:{x:3,y:0},
     supporters:[
+      {card:'necro',x:1,y:1},
       {card:'necro',x:6,y:1},
-      {card:'necro',x:6,y:5},
+      {card:'mage',x:2,y:2},
       {card:'mage',x:5,y:2},
-      {card:'mage',x:5,y:4},
     ],  // v0.6.2：添加開場小兵（最終 BOSS 多 1 個）
     obstacles:[
-      {x:1,y:1,type:'void'},
-      {x:1,y:9,type:'void'},
-      {x:3,y:5,type:'void'},
-      {x:5,y:3,type:'void'},
-      {x:5,y:7,type:'void'},
+      {x:0,y:3,type:'void'},
+      {x:7,y:3,type:'void'},
+      {x:4,y:4,type:'void'},
     ],
     reward:{gold:1500,essence:150},
     unlockStage:'6-10',
@@ -3151,8 +3148,8 @@ function createBattleState(stage, raid = null) {
   const usedIdxs = startCards.map(s => s.idx).sort((a,b)=>b-a);
   usedIdxs.forEach(idx => state.deck.splice(idx, 1));
 
-  // v0.7：9×7 戰場開場位置（我方下方 2×3 區域）
-  const startPositions = [ {x:3,y:5}, {x:4,y:5}, {x:5,y:5} ];
+  // v0.7：9×7 戰場開場位置（我方下方 2×3 區域，分散排列）
+  const startPositions = [ {x:3,y:5}, {x:5,y:5}, {x:4,y:6} ];
   startCards.forEach((sc, i) => {
     const pos = startPositions[i];
     const u = makeUnit('my' + state.unitIdCounter++, CARD_DB[sc.cardId], pos.x, pos.y, true, false);

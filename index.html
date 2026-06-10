@@ -2860,10 +2860,32 @@ function findTarget(u, enemies) {
   }
   // 預設：最近敵人
   return enemies.reduce((a, b) => {
-    const da = Math.abs(u.x-a.x)+Math.abs(u.y-a.y);
-    const db = Math.abs(u.x-b.x)+Math.abs(u.y-b.y);
+    // v0.3：計算到敵人的最短距離（考慮 BOSS 4×4 佔據）
+    const da = getDistanceToUnit(u, a);
+    const db = getDistanceToUnit(u, b);
     return da < db ? a : b;
   });
+}
+
+// v0.3：計算單位到目標的最短距離（考慮 BOSS 多格佔據）
+function getDistanceToUnit(from, to) {
+  if (to.isBoss && to.bossSize) {
+    // BOSS：計算到 BOSS 任意格子的最短距離
+    let minDist = Infinity;
+    const size = to.bossSize;
+    for (let dx = 0; dx < size; dx++) {
+      for (let dy = 0; dy < size; dy++) {
+        const tx = to.x + dx;
+        const ty = to.y + dy;
+        const dist = Math.abs(from.x - tx) + Math.abs(from.y - ty);
+        minDist = Math.min(minDist, dist);
+      }
+    }
+    return minDist;
+  } else {
+    // 普通單位：曼哈頓距離
+    return Math.abs(from.x - to.x) + Math.abs(from.y - to.y);
+  }
 }
 
 function attack(attacker, target) {
@@ -3092,8 +3114,30 @@ function moveToward(u, target) {
   if (!u._stuckCount) u._stuckCount = 0;
   if (!u._lastPos) u._lastPos = { x: u.x, y: u.y };
 
+  // v0.3：找到目標的最佳位置（BOSS 則找最近的格子）
+  let targetX = target.x;
+  let targetY = target.y;
+
+  if (target.isBoss && target.bossSize) {
+    // BOSS：找到 BOSS 佔據的所有格子中最近的一個
+    let minDist = Infinity;
+    const size = target.bossSize;
+    for (let dx = 0; dx < size; dx++) {
+      for (let dy = 0; dy < size; dy++) {
+        const tx = target.x + dx;
+        const ty = target.y + dy;
+        const dist = Math.abs(u.x - tx) + Math.abs(u.y - ty);
+        if (dist < minDist) {
+          minDist = dist;
+          targetX = tx;
+          targetY = ty;
+        }
+      }
+    }
+  }
+
   // BFS 找往目標的下一步
-  let step = bfsNextStep(u, target.x, target.y);
+  let step = bfsNextStep(u, targetX, targetY);
 
   if (!step) {
     // 完全堵死：卡住計數++，超過門檻換最近的可達敵人
@@ -3103,7 +3147,24 @@ function moveToward(u, target) {
       const enemies = B.units.filter(e => e.alive && e.isMy !== u.isMy);
       // 找距離最近且BFS可達的敵人
       const reachable = enemies
-        .map(e => ({ e, step: bfsNextStep(u, e.x, e.y) }))
+        .map(e => {
+          // v0.3：對 BOSS 找最近格子
+          let ex = e.x, ey = e.y;
+          if (e.isBoss && e.bossSize) {
+            let minD = Infinity;
+            for (let dx = 0; dx < e.bossSize; dx++) {
+              for (let dy = 0; dy < e.bossSize; dy++) {
+                const d = Math.abs(u.x - (e.x + dx)) + Math.abs(u.y - (e.y + dy));
+                if (d < minD) {
+                  minD = d;
+                  ex = e.x + dx;
+                  ey = e.y + dy;
+                }
+              }
+            }
+          }
+          return { e, step: bfsNextStep(u, ex, ey) };
+        })
         .filter(r => r.step !== null)
         .sort((a, b) => {
           const da = Math.abs(u.x-a.e.x)+Math.abs(u.y-a.e.y);

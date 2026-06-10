@@ -576,73 +576,106 @@ body {
 
 /* 戰鬥下方 */
 .battle-bottom {
-  height: 130px;
+  height: 140px;
   background: var(--bg-panel);
   border-top: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  padding: 8px 16px;
-  gap: 6px;
+  padding: 12px 24px;
+  gap: 8px;
   flex-shrink: 0;
 }
 
 .battle-bottom-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  gap: 20px;
 }
 
 /* 能量條 */
 .energy-section {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.energy-label {
+  font-size: 13px;
+  color: var(--text-dim);
+  font-weight: 600;
+  display: flex;
   align-items: center;
   gap: 6px;
 }
-.energy-label { font-size: 11px; color: var(--text-dim); }
 .energy-pips {
   display: flex;
-  gap: 3px;
+  gap: 5px;
 }
 .energy-pip {
-  width: 16px; height: 16px;
-  border-radius: 2px;
+  width: 20px; height: 20px;
+  border-radius: 3px;
   background: var(--bg-card);
   border: 1px solid var(--border);
   transition: background 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
-.energy-pip.filled { background: var(--energy-blue); border-color: #5ab4ff; }
+.energy-pip.filled {
+  background: var(--energy-blue);
+  border-color: #5ab4ff;
+  box-shadow: 0 0 8px rgba(58,180,255,0.4);
+}
 
 /* 手牌 */
-.hand-section { flex: 1; display: flex; gap: 6px; align-items: flex-end; }
+.hand-section {
+  flex: 1;
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  justify-content: center;
+  max-width: 600px;
+}
 
 .hand-card {
-  width: 58px;
+  width: 68px;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 4px;
-  padding: 4px;
+  padding: 6px;
   text-align: center;
   cursor: default;
   transition: all 0.15s;
   position: relative;
   flex-shrink: 0;
 }
-.hand-card:hover { transform: translateY(-3px); border-color: var(--border-gold); }
+.hand-card:hover { transform: translateY(-4px); border-color: var(--border-gold); }
 .hand-card .card-cost {
   position: absolute;
-  top: -6px; right: -6px;
-  width: 16px; height: 16px;
+  top: -8px; right: -8px;
+  width: 20px; height: 20px;
   border-radius: 50%;
   background: var(--energy-blue);
   color: #fff;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   display: flex; align-items: center; justify-content: center;
   border: 1px solid #5ab4ff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
-.hand-card .card-icon { font-size: 18px; }
-.hand-card .card-name { font-size: 8px; color: var(--text-silver); margin-top: 2px; white-space: nowrap; overflow: hidden; }
-.hand-card .card-stats { font-size: 7px; color: var(--text-dim); }
+.hand-card .card-icon { font-size: 22px; }
+.hand-card .card-name {
+  font-size: 10px;
+  color: var(--text-silver);
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  font-weight: 600;
+}
+.hand-card .card-stats {
+  font-size: 9px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
 
 /* N/R/SR/SSR 邊框 */
 .hand-card.rarity-N { border-color: var(--n-col); }
@@ -1176,7 +1209,7 @@ body {
   <div class="battle-bottom">
     <div class="battle-bottom-row">
       <div class="energy-section">
-        <span class="energy-label">能量</span>
+        <span class="energy-label">能量 <span id="energy-timer" style="font-size:11px;color:var(--energy-blue);">2.0s</span></span>
         <div class="energy-pips" id="energy-pips"></div>
       </div>
       <div class="hand-section" id="hand-section"></div>
@@ -1866,8 +1899,9 @@ function startBattleLoop() {
     while (B.energyTimer >= B.energyRate && B.energy < B.maxEnergy) {
       B.energy++;
       B.energyTimer -= B.energyRate;
-      renderEnergy();
     }
+    // 每幀更新能量顯示（包含倒數計時）
+    renderEnergy();
 
     // AI 打牌
     aiPlayCard();
@@ -2309,6 +2343,13 @@ function renderEnergy() {
     const pip = document.createElement('div');
     pip.className = 'energy-pip' + (i < B.energy ? ' filled' : '');
     pips.appendChild(pip);
+  }
+
+  // 更新能量倒數計時
+  const timerEl = document.getElementById('energy-timer');
+  if (timerEl && B.running) {
+    const remaining = (B.energyRate - B.energyTimer) / 1000;
+    timerEl.textContent = remaining.toFixed(1) + 's';
   }
 }
 

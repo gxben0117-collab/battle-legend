@@ -336,8 +336,8 @@ body {
 
 .battlefield {
   display: grid;
-  grid-template-columns: repeat(9, 58px);
-  grid-template-rows: repeat(9, 58px);
+  grid-template-columns: repeat(10, 64px);
+  grid-template-rows: repeat(10, 64px);
   gap: 2px;
   position: relative;
   z-index: 1;
@@ -2065,17 +2065,19 @@ function applySynergies() {
 function setupBattlefield() {
   const bf = document.getElementById('battlefield');
   bf.innerHTML = '';
-  for (let row = 0; row < 9; row++) {
-    for (let col = 0; col < 9; col++) {
+  for (let row = 0; row < 10; row++) {
+    for (let col = 0; col < 10; col++) {
       const cell = document.createElement('div');
       cell.id = `cell-${col}-${row}`;
       cell.className = 'cell';
-      // 我方陣地：左下 3x3（x=0~2, y=6~8）
-      if (col <= 2 && row >= 6) cell.classList.add('my-zone');
-      // 敵方陣地：右上 3x3（x=6~8, y=0~2）
-      else if (col >= 6 && row <= 2) cell.classList.add('enemy-zone');
+      // v0.3：10×10 戰場
+      // 我方陣地：左下 3x3（x=0~2, y=7~9）
+      if (col <= 2 && row >= 7) cell.classList.add('my-zone');
+      // 敵方陣地：右上 3x3（x=7~9, y=0~2）
+      else if (col >= 7 && row <= 2) cell.classList.add('enemy-zone');
       else cell.classList.add('neutral-zone');
-      if ((col === 0 && row === 8) || (col === 8 && row === 0)) cell.classList.add('commander-cell');
+      // 主堡位置：左下角 (0,9) 和右上角 (9,0)
+      if ((col === 0 && row === 9) || (col === 9 && row === 0)) cell.classList.add('commander-cell');
 
       // v0.2：渲染障礙物
       if (B.obstacles) {
@@ -2445,8 +2447,10 @@ function killUnit(unit) {
 
 // v0.2：檢查某格是否可通行（邊界、指揮官格、障礙物、其他單位）
 function isCellWalkable(x, y, u) {
-  if (x < 0 || x > 8 || y < 0 || y > 8) return false;
-  if (!u.isCommander && ((x===0&&y===8)||(x===8&&y===0))) return false;
+  // v0.3：10×10 戰場邊界檢查
+  if (x < 0 || x > 9 || y < 0 || y > 9) return false;
+  // 主堡位置：(0,9) 和 (9,0)
+  if (!u.isCommander && ((x===0&&y===9)||(x===9&&y===0))) return false;
   // v0.2：檢查障礙物
   if (B.obstacles && B.obstacles.some(obs => obs.x === x && obs.y === y)) return false;
   if (B.units.some(o => o.alive && o.uid !== u.uid && o.x === x && o.y === y)) return false;
@@ -2542,14 +2546,15 @@ function moveUnitTo(u, nx, ny) {
 }
 
 function findFreeCell(isMy) {
-  // 我方陣地：x=0~2, y=6~8（左下3x3）
-  // 敵方陣地：x=6~8, y=0~2（右上3x3）
-  const cols = isMy ? [0, 1, 2] : [8, 7, 6];
-  const rows = isMy ? [7, 6, 8] : [1, 2, 0];
+  // v0.3：10×10 戰場
+  // 我方陣地：x=0~2, y=7~9（左下3x3）
+  // 敵方陣地：x=7~9, y=0~2（右上3x3）
+  const cols = isMy ? [0, 1, 2] : [9, 8, 7];
+  const rows = isMy ? [8, 7, 9] : [1, 2, 0];
   for (const row of rows) {
     for (const col of cols) {
-      const isMyCmd = col===0 && row===8;
-      const isEnemyCmd = col===8 && row===0;
+      const isMyCmd = col===0 && row===9;
+      const isEnemyCmd = col===9 && row===0;
       if (!isMyCmd && !isEnemyCmd && !B.units.some(u=>u.alive&&u.x===col&&u.y===row)) {
         return { x:col, y:row };
       }

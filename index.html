@@ -388,6 +388,24 @@ body {
 }
 .cell.obstacle.rock { background: rgba(100,90,80,0.25); }
 .cell.obstacle.tree { background: rgba(50,80,50,0.25); }
+/* v0.3：新障礙物類型 */
+.cell.obstacle.water {
+  background: rgba(30,80,150,0.3);
+  border-color: rgba(50,120,200,0.5);
+}
+.cell.obstacle.poison {
+  background: rgba(80,150,80,0.3);
+  border-color: rgba(100,180,100,0.5);
+  animation: poison-pulse 2s ease-in-out infinite;
+}
+@keyframes poison-pulse {
+  0%, 100% { background: rgba(80,150,80,0.3); }
+  50% { background: rgba(100,180,100,0.4); }
+}
+.cell.obstacle.statue {
+  background: rgba(120,120,120,0.35);
+  border-color: rgba(150,150,150,0.6);
+}
 
 /* 單位 */
 /* ===== 單位卡片 ===== */
@@ -1424,6 +1442,98 @@ const CARD_DB = {
     passive:'死亡汲取', passiveDesc:'場上單位死亡時回血5%',
     skillMult:0, skillType:'summon',
   },
+  // v0.3：新增卡牌（物理系 5 張）
+  'shield-guard': {
+    id:'shield-guard', name:'盾衛兵', icon:'🛡️', rarity:'N', cardType:'unit',
+    race:'人類', job:'坦克', cost:2,
+    hp:80, patk:5, matk:0, pdef:15, mdef:4, spd:45, acc:70, crit:2, critDmg:120,
+    move:1, range:1, color:'#4a4a5a', dmgType:'physical',
+    skill:'堅盾防禦', skillDesc:'獲得自身HP 40%的護盾',
+    passive:'格擋', passiveDesc:'受物理傷害-20%',
+    skillMult:0, skillType:'shield',
+  },
+  'light-cavalry': {
+    id:'light-cavalry', name:'輕騎兵', icon:'🏇', rarity:'N', cardType:'unit',
+    race:'人類', job:'戰士', cost:2,
+    hp:55, patk:11, matk:0, pdef:5, mdef:3, spd:85, acc:80, crit:8, critDmg:160,
+    move:3, range:1, color:'#6a5a3a', dmgType:'physical',
+    skill:'衝鋒', skillDesc:'造成140%傷害',
+    passive:'機動', passiveDesc:'移動後攻擊+15%',
+    skillMult:1.4, skillType:'melee',
+  },
+  'sniper': {
+    id:'sniper', name:'神射手', icon:'🎯', rarity:'R', cardType:'unit',
+    race:'精靈', job:'射手', cost:3,
+    hp:38, patk:14, matk:0, pdef:2, mdef:3, spd:70, acc:98, crit:25, critDmg:220,
+    move:2, range:5, color:'#3a5a3a', dmgType:'physical',
+    skill:'狙擊', skillDesc:'造成200%傷害，必定暴擊',
+    passive:'鷹眼', passiveDesc:'攻擊HP最低敵人暴擊率+30%',
+    skillMult:2.0, skillType:'ranged',
+  },
+  'sword-master': {
+    id:'sword-master', name:'劍聖', icon:'⚔️', rarity:'SR', cardType:'unit',
+    race:'人類', job:'戰士', cost:3,
+    hp:65, patk:18, matk:0, pdef:7, mdef:5, spd:75, acc:88, crit:12, critDmg:180,
+    move:2, range:1, color:'#7a3a3a', dmgType:'physical',
+    skill:'劍氣斬', skillDesc:'對前方3格敵人造成160%傷害',
+    passive:'劍意', passiveDesc:'每擊殺1敵人物攻+5%(最多3層)',
+    skillMult:1.6, skillType:'aoe',
+  },
+  'aerial-archer': {
+    id:'aerial-archer', name:'飛行弩手', icon:'🦅', rarity:'SR', cardType:'unit',
+    race:'精靈', job:'射手', cost:3,
+    hp:42, patk:13, matk:0, pdef:3, mdef:4, spd:90, acc:92, crit:15, critDmg:170,
+    move:2, range:4, color:'#3a6a7a', dmgType:'physical',
+    skill:'俯衝射擊', skillDesc:'造成170%傷害',
+    passive:'飛行', passiveDesc:'無視障礙物',
+    skillMult:1.7, skillType:'ranged',
+  },
+  // v0.3：新增卡牌（魔法系 5 張）
+  'novice-monk': {
+    id:'novice-monk', name:'見習僧侶', icon:'📿', rarity:'N', cardType:'unit',
+    race:'人類', job:'牧師', cost:2,
+    hp:45, patk:2, matk:8, pdef:3, mdef:6, spd:60, acc:80, crit:3, critDmg:120,
+    move:2, range:3, color:'#5a5a3a', dmgType:'magic',
+    skill:'輕治癒', skillDesc:'治療友方20% HP',
+    passive:'祈禱', passiveDesc:'每10秒隨機友方恢復5% HP',
+    skillMult:0.20, skillType:'heal',
+  },
+  'thunder-mage': {
+    id:'thunder-mage', name:'雷法師', icon:'⚡', rarity:'R', cardType:'unit',
+    race:'人類', job:'法師', cost:3,
+    hp:38, patk:2, matk:20, pdef:1, mdef:6, spd:70, acc:95, crit:8, critDmg:160,
+    move:2, range:4, color:'#4a4a7a', dmgType:'magic',
+    skill:'連鎖閃電', skillDesc:'造成180%傷害',
+    passive:'雷擊', passiveDesc:'暴擊時麻痺目標1秒',
+    skillMult:1.8, skillType:'ranged',
+  },
+  'ice-mage': {
+    id:'ice-mage', name:'冰法師', icon:'❄️', rarity:'R', cardType:'unit',
+    race:'人類', job:'法師', cost:3,
+    hp:40, patk:2, matk:15, pdef:2, mdef:7, spd:65, acc:90, crit:5, critDmg:140,
+    move:2, range:4, color:'#3a5a7a', dmgType:'magic',
+    skill:'冰霜新星', skillDesc:'對周圍造成120%傷害並減速50%',
+    passive:'寒冰', passiveDesc:'攻擊降低目標10%速度(最多3層)',
+    skillMult:1.2, skillType:'aoe',
+  },
+  'wind-walker': {
+    id:'wind-walker', name:'風行者', icon:'🌪️', rarity:'SR', cardType:'unit',
+    race:'精靈', job:'法師', cost:3,
+    hp:36, patk:2, matk:16, pdef:2, mdef:8, spd:100, acc:92, crit:10, critDmg:150,
+    move:3, range:4, color:'#5a7a5a', dmgType:'magic',
+    skill:'風暴之力', skillDesc:'造成150%傷害並推開目標2格',
+    passive:'疾風', passiveDesc:'速度+20%、迴避+15%',
+    skillMult:1.5, skillType:'ranged',
+  },
+  'inferno-mage': {
+    id:'inferno-mage', name:'烈焰術士', icon:'🔥', rarity:'SSR', cardType:'hero',
+    race:'人類', job:'法師', cost:4,
+    hp:50, patk:2, matk:22, pdef:3, mdef:10, spd:68, acc:95, crit:12, critDmg:180,
+    move:2, range:5, color:'#7a2a2a', dmgType:'magic',
+    skill:'火焰風暴', skillDesc:'對3×3範圍造成180%傷害',
+    passive:'烈焰', passiveDesc:'攻擊附帶燃燒(每秒3% HP持續2秒)',
+    skillMult:1.8, skillType:'aoe',
+  },
 };
 
 // 骷髏士兵（臨時單位）
@@ -1502,6 +1612,128 @@ const STAGES = [
     obstacles:[{x:3,y:3,type:'rock'},{x:5,y:3,type:'rock'},{x:4,y:5,type:'rock'},{x:5,y:6,type:'rock'},{x:6,y:4,type:'rock'}],
     reward:{gold:300,essence:30}
   },
+  // v0.3：第二章（暗影森林）
+  {
+    id:'2-1', name:'黑暗小徑', type:'普通',
+    enemy:[{card:'warrior',x:7,y:2},{card:'archer',x:8,y:1},{card:'mage',x:7,y:4}],
+    obstacles:[{x:4,y:3,type:'tree'},{x:5,y:5,type:'tree'},{x:4,y:6,type:'rock'}],
+    reward:{gold:100,essence:8}
+  },
+  {
+    id:'2-2', name:'腐木巢穴', type:'普通',
+    enemy:[{card:'assassin',x:7,y:2},{card:'assassin',x:7,y:4},{card:'archer',x:8,y:3}],
+    obstacles:[{x:3,y:2,type:'tree'},{x:3,y:4,type:'tree'},{x:5,y:3,type:'tree'}],
+    reward:{gold:100,essence:8}
+  },
+  {
+    id:'2-3', name:'蜘蛛洞窟', type:'精英',
+    enemy:[{card:'assassin',x:7,y:1},{card:'assassin',x:7,y:3},{card:'assassin',x:7,y:5},{card:'mage',x:8,y:3}],
+    obstacles:[{x:4,y:2,type:'rock'},{x:4,y:4,type:'rock'},{x:5,y:3,type:'poison'}],
+    reward:{gold:150,essence:12}
+  },
+  {
+    id:'2-4', name:'幽靈墓地', type:'普通',
+    enemy:[{card:'mage',x:7,y:2},{card:'mage',x:7,y:4},{card:'warrior',x:8,y:3}],
+    obstacles:[{x:3,y:3,type:'statue'},{x:5,y:2,type:'rock'},{x:5,y:4,type:'rock'}],
+    reward:{gold:110,essence:9}
+  },
+  {
+    id:'2-5', name:'森林深處', type:'普通',
+    enemy:[{card:'tank',x:7,y:3},{card:'archer',x:8,y:1},{card:'archer',x:8,y:5}],
+    obstacles:[{x:4,y:1,type:'tree'},{x:4,y:5,type:'tree'},{x:5,y:3,type:'water'}],
+    reward:{gold:110,essence:9}
+  },
+  {
+    id:'2-6', name:'暗影刺客', type:'精英',
+    enemy:[{card:'assassin',x:6,y:2},{card:'assassin',x:6,y:4},{card:'assassin',x:7,y:3},{card:'tank',x:8,y:3}],
+    obstacles:[{x:4,y:3,type:'water'},{x:5,y:2,type:'rock'},{x:5,y:4,type:'rock'}],
+    reward:{gold:150,essence:12}
+  },
+  {
+    id:'2-7', name:'沼澤邊緣', type:'普通',
+    enemy:[{card:'warrior',x:7,y:2},{card:'warrior',x:7,y:4},{card:'priest',x:8,y:3}],
+    obstacles:[{x:3,y:2,type:'poison'},{x:3,y:4,type:'poison'},{x:5,y:3,type:'water'}],
+    reward:{gold:120,essence:10}
+  },
+  {
+    id:'2-8', name:'毒霧沼澤', type:'精英',
+    enemy:[{card:'mage',x:7,y:1},{card:'mage',x:7,y:5},{card:'tank',x:8,y:3},{card:'archer',x:7,y:3}],
+    obstacles:[{x:3,y:3,type:'poison'},{x:4,y:2,type:'poison'},{x:4,y:4,type:'poison'},{x:5,y:3,type:'water'}],
+    reward:{gold:160,essence:13}
+  },
+  {
+    id:'2-9', name:'古老祭壇', type:'普通',
+    enemy:[{card:'priest',x:7,y:2},{card:'priest',x:7,y:4},{card:'tank',x:8,y:3}],
+    obstacles:[{x:4,y:3,type:'statue'},{x:5,y:2,type:'statue'},{x:5,y:4,type:'rock'}],
+    reward:{gold:120,essence:10}
+  },
+  {
+    id:'2-10', name:'暗影領主', type:'Boss',
+    enemy:[{card:'necro',x:7,y:3},{card:'assassin',x:6,y:2},{card:'assassin',x:6,y:4},{card:'mage',x:8,y:2},{card:'mage',x:8,y:4}],
+    obstacles:[{x:4,y:1,type:'statue'},{x:4,y:5,type:'statue'},{x:5,y:3,type:'poison'}],
+    reward:{gold:300,essence:25}
+  },
+  // v0.3：第三章（烈焰高地）
+  {
+    id:'3-1', name:'火山腳下', type:'普通',
+    enemy:[{card:'warrior',x:7,y:2},{card:'warrior',x:7,y:4},{card:'mage',x:8,y:3}],
+    obstacles:[{x:4,y:3,type:'rock'},{x:5,y:2,type:'rock'},{x:5,y:4,type:'rock'}],
+    reward:{gold:130,essence:11}
+  },
+  {
+    id:'3-2', name:'熔岩洞穴', type:'普通',
+    enemy:[{card:'knight',x:7,y:2},{card:'archer',x:7,y:4},{card:'mage',x:8,y:3}],
+    obstacles:[{x:3,y:2,type:'rock'},{x:3,y:4,type:'rock'},{x:5,y:3,type:'rock'}],
+    reward:{gold:130,essence:11}
+  },
+  {
+    id:'3-3', name:'火焰守衛', type:'精英',
+    enemy:[{card:'tank',x:7,y:2},{card:'tank',x:7,y:4},{card:'warrior',x:8,y:1},{card:'warrior',x:8,y:5}],
+    obstacles:[{x:4,y:3,type:'statue'},{x:5,y:2,type:'rock'},{x:5,y:4,type:'rock'}],
+    reward:{gold:170,essence:14}
+  },
+  {
+    id:'3-4', name:'烈焰平原', type:'普通',
+    enemy:[{card:'archer',x:7,y:1},{card:'archer',x:7,y:3},{card:'archer',x:7,y:5},{card:'priest',x:8,y:3}],
+    obstacles:[{x:4,y:2,type:'rock'},{x:4,y:4,type:'rock'},{x:5,y:3,type:'statue'}],
+    reward:{gold:140,essence:12}
+  },
+  {
+    id:'3-5', name:'熔岩河流', type:'普通',
+    enemy:[{card:'mage',x:7,y:2},{card:'mage',x:7,y:4},{card:'tank',x:8,y:3}],
+    obstacles:[{x:3,y:3,type:'water'},{x:4,y:3,type:'water'},{x:5,y:3,type:'water'}],
+    reward:{gold:140,essence:12}
+  },
+  {
+    id:'3-6', name:'火焰巨獸', type:'精英',
+    enemy:[{card:'tank',x:7,y:3},{card:'warrior',x:6,y:2},{card:'warrior',x:6,y:4},{card:'mage',x:8,y:2},{card:'mage',x:8,y:4}],
+    obstacles:[{x:4,y:1,type:'rock'},{x:4,y:5,type:'rock'},{x:5,y:3,type:'statue'}],
+    reward:{gold:180,essence:15}
+  },
+  {
+    id:'3-7', name:'龍巢入口', type:'普通',
+    enemy:[{card:'knight',x:7,y:2},{card:'archer',x:7,y:4},{card:'priest',x:8,y:3}],
+    obstacles:[{x:3,y:2,type:'rock'},{x:3,y:4,type:'rock'},{x:5,y:3,type:'statue'}],
+    reward:{gold:150,essence:13}
+  },
+  {
+    id:'3-8', name:'龍族守護', type:'精英',
+    enemy:[{card:'necro',x:7,y:3},{card:'tank',x:6,y:3},{card:'mage',x:8,y:2},{card:'mage',x:8,y:4}],
+    obstacles:[{x:4,y:2,type:'statue'},{x:4,y:4,type:'statue'},{x:5,y:3,type:'rock'}],
+    reward:{gold:190,essence:16}
+  },
+  {
+    id:'3-9', name:'熔岩之心', type:'普通',
+    enemy:[{card:'warrior',x:7,y:1},{card:'warrior',x:7,y:5},{card:'priest',x:8,y:3},{card:'archer',x:7,y:3}],
+    obstacles:[{x:3,y:3,type:'water'},{x:4,y:2,type:'rock'},{x:4,y:4,type:'rock'},{x:5,y:3,type:'statue'}],
+    reward:{gold:150,essence:13}
+  },
+  {
+    id:'3-10', name:'烈焰龍王', type:'Boss',
+    enemy:[{card:'necro',x:7,y:3},{card:'tank',x:6,y:2},{card:'tank',x:6,y:4},{card:'mage',x:8,y:1},{card:'mage',x:8,y:5},{card:'priest',x:8,y:3}],
+    obstacles:[{x:4,y:1,type:'statue'},{x:4,y:5,type:'statue'},{x:5,y:2,type:'rock'},{x:5,y:4,type:'rock'}],
+    reward:{gold:400,essence:30}
+  },
 ];
 
 // ============================================================
@@ -1534,7 +1766,12 @@ function loadGame() {
 // 初始卡牌
 // ============================================================
 function initStarterCards() {
-  G.collection = { knight:3, warrior:3, archer:3, mage:1, assassin:1, tank:1 };
+  // v0.3：添加新卡牌到初始收藏
+  G.collection = {
+    knight:3, warrior:3, archer:3, mage:1, assassin:1, tank:1,
+    'shield-guard':2, 'light-cavalry':2, 'sniper':1, 'sword-master':1, 'aerial-archer':1,
+    'novice-monk':2, 'thunder-mage':1, 'ice-mage':1, 'wind-walker':1, 'inferno-mage':0
+  };
   G.deck = ['knight','knight','warrior','warrior','archer','archer','mage','assassin','tank',
             'knight','warrior','archer','warrior','archer','knight',
             'knight','warrior','archer','mage','archer',
@@ -1845,7 +2082,13 @@ function setupBattlefield() {
         const obstacle = B.obstacles.find(obs => obs.x === col && obs.y === row);
         if (obstacle) {
           cell.classList.add('obstacle', obstacle.type || 'rock');
-          const obstacleIcon = obstacle.type === 'tree' ? '🌳' : '🪨';
+          // v0.3：新增障礙物圖示
+          let obstacleIcon = '🪨';
+          if (obstacle.type === 'tree') obstacleIcon = '🌳';
+          else if (obstacle.type === 'water') obstacleIcon = '🌊';
+          else if (obstacle.type === 'poison') obstacleIcon = '☠️';
+          else if (obstacle.type === 'statue') obstacleIcon = '🗿';
+
           const iconDiv = document.createElement('div');
           iconDiv.className = 'obstacle-icon';
           iconDiv.textContent = obstacleIcon;

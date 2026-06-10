@@ -2,7 +2,7 @@
 
 > 一款基於 HTML5 的戰術自走棋遊戲
 
-[![Version](https://img.shields.io/badge/version-0.6.2-blue.svg)](https://github.com/gxben0117-collab/battle-legend)
+[![Version](https://img.shields.io/badge/version-0.7.0-blue.svg)](https://github.com/gxben0117-collab/battle-legend)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Live Demo](https://img.shields.io/badge/demo-live-brightgreen.svg)](https://gxben0117-collab.github.io/battle-legend)
 

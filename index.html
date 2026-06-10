@@ -2133,11 +2133,8 @@ function initStarterCards() {
     'shield-guard':2, 'light-cavalry':2, 'sniper':1, 'sword-master':1, 'aerial-archer':1,
     'novice-monk':2, 'thunder-mage':1, 'ice-mage':1, 'wind-walker':1, 'inferno-mage':0
   };
-  G.deck = ['knight','knight','warrior','warrior','archer','archer','mage','assassin','tank',
-            'knight','warrior','archer','warrior','archer','knight',
-            'knight','warrior','archer','mage','archer',
-            'knight','warrior','archer','archer','warrior',
-            'knight','warrior','archer','archer','knight'];
+  // v0.3：初始牌組改為空（玩家需要自己編輯牌組）
+  G.deck = [];
   saveGame();
 }
 

@@ -2133,22 +2133,25 @@ function initStarterCards() {
     'shield-guard':2, 'light-cavalry':2, 'sniper':1, 'sword-master':1, 'aerial-archer':1,
     'novice-monk':2, 'thunder-mage':1, 'ice-mage':1, 'wind-walker':1, 'inferno-mage':0
   };
-  // v0.3：初始牌組（用初始卡片湊滿 30 張）
+  // v0.3：初始牌組（只用初始收藏的卡片，不足 30 張）
   G.deck = [
     'knight','knight','knight',           // 騎士 x3
     'warrior','warrior','warrior',        // 戰士 x3
     'archer','archer','archer',           // 弓手 x3
-    'mage','mage','mage',                 // 法師 x3
-    'tank','tank','tank',                 // 坦克 x3
-    'assassin','assassin','assassin',     // 刺客 x3
-    'priest','priest','priest',           // 牧師 x3
-    'holy-knight','holy-knight',          // 聖光騎士 x2
-    'berserker','berserker',              // 狂野戰士 x2
-    'ranger','ranger',                     // 翠林遊俠 x2
-    'archmage',                            // 星穹法師 x1
-    'shadow-blade',                        // 影刃刺客 x1
-    'iron-wall',                           // 鐵壁守衛 x1
+    'mage',                                // 法師 x1
+    'assassin',                            // 刺客 x1
+    'tank',                                // 坦克 x1
+    'shield-guard','shield-guard',        // 盾衛兵 x2
+    'light-cavalry','light-cavalry',      // 輕騎兵 x2
+    'sniper',                              // 神射手 x1
+    'sword-master',                        // 劍聖 x1
+    'aerial-archer',                       // 飛行弩手 x1
+    'novice-monk','novice-monk',          // 見習僧侶 x2
+    'thunder-mage',                        // 雷法師 x1
+    'ice-mage',                            // 冰法師 x1
+    'wind-walker',                         // 風行者 x1
   ];
+  // 共 22 張，玩家需要通過抽卡/購買來補滿 30 張
   saveGame();
 }
 

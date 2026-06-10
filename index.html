@@ -495,31 +495,34 @@ body {
   position: absolute;
   bottom: -8px; left: 0;
   width: 100%;
-  height: 5px;
-  background: rgba(0,0,0,0.7);
-  border-radius: 2px;
+  height: 6px;
+  background: rgba(0,0,0,0.8);
+  border-radius: 3px;
   overflow: visible;
-  border: 1px solid rgba(255,255,255,0.15);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.2);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  z-index: 10;
 }
 .unit-hp-fill {
   height: 100%;
   background: linear-gradient(90deg, #27ae60, #2ecc71);
   transition: width 0.3s ease-out;
-  border-radius: 2px;
+  border-radius: 3px;
   position: relative;
+  box-shadow: inset 0 1px 2px rgba(255,255,255,0.3);
 }
 .unit-hp-fill::after {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 50%;
-  background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
-  border-radius: 2px 2px 0 0;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.4), transparent);
+  border-radius: 3px 3px 0 0;
 }
 .unit-hp-fill.low {
   background: linear-gradient(90deg, #c0392b, #e74c3c);
   animation: pulse-low-hp 1s ease-in-out infinite;
+  box-shadow: 0 0 8px rgba(231,76,60,0.6);
 }
 @keyframes pulse-low-hp {
   0%, 100% { opacity: 1; }
@@ -2802,21 +2805,28 @@ function selectUpgradeCard(cardId) {
   if (!G.cardLevels) G.cardLevels = {};
   const level = G.cardLevels[cardId] || 1;
   const upgradeCost = level * 50;
-  const hpBonus = (level-1) * 3;
-  const atkBonus = (level-1) * 1;
+  const hpBonus = (level-1) * 5;
+  const patkBonus = (level-1) * 2;
+  const matkBonus = (level-1) * 2;
+  const pdefBonus = (level-1) * 1;
+  const mdefBonus = (level-1) * 1;
+
+  // v0.2：顯示物攻/魔攻/物防/魔防
   const el = document.getElementById('upgrade-display');
   el.innerHTML = `
     <div class="upgrade-icon">${card.icon}</div>
     <div class="upgrade-name">${card.name}</div>
     <div class="upgrade-level">Lv.${level} / 30</div>
     <div class="upgrade-stats">
-      <div class="upgrade-stat-row"><span class="upgrade-stat-label">HP</span><span><span class="upgrade-stat-val">${card.hp+hpBonus}</span> <span class="upgrade-stat-next">→ ${card.hp+hpBonus+3}</span></span></div>
-      <div class="upgrade-stat-row"><span class="upgrade-stat-label">ATK</span><span><span class="upgrade-stat-val">${card.atk+atkBonus}</span> <span class="upgrade-stat-next">→ ${card.atk+atkBonus+1}</span></span></div>
-      <div class="upgrade-stat-row"><span class="upgrade-stat-label">DEF</span><span class="upgrade-stat-val">${card.def}</span></div>
-      <div class="upgrade-stat-row"><span class="upgrade-stat-label">SPD</span><span class="upgrade-stat-val">${card.spd}</span></div>
+      <div class="upgrade-stat-row"><span class="upgrade-stat-label">HP</span><span><span class="upgrade-stat-val">${card.hp+hpBonus}</span> <span class="upgrade-stat-next">→ ${card.hp+hpBonus+5}</span></span></div>
+      <div class="upgrade-stat-row"><span class="upgrade-stat-label">物攻</span><span><span class="upgrade-stat-val">${card.patk+patkBonus}</span> <span class="upgrade-stat-next">→ ${card.patk+patkBonus+2}</span></span></div>
+      <div class="upgrade-stat-row"><span class="upgrade-stat-label">魔攻</span><span><span class="upgrade-stat-val">${card.matk+matkBonus}</span> <span class="upgrade-stat-next">→ ${card.matk+matkBonus+2}</span></span></div>
+      <div class="upgrade-stat-row"><span class="upgrade-stat-label">物防</span><span><span class="upgrade-stat-val">${card.pdef+pdefBonus}</span> <span class="upgrade-stat-next">→ ${card.pdef+pdefBonus+1}</span></span></div>
+      <div class="upgrade-stat-row"><span class="upgrade-stat-label">魔防</span><span><span class="upgrade-stat-val">${card.mdef+mdefBonus}</span> <span class="upgrade-stat-next">→ ${card.mdef+mdefBonus+1}</span></span></div>
+      <div class="upgrade-stat-row"><span class="upgrade-stat-label">速度</span><span class="upgrade-stat-val">${card.spd}</span></div>
     </div>
-    <div style="font-size:11px;color:var(--text-dim)">升級費用：<span style="color:var(--gold-bright)">💰 ${upgradeCost}</span></div>
-    <button class="btn btn-primary" onclick="upgradeCard('${cardId}')">⬆ 升級</button>`;
+    <div style="font-size:11px;color:var(--text-dim);margin-top:8px;">升級費用：<span style="color:var(--gold-bright)">💰 ${upgradeCost}</span></div>
+    <button class="btn btn-primary" onclick="upgradeCard('${cardId}')" style="margin-top:8px;">⬆ 升級</button>`;
 }
 
 function upgradeCard(cardId) {

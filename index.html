@@ -3097,7 +3097,7 @@ function createBattleState(stage, raid = null) {
   for (let i = 0; i < 5; i++) drawCard(state);
 
   // v0.2：放我方主堡（靜態建築，永不移動）
-  // v0.3：10×10 戰場，主堡在 (0,9)
+  // v0.7：9×7 戰場，主堡在下方中央 (4,6) - 我方陣地
   state.units.push(makeUnit('cmdr_my', {
     id:'fortress',
     name:'我方主堡',
@@ -3108,14 +3108,14 @@ function createBattleState(stage, raid = null) {
     range:0, move:0,
     skillType:'none',
     color:'#2a4a8a'
-  }, 0, 9, true, true));
+  }, 4, 6, true, true));
 
   if (raid) {
     // v0.3：BOSS 副本模式 - 無敵方主堡，創建 BOSS
     createBoss(state, raid.boss, raid.bossPosition);
   } else {
     // v0.2：放敵方主堡（靜態建築，永不移動）
-    // v0.3：10×10 戰場，主堡在 (9,0)
+    // v0.7：9×7 戰場，主堡在上方中央 (4,0) - 敵方陣地
     state.units.push(makeUnit('cmdr_enemy', {
       id:'fortress',
       name:'敵方主堡',
@@ -3126,7 +3126,7 @@ function createBattleState(stage, raid = null) {
       range:0, move:0,
       skillType:'none',
       color:'#8a2a2a'
-    }, 9, 0, false, true));
+    }, 4, 0, false, true));
 
     // 放敵方單位
     stage.enemy.forEach((e, i) => {
@@ -3151,8 +3151,8 @@ function createBattleState(stage, raid = null) {
   const usedIdxs = startCards.map(s => s.idx).sort((a,b)=>b-a);
   usedIdxs.forEach(idx => state.deck.splice(idx, 1));
 
-  // v0.3：10×10 戰場開場位置
-  const startPositions = [ {x:1,y:9}, {x:2,y:9}, {x:1,y:8} ];
+  // v0.7：9×7 戰場開場位置（我方下方 2×3 區域）
+  const startPositions = [ {x:3,y:5}, {x:4,y:5}, {x:5,y:5} ];
   startCards.forEach((sc, i) => {
     const pos = startPositions[i];
     const u = makeUnit('my' + state.unitIdCounter++, CARD_DB[sc.cardId], pos.x, pos.y, true, false);
@@ -3190,6 +3190,9 @@ function createBoss(state, bossCardId, topLeftPos) {
 }
 
 function makeUnit(uid, template, x, y, isMy, isCommander) {
+  // v0.7：提高血量 50% 以增加戰鬥精彩度
+  const hpMultiplier = isCommander ? 1 : 1.5;
+
   const unit = {
     uid,
     cardId: template.id,
@@ -3198,8 +3201,8 @@ function makeUnit(uid, template, x, y, isMy, isCommander) {
     x, y,
     isMy,
     isCommander,
-    hp: template.hp,
-    maxHp: template.hp,
+    hp: template.hp * hpMultiplier,
+    maxHp: template.hp * hpMultiplier,
     patk: template.patk || 0,
     matk: template.matk || 0,
     pdef: template.pdef || 0,
@@ -3367,7 +3370,7 @@ function placeUnit(u) {
   }
 
   // v0.3：修復 - 直接使用格子坐標計算位置，不依賴 getBoundingClientRect
-  const cellSize = 64; // 10×10 戰場格子大小
+  const cellSize = 72; // v0.7：9×7 戰場格子大小（增大以適應螢幕）
   const borderSize = 1; // 格子邊框
   let left = u.x * (cellSize + borderSize) + 3; // +3 居中調整
   let top = u.y * (cellSize + borderSize) + 3;
@@ -3441,8 +3444,8 @@ function startBattleLoop() {
     B.timer += rawDt;
     updateTimer();
 
-    // 平局判定（3分鐘）
-    if (B.timer > 180000) { endBattle('draw'); return; }
+    // v0.7：平局判定改為 10 分鐘
+    if (B.timer > 600000) { endBattle('draw'); return; }
 
     // v0.6.2：能量恢復使用真實時間（不受倍速影響）
     B.energyTimer += rawDt;
@@ -3456,9 +3459,9 @@ function startBattleLoop() {
     // AI 打牌
     aiPlayCard();
 
-    // ATB 更新（ATB速度額外×2）
+    // v0.7：ATB 更新（增加速度以提高出招頻率）
     B.units.filter(u => u.alive).forEach(u => {
-      u.atb += u.spd * dt / 1000 * 2;
+      u.atb += u.spd * dt / 1000 * 3;  // 從 ×2 增加到 ×3
       if (u.skillCd > 0) u.skillCd -= dt;
       if (u.atb >= u.maxAtb) {
         u.atb = 0;
@@ -3769,10 +3772,10 @@ function killUnit(unit) {
 
 // v0.2：檢查某格是否可通行（邊界、指揮官格、障礙物、其他單位）
 function isCellWalkable(x, y, u) {
-  // v0.3：10×10 戰場邊界檢查
-  if (x < 0 || x > 9 || y < 0 || y > 9) return false;
-  // 主堡位置：(0,9) 和 (9,0)
-  if (!u.isCommander && ((x===0&&y===9)||(x===9&&y===0))) return false;
+  // v0.7：9×7 戰場邊界檢查
+  if (x < 0 || x > 8 || y < 0 || y > 6) return false;
+  // 主堡位置：(4,6) 我方和 (4,0) 敵方
+  if (!u.isCommander && ((x===4&&y===6)||(x===4&&y===0))) return false;
   // v0.2：檢查障礙物
   if (B.obstacles && B.obstacles.some(obs => obs.x === x && obs.y === y)) return false;
   // v0.3：檢查 BOSS 佔據的格子
@@ -3964,15 +3967,15 @@ function moveUnitTo(u, nx, ny) {
 }
 
 function findFreeCell(isMy) {
-  // v0.3：10×10 戰場
-  // 我方陣地：x=0~2, y=7~9（左下3x3）
-  // 敵方陣地：x=7~9, y=0~2（右上3x3）
-  const cols = isMy ? [0, 1, 2] : [9, 8, 7];
-  const rows = isMy ? [8, 7, 9] : [1, 2, 0];
+  // v0.7：9×7 戰場
+  // 我方陣地：x=3~5, y=5~6（下方 2×3）
+  // 敵方陣地：x=3~5, y=0~1（上方 2×3）
+  const cols = [3, 4, 5];
+  const rows = isMy ? [5, 6] : [1, 0];
   for (const row of rows) {
     for (const col of cols) {
-      const isMyCmd = col===0 && row===9;
-      const isEnemyCmd = col===9 && row===0;
+      const isMyCmd = col===4 && row===6;
+      const isEnemyCmd = col===4 && row===0;
       if (!isMyCmd && !isEnemyCmd && !B.units.some(u=>u.alive&&u.x===col&&u.y===row)) {
         return { x:col, y:row };
       }

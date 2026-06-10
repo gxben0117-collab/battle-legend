@@ -652,6 +652,63 @@ body {
   text-shadow: 0 0 10px rgba(255,50,50,0.8);
 }
 
+/* v0.4：像素風角色樣式 */
+.pixel-char {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+.pixel-grid {
+  display: grid;
+  gap: 0;
+  transform: scale(1.2);
+}
+.pixel {
+  width: 3px;
+  height: 3px;
+  border-radius: 0;
+}
+
+/* 騎士：藍色盔甲+劍盾 */
+.pixel-knight {
+  grid-template: repeat(8, 3px) / repeat(6, 3px);
+}
+
+/* 戰士：紅色戰袍+斧頭 */
+.pixel-warrior {
+  grid-template: repeat(8, 3px) / repeat(6, 3px);
+}
+
+/* 弓手：綠色+弓箭 */
+.pixel-archer {
+  grid-template: repeat(8, 3px) / repeat(6, 3px);
+}
+
+/* 法師：紫色長袍+法杖 */
+.pixel-mage {
+  grid-template: repeat(8, 3px) / repeat(6, 3px);
+}
+
+/* 刺客：黑色+匕首 */
+.pixel-assassin {
+  grid-template: repeat(8, 3px) / repeat(6, 3px);
+}
+
+/* 坦克：灰色重甲 */
+.pixel-tank {
+  grid-template: repeat(8, 3px) / repeat(6, 3px);
+}
+
+/* 牧師：白色+十字 */
+.pixel-priest {
+  grid-template: repeat(8, 3px) / repeat(6, 3px);
+}
+
 /* v0.2：HP 條強化（常駐、護盾條、低血閃爍） */
 .unit-hp-bar {
   position: absolute;
@@ -1249,6 +1306,105 @@ body {
   margin-top: 4px;
 }
 
+/* v0.4：裝備系統 */
+.equip-slot {
+  background: var(--bg-panel);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.equip-slot:hover {
+  border-color: var(--border-gold);
+  background: var(--bg-hover);
+  transform: translateX(4px);
+}
+.equip-slot.equipped {
+  border-color: #4ade80;
+  box-shadow: 0 0 12px rgba(74,222,128,0.3);
+}
+.equip-slot-icon {
+  font-size: 32px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-dark);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+.equip-slot-info {
+  flex: 1;
+}
+.equip-slot-name {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+.equip-slot-equipped {
+  font-size: 14px;
+  color: var(--text-silver);
+  font-weight: 600;
+}
+.equip-slot-arrow {
+  font-size: 20px;
+  color: var(--text-dim);
+}
+
+.equip-card {
+  background: var(--bg-panel);
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.equip-card:hover {
+  border-color: var(--border-gold);
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+.equip-card.rarity-N { border-color: var(--n-col); }
+.equip-card.rarity-R { border-color: var(--r-col); }
+.equip-card.rarity-SR { border-color: var(--sr-col); }
+.equip-card.rarity-SSR { border-color: var(--ssr-col); }
+.equip-card-icon {
+  font-size: 36px;
+  margin-bottom: 8px;
+}
+.equip-card-name {
+  font-size: 13px;
+  color: var(--text-silver);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.equip-card-stats {
+  font-size: 11px;
+  color: #4ade80;
+  margin-bottom: 8px;
+  min-height: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.equip-card-desc {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+  min-height: 28px;
+}
+.equip-card-price {
+  font-size: 12px;
+  color: var(--gold);
+  font-weight: 700;
+}
+
 /* 強化 */
 #screen-upgrade {
   flex-direction: column;
@@ -1444,6 +1600,10 @@ body {
           <div class="menu-item-icon">🏪</div>
           <div class="menu-item-label">商店</div>
         </div>
+        <div class="menu-item" onclick="showScreen('equipment')">
+          <div class="menu-item-icon">⚔️</div>
+          <div class="menu-item-label">裝備</div>
+        </div>
         <div class="menu-item" onclick="showScreen('upgrade')">
           <div class="menu-item-icon">⬆️</div>
           <div class="menu-item-label">強化</div>
@@ -1588,6 +1748,77 @@ body {
     </div>
   </div>
   <div class="shop-body" id="shop-body"></div>
+</div>
+
+<!-- v0.4：裝備界面 -->
+<div id="screen-equipment" class="screen" style="flex-direction:column;background:var(--bg-dark);">
+  <div class="hub-header">
+    <button class="btn btn-secondary btn-sm" onclick="showScreen('hub')">← 返回</button>
+    <span class="hub-title" style="font-size:14px">⚔️ 裝備系統</span>
+    <div class="resource-badge"><span>💰</span><span class="resource-val" id="equip-gold">0</span></div>
+  </div>
+
+  <div style="flex:1;padding:20px;display:flex;gap:20px;overflow-y:auto;">
+    <!-- 左側：裝備槽 -->
+    <div style="flex:0 0 300px;display:flex;flex-direction:column;gap:12px;">
+      <div style="color:var(--text-silver);font-size:14px;font-weight:700;margin-bottom:8px;">📦 已裝備</div>
+
+      <div class="equip-slot" id="slot-weapon" onclick="openEquipSlot('weapon')">
+        <div class="equip-slot-icon">🗡️</div>
+        <div class="equip-slot-info">
+          <div class="equip-slot-name">武器</div>
+          <div class="equip-slot-equipped" id="weapon-name">未裝備</div>
+        </div>
+        <div class="equip-slot-arrow">→</div>
+      </div>
+
+      <div class="equip-slot" id="slot-armor" onclick="openEquipSlot('armor')">
+        <div class="equip-slot-icon">🛡️</div>
+        <div class="equip-slot-info">
+          <div class="equip-slot-name">護甲</div>
+          <div class="equip-slot-equipped" id="armor-name">未裝備</div>
+        </div>
+        <div class="equip-slot-arrow">→</div>
+      </div>
+
+      <div class="equip-slot" id="slot-accessory" onclick="openEquipSlot('accessory')">
+        <div class="equip-slot-icon">💍</div>
+        <div class="equip-slot-info">
+          <div class="equip-slot-name">飾品</div>
+          <div class="equip-slot-equipped" id="accessory-name">未裝備</div>
+        </div>
+        <div class="equip-slot-arrow">→</div>
+      </div>
+
+      <!-- 屬性加成 -->
+      <div style="margin-top:20px;padding:16px;background:var(--bg-panel);border:1px solid var(--border);border-radius:6px;">
+        <div style="color:var(--text-silver);font-size:13px;font-weight:700;margin-bottom:12px;">✨ 屬性加成</div>
+        <div id="equip-stats" style="font-size:12px;color:var(--text-dim);display:flex;flex-direction:column;gap:6px;">
+          <div>物攻：+0</div>
+          <div>魔攻：+0</div>
+          <div>物防：+0</div>
+          <div>魔防：+0</div>
+          <div>生命：+0</div>
+          <div>速度：+0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右側：背包 & 商店 -->
+    <div style="flex:1;display:flex;flex-direction:column;gap:16px;">
+      <!-- 標籤頁 -->
+      <div style="display:flex;gap:8px;border-bottom:2px solid var(--border);padding-bottom:8px;">
+        <button class="btn btn-secondary btn-sm active" id="tab-inventory" onclick="switchEquipTab('inventory')">🎒 背包</button>
+        <button class="btn btn-secondary btn-sm" id="tab-shop" onclick="switchEquipTab('shop')">🏪 商店</button>
+      </div>
+
+      <!-- 背包內容 -->
+      <div id="equip-inventory" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;"></div>
+
+      <!-- 商店內容 -->
+      <div id="equip-shop" style="display:none;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;"></div>
+    </div>
+  </div>
 </div>
 
 <!-- 強化 -->
@@ -2167,6 +2398,13 @@ let G = {
   deck: [],       // 30張 cardId
   stageCleared: {},
   production: {},
+  // v0.4：裝備系統
+  equipment: {
+    weapon: null,    // 武器槽
+    armor: null,     // 護甲槽
+    accessory: null, // 飾品槽
+  },
+  equipmentInventory: {}, // equipId -> count
 };
 
 // 戰鬥狀態
@@ -2174,6 +2412,80 @@ let B = null;
 
 // v0.3：當前選擇的章節
 let currentChapter = null;
+
+// v0.4：裝備數據庫
+const EQUIPMENT_DB = {
+  // ========== 武器 ==========
+  'iron-sword': {
+    id:'iron-sword', name:'鐵劍', icon:'🗡️', slot:'weapon', rarity:'N',
+    patk:5, matk:0, price:100,
+    desc:'基礎鐵劍，增加物理攻擊',
+  },
+  'steel-sword': {
+    id:'steel-sword', name:'精鋼劍', icon:'⚔️', slot:'weapon', rarity:'R',
+    patk:10, matk:0, price:300,
+    desc:'精鋼打造，鋒利無比',
+  },
+  'flame-blade': {
+    id:'flame-blade', name:'烈焰之刃', icon:'🔥', slot:'weapon', rarity:'SR',
+    patk:15, matk:5, price:800,
+    desc:'蘊含火焰之力，物魔雙攻',
+  },
+  'magic-staff': {
+    id:'magic-staff', name:'魔法杖', icon:'🪄', slot:'weapon', rarity:'N',
+    patk:0, matk:8, price:120,
+    desc:'基礎法杖，增加魔法攻擊',
+  },
+  'arcane-staff': {
+    id:'arcane-staff', name:'奧術法杖', icon:'✨', slot:'weapon', rarity:'R',
+    patk:0, matk:15, price:350,
+    desc:'強大的魔法增幅',
+  },
+
+  // ========== 護甲 ==========
+  'leather-armor': {
+    id:'leather-armor', name:'皮甲', icon:'🧥', slot:'armor', rarity:'N',
+    pdef:3, mdef:2, hp:20, price:100,
+    desc:'基礎皮甲，輕便靈活',
+  },
+  'chain-mail': {
+    id:'chain-mail', name:'鎖子甲', icon:'🛡️', slot:'armor', rarity:'R',
+    pdef:8, mdef:4, hp:50, price:300,
+    desc:'環環相扣的鎖甲',
+  },
+  'plate-armor': {
+    id:'plate-armor', name:'板甲', icon:'🦾', slot:'armor', rarity:'SR',
+    pdef:15, mdef:8, hp:100, price:800,
+    desc:'最堅固的重型護甲',
+  },
+  'magic-robe': {
+    id:'magic-robe', name:'魔法長袍', icon:'👘', slot:'armor', rarity:'R',
+    pdef:4, mdef:10, hp:30, price:320,
+    desc:'蘊含魔力的長袍',
+  },
+
+  // ========== 飾品 ==========
+  'speed-boots': {
+    id:'speed-boots', name:'疾行靴', icon:'👟', slot:'accessory', rarity:'N',
+    spd:10, price:150,
+    desc:'增加移動速度',
+  },
+  'power-ring': {
+    id:'power-ring', name:'力量戒指', icon:'💍', slot:'accessory', rarity:'R',
+    patk:8, crit:5, price:350,
+    desc:'增加攻擊力和暴擊率',
+  },
+  'wisdom-amulet': {
+    id:'wisdom-amulet', name:'智慧護符', icon:'📿', slot:'accessory', rarity:'SR',
+    matk:12, acc:10, price:700,
+    desc:'增加魔攻和命中率',
+  },
+  'vampire-fang': {
+    id:'vampire-fang', name:'吸血鬼之牙', icon:'🦷', slot:'accessory', rarity:'SR',
+    patk:5, lifesteal:15, price:900,
+    desc:'攻擊時恢復15%傷害的生命',
+  },
+};
 
 // ============================================================
 // 存檔
@@ -2216,6 +2528,15 @@ function initStarterCards() {
     'wind-walker',                         // 風行者 x1
   ];
   // 共 22 張，玩家需要通過抽卡/購買來補滿 30 張
+
+  // v0.4：初始裝備
+  G.equipment = { weapon: null, armor: null, accessory: null };
+  G.equipmentInventory = {
+    'iron-sword': 1,
+    'leather-armor': 1,
+    'speed-boots': 1,
+  };
+
   saveGame();
 }
 
@@ -2250,6 +2571,7 @@ function showScreen(name) {
   if (name === 'upgrade') renderUpgradeScreen();
   if (name === 'production') renderProductionScreen();
   if (name === 'stage') renderStageScreen();
+  if (name === 'equipment') renderEquipmentScreen(); // v0.4：裝備界面
 }
 function showHub() { showScreen('hub'); }
 
@@ -2590,7 +2912,7 @@ function createBoss(state, bossCardId, topLeftPos) {
 }
 
 function makeUnit(uid, template, x, y, isMy, isCommander) {
-  return {
+  const unit = {
     uid,
     cardId: template.id,
     name: template.name,
@@ -2624,6 +2946,13 @@ function makeUnit(uid, template, x, y, isMy, isCommander) {
     alive: true,
     el: null,
   };
+
+  // v0.4：應用裝備加成（只對我方單位）
+  if (isMy && !isCommander) {
+    applyEquipmentBonus(unit);
+  }
+
+  return unit;
 }
 
 // ============================================================
@@ -3020,6 +3349,16 @@ function attack(attacker, target) {
   if (isCrit) showFloatNumber(target, `💥${dmg}`, 'crit');
   else if (attacker.dmgType === 'physical') showFloatNumber(target, `-${dmg}`, 'damage');
   else showFloatNumber(target, `🔮${dmg}`, 'crit'); // 魔法傷害用紫色
+
+  // v0.4：吸血效果
+  if (attacker.lifesteal && dmg > 0) {
+    const healAmt = Math.round(dmg * attacker.lifesteal / 100);
+    if (healAmt > 0) {
+      attacker.hp = Math.min(attacker.maxHp, attacker.hp + healAmt);
+      showFloatNumber(attacker, `+${healAmt}`, 'heal');
+      updateUnitBar(attacker);
+    }
+  }
 
   // 死靈術士被動
   if (!target.alive) {
@@ -4127,6 +4466,218 @@ function showToast(msg) {
   div.textContent = msg;
   document.body.appendChild(div);
   setTimeout(() => div.remove(), 2600);
+}
+
+// ============================================================
+// v0.4：裝備系統
+// ============================================================
+function renderEquipmentScreen() {
+  // 更新金幣顯示
+  document.getElementById('equip-gold').textContent = G.player.gold;
+
+  // 渲染已裝備
+  renderEquippedSlots();
+
+  // 渲染背包
+  renderEquipInventory();
+
+  // 渲染商店
+  renderEquipShop();
+
+  // 更新屬性加成
+  updateEquipStats();
+}
+
+function renderEquippedSlots() {
+  ['weapon', 'armor', 'accessory'].forEach(slot => {
+    const equipId = G.equipment[slot];
+    const nameEl = document.getElementById(slot + '-name');
+    const slotEl = document.getElementById('slot-' + slot);
+
+    if (equipId && EQUIPMENT_DB[equipId]) {
+      const equip = EQUIPMENT_DB[equipId];
+      nameEl.textContent = equip.name;
+      nameEl.style.color = 'var(--text-silver)';
+      slotEl.classList.add('equipped');
+    } else {
+      nameEl.textContent = '未裝備';
+      nameEl.style.color = 'var(--text-dim)';
+      slotEl.classList.remove('equipped');
+    }
+  });
+}
+
+function renderEquipInventory() {
+  const container = document.getElementById('equip-inventory');
+  container.innerHTML = '';
+
+  Object.entries(G.equipmentInventory).forEach(([equipId, count]) => {
+    if (count <= 0) return;
+    const equip = EQUIPMENT_DB[equipId];
+    if (!equip) return;
+
+    const card = createEquipCard(equip, count, false);
+    card.onclick = () => equipItem(equipId);
+    container.appendChild(card);
+  });
+
+  if (container.children.length === 0) {
+    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--text-dim);padding:40px;">背包空空如也</div>';
+  }
+}
+
+function renderEquipShop() {
+  const container = document.getElementById('equip-shop');
+  container.innerHTML = '';
+
+  Object.values(EQUIPMENT_DB).forEach(equip => {
+    const card = createEquipCard(equip, null, true);
+    card.onclick = () => buyEquipment(equip.id);
+    container.appendChild(card);
+  });
+}
+
+function createEquipCard(equip, count, isShop) {
+  const div = document.createElement('div');
+  div.className = `equip-card rarity-${equip.rarity}`;
+
+  // 屬性文本
+  const stats = [];
+  if (equip.patk) stats.push(`物攻 +${equip.patk}`);
+  if (equip.matk) stats.push(`魔攻 +${equip.matk}`);
+  if (equip.pdef) stats.push(`物防 +${equip.pdef}`);
+  if (equip.mdef) stats.push(`魔防 +${equip.mdef}`);
+  if (equip.hp) stats.push(`生命 +${equip.hp}`);
+  if (equip.spd) stats.push(`速度 +${equip.spd}`);
+  if (equip.crit) stats.push(`暴擊 +${equip.crit}%`);
+  if (equip.acc) stats.push(`命中 +${equip.acc}%`);
+  if (equip.lifesteal) stats.push(`吸血 ${equip.lifesteal}%`);
+
+  const statsHtml = stats.map(s => `<div>${s}</div>`).join('');
+
+  div.innerHTML = `
+    <div class="equip-card-icon">${equip.icon}</div>
+    <div class="equip-card-name">${equip.name}</div>
+    <div class="equip-card-stats">${statsHtml}</div>
+    <div class="equip-card-desc">${equip.desc}</div>
+    ${isShop ? `<div class="equip-card-price">${equip.price} 💰</div>` : ''}
+    ${!isShop && count > 1 ? `<div style="font-size:11px;color:var(--text-dim);">×${count}</div>` : ''}
+  `;
+
+  return div;
+}
+
+function switchEquipTab(tab) {
+  document.getElementById('tab-inventory').classList.toggle('active', tab === 'inventory');
+  document.getElementById('tab-shop').classList.toggle('active', tab === 'shop');
+  document.getElementById('equip-inventory').style.display = tab === 'inventory' ? 'grid' : 'none';
+  document.getElementById('equip-shop').style.display = tab === 'shop' ? 'grid' : 'none';
+}
+
+function equipItem(equipId) {
+  const equip = EQUIPMENT_DB[equipId];
+  if (!equip) return;
+
+  const slot = equip.slot;
+  const oldEquip = G.equipment[slot];
+
+  // 卸下舊裝備
+  if (oldEquip) {
+    G.equipmentInventory[oldEquip] = (G.equipmentInventory[oldEquip] || 0) + 1;
+  }
+
+  // 裝備新裝備
+  G.equipment[slot] = equipId;
+  G.equipmentInventory[equipId]--;
+  if (G.equipmentInventory[equipId] <= 0) {
+    delete G.equipmentInventory[equipId];
+  }
+
+  saveGame();
+  renderEquipmentScreen();
+  showToast(`✅ 已裝備：${equip.name}`);
+}
+
+function openEquipSlot(slot) {
+  const equipId = G.equipment[slot];
+  if (!equipId) {
+    showToast('該槽位無裝備');
+    return;
+  }
+
+  // 卸下裝備
+  G.equipmentInventory[equipId] = (G.equipmentInventory[equipId] || 0) + 1;
+  G.equipment[slot] = null;
+
+  saveGame();
+  renderEquipmentScreen();
+  showToast('✅ 已卸下裝備');
+}
+
+function buyEquipment(equipId) {
+  const equip = EQUIPMENT_DB[equipId];
+  if (!equip) return;
+
+  if (G.player.gold < equip.price) {
+    showToast('💰 金幣不足');
+    return;
+  }
+
+  G.player.gold -= equip.price;
+  G.equipmentInventory[equipId] = (G.equipmentInventory[equipId] || 0) + 1;
+
+  saveGame();
+  renderEquipmentScreen();
+  showToast(`✅ 購買成功：${equip.name}`);
+}
+
+function updateEquipStats() {
+  let totalPatk = 0, totalMatk = 0, totalPdef = 0, totalMdef = 0, totalHp = 0, totalSpd = 0;
+
+  ['weapon', 'armor', 'accessory'].forEach(slot => {
+    const equipId = G.equipment[slot];
+    if (equipId && EQUIPMENT_DB[equipId]) {
+      const equip = EQUIPMENT_DB[equipId];
+      totalPatk += equip.patk || 0;
+      totalMatk += equip.matk || 0;
+      totalPdef += equip.pdef || 0;
+      totalMdef += equip.mdef || 0;
+      totalHp += equip.hp || 0;
+      totalSpd += equip.spd || 0;
+    }
+  });
+
+  document.getElementById('equip-stats').innerHTML = `
+    <div>物攻：+${totalPatk}</div>
+    <div>魔攻：+${totalMatk}</div>
+    <div>物防：+${totalPdef}</div>
+    <div>魔防：+${totalMdef}</div>
+    <div>生命：+${totalHp}</div>
+    <div>速度：+${totalSpd}</div>
+  `;
+}
+
+// v0.4：戰鬥中應用裝備加成
+function applyEquipmentBonus(unit) {
+  if (!unit.isMy) return; // 只對我方單位生效
+
+  ['weapon', 'armor', 'accessory'].forEach(slot => {
+    const equipId = G.equipment[slot];
+    if (equipId && EQUIPMENT_DB[equipId]) {
+      const equip = EQUIPMENT_DB[equipId];
+      unit.patk += equip.patk || 0;
+      unit.matk += equip.matk || 0;
+      unit.pdef += equip.pdef || 0;
+      unit.mdef += equip.mdef || 0;
+      unit.hp += equip.hp || 0;
+      unit.maxHp += equip.hp || 0;
+      unit.spd += equip.spd || 0;
+      unit.acc += equip.acc || 0;
+      unit.crit += equip.crit || 0;
+      // 吸血等特殊效果存儲到單位上
+      if (equip.lifesteal) unit.lifesteal = (unit.lifesteal || 0) + equip.lifesteal;
+    }
+  });
 }
 
 // ============================================================

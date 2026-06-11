@@ -498,6 +498,25 @@ body {
   flex-shrink: 0;
 }
 
+/* v0.8.3：計時器盒子（左側） */
+.battle-timer-box {
+  background: var(--bg-panel);
+  border: 2px solid var(--gold-bright);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+.battle-timer {
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--gold-bright);
+  text-shadow:
+    0 0 10px rgba(255, 215, 0, 0.8),
+    0 0 20px rgba(255, 215, 0, 0.4);
+}
+
 .hand-area {
   flex: 1;
   display: flex;
@@ -2358,8 +2377,13 @@ body {
 
   <!-- v0.7.4：新佈局 - 左中右三欄 -->
   <div class="battle-content">
-    <!-- 左側：手牌區 -->
+    <!-- 左側：手牌區 + 計時器 -->
     <div class="battle-left">
+      <!-- v0.8.3：計時器移到左側 -->
+      <div class="battle-timer-box">
+        <div class="battle-timer" id="battle-timer">00:00</div>
+      </div>
+
       <div class="hand-area" id="hand"></div>
     </div>
 
@@ -2368,28 +2392,6 @@ body {
       <canvas id="battleCanvas"></canvas>
       <div class="battlefield" id="battlefield"></div>
       <div class="speed-indicator" id="speed-indicator" style="display:none">⚡ 1×</div>
-
-      <!-- v0.8.3：計時器和血量條移到戰場下方 -->
-      <div class="battle-bottom">
-        <div class="commander-bar">
-          <span class="commander-label">🏰 我方主堡</span>
-          <div class="hp-bar-wrap">
-            <div class="hp-bar-fill" id="my-hp-bar" style="width:100%"></div>
-            <span class="hp-text" id="my-hp-text">100/100</span>
-          </div>
-        </div>
-        <div class="battle-info">
-          <div class="battle-timer" id="battle-timer">00:00</div>
-          <div class="battle-round" id="battle-round">ROUND 1</div>
-        </div>
-        <div class="commander-bar">
-          <div class="hp-bar-wrap">
-            <div class="hp-bar-fill enemy" id="enemy-hp-bar" style="width:100%"></div>
-            <span class="hp-text" id="enemy-hp-text">100/100</span>
-          </div>
-          <span class="commander-label">🚩 敵方主堡</span>
-        </div>
-      </div>
     </div>
 
     <!-- 右側：能量+控制 -->

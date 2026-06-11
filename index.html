@@ -4464,6 +4464,8 @@ function makeUnit(uid, template, x, y, isMy, isCommander) {
     pdef: template.pdef || 0,
     mdef: template.mdef || 0,
     spd: template.spd,
+    atkSpd: template.atkSpd || template.spd || 60,
+    moveSpd: template.moveSpd || ((template.move || 2) * 28 + Math.round((template.spd || 60) * 0.25)),
     acc: template.acc,
     crit: template.crit || 5,
     critDmg: template.critDmg || 150,
@@ -4472,7 +4474,9 @@ function makeUnit(uid, template, x, y, isMy, isCommander) {
     color: template.color || '#444',
     dmgType: template.dmgType || 'physical',
     atb: 0,
+    moveAtb: 0,
     maxAtb: 1000,
+    maxMoveAtb: 1000,
     skillCd: 0,
     maxSkillCd: 5000,
     shield: 0,
@@ -4671,13 +4675,27 @@ function startBattleLoop() {
       // AI 打牌
       aiPlayCard();
 
-      // v0.7：ATB 更新（增加速度以提高出招頻率）
+      // v0.8.5：攻擊速度與移動速度分開計算。
+      // atkSpd 控制在射程內的出手頻率；moveSpd 控制不在射程時的走位頻率。
       B.units.filter(u => u.alive).forEach(u => {
-        u.atb += u.spd * dt / 1000 * 3;  // 從 ×2 增加到 ×3
         if (u.skillCd > 0) u.skillCd -= dt;
-        if (u.atb >= u.maxAtb) {
-          u.atb = 0;
-          unitAction(u);
+
+        const target = findTargetForAction(u);
+        if (u.isCommander || !target || isTargetInRange(u, target)) {
+          u.atb += u.atkSpd * dt / 1000 * 3;
+          if (u.atb >= u.maxAtb) {
+            u.atb = 0;
+            unitAction(u);
+          }
+          if (target && !u.isCommander && u.moveAtb > 0) {
+            u.moveAtb = Math.max(0, u.moveAtb - dt * 0.5);
+          }
+        } else {
+          u.moveAtb += u.moveSpd * dt / 1000 * 3;
+          if (u.moveAtb >= u.maxMoveAtb) {
+            u.moveAtb = 0;
+            moveToward(u, target);
+          }
         }
         updateUnitBar(u);
       });
@@ -4773,6 +4791,18 @@ function unitAction(u) {
       }
     }
   }
+}
+
+function findTargetForAction(u) {
+  if (!B || !u || !u.alive) return null;
+  const enemies = B.units.filter(e => e.alive && e.isMy !== u.isMy);
+  if (enemies.length === 0) return null;
+  return findTarget(u, enemies);
+}
+
+function isTargetInRange(u, target) {
+  if (!u || !target) return false;
+  return getDistanceToUnit(u, target) <= u.range;
 }
 
 function findTarget(u, enemies) {
@@ -6090,22 +6120,36 @@ function renderShopScreen() {
   document.getElementById('shop-gold').textContent = G.player.gold;
   const el = document.getElementById('shop-body');
   el.innerHTML = '';
-  Object.values(CARD_DB).forEach(card => {
+  Object.values(CARD_DB).filter(isPurchasableCard).forEach(card => {
     const price = card.rarity==='N'?100:card.rarity==='R'?250:card.rarity==='SR'?600:1500;
     const div = document.createElement('div');
     div.className = `shop-card rarity-${card.rarity}`;
+    div.dataset.cardId = card.id;
+    div.dataset.cardType = card.cardType;
+    div.dataset.cardCost = String(card.cost);
     div.innerHTML = `
       <div class="shop-card-icon">${card.icon}</div>
       <div class="shop-card-name">${card.name}</div>
       <div class="shop-card-rarity" style="color:var(--${card.rarity.toLowerCase()}-col,var(--text-dim))">[${card.rarity}] ${card.race} ${card.job}</div>
       <div class="shop-card-desc">${card.skillDesc}<br><small>被動：${card.passiveDesc}</small></div>
+      <div class="shop-card-price">⚡ COST ${card.cost}</div>
       <div class="shop-card-price">💰 ${price}</div>
       <button class="btn btn-primary btn-sm" onclick="buyCard('${card.id}', ${price})">購買</button>`;
     el.appendChild(div);
   });
 }
 
+function isPurchasableCard(card) {
+  return card && (card.cardType === 'unit' || card.cardType === 'hero') && !card.isBoss && !card.isSummon && (card.cost || 0) > 0;
+}
+
 function buyCard(cardId, price) {
+  const card = CARD_DB[cardId];
+  if (!isPurchasableCard(card)) {
+    showToast('此卡不可購買');
+    return;
+  }
+
   if (G.player.gold < price) {
     showToast('💰 金幣不足');
     return;
@@ -6115,7 +6159,7 @@ function buyCard(cardId, price) {
   G.collection[cardId] = (G.collection[cardId] || 0) + 1;
   saveGame();
   renderShopScreen();
-  showToast(`獲得 ${CARD_DB[cardId].name}！`);
+  showToast(`獲得 ${card.name}！`);
 }
 
 function buyPack(type) {
@@ -6127,7 +6171,7 @@ function buyPack(type) {
 
   G.player.gold -= cost;
   const rolls = type === 'normal' ? [60,25,10,4,1] : [30,35,25,8,2];
-  const pool = Object.values(CARD_DB);
+  const pool = Object.values(CARD_DB).filter(isPurchasableCard);
   const roll = Math.random() * 100;
   let rarity;
   if (roll < rolls[4]) rarity = 'UR';

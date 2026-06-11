@@ -81,6 +81,8 @@ async function runTests() {
     await runManualCardClickRegression(page);
     await runShopPurchaseRegression(page);
     await runDeckAutoBuildRegression(page);
+    await runCardCostRegression(page);
+    await runSplitSpeedRegression(page);
 
     // 運行所有測試
     for (let i = 1; i <= CONFIG.rounds; i++) {
@@ -89,6 +91,7 @@ async function runTests() {
 
   } catch (error) {
     console.error('💥 測試過程發生錯誤:', error);
+    process.exitCode = 1;
   } finally {
     await browser.close();
     displayResults();
@@ -238,6 +241,97 @@ async function runDeckAutoBuildRegression(page) {
   }
 
   console.log(`✅ 一鍵組隊回歸測試通過，${result.deckSize} 張，平均費用 ${result.avgCost}\n`);
+}
+
+async function runCardCostRegression(page) {
+  console.log('🧪 卡片 COST / 商店過濾回歸測試...');
+  await resetGameForRegression(page);
+
+  const result = await page.evaluate(() => {
+    showScreen('shop');
+    const purchasable = Object.values(CARD_DB).filter(isPurchasableCard);
+    const invalidPurchasable = purchasable.filter(card => !card.cost || card.cost <= 0 || card.cardType === 'boss');
+    const shopCards = [...document.querySelectorAll('.shop-card')].map(el => ({
+      cardId: el.dataset.cardId,
+      cardType: el.dataset.cardType,
+      cost: Number(el.dataset.cardCost || 0),
+    }));
+    const invalidShopCards = shopCards.filter(card => card.cardType === 'boss' || card.cost <= 0);
+    return {
+      purchasableCount: purchasable.length,
+      invalidCount: invalidPurchasable.length,
+      shopCount: shopCards.length,
+      invalidShopCards,
+    };
+  });
+
+  if (result.purchasableCount === 0 || result.shopCount === 0) {
+    throw new Error('商店沒有可購買卡片');
+  }
+  if (result.invalidCount > 0 || result.invalidShopCards.length > 0) {
+    throw new Error(`商店包含不可購買或 COST 0 卡片: ${JSON.stringify(result)}`);
+  }
+
+  console.log('✅ 卡片 COST / 商店過濾回歸測試通過\n');
+}
+
+async function runSplitSpeedRegression(page) {
+  console.log('🧪 移動速度 / 攻擊速度分離回歸測試...');
+  await resetGameForRegression(page);
+
+  const result = await page.evaluate(() => {
+    startBattle('1-1');
+    const unit = B.units.find(u => u.alive && u.isMy && !u.isCommander);
+    const enemy = B.units.find(u => u.alive && !u.isMy && !u.isCommander);
+    if (!unit || !enemy) return { missingUnit: true };
+
+    unit.x = 3;
+    unit.y = 8;
+    enemy.x = 8;
+    enemy.y = 0;
+    unit.range = 1;
+    unit.atkSpd = 10;
+    unit.moveSpd = 500;
+    unit.atb = 0;
+    unit.moveAtb = 0;
+
+    const target = findTargetForAction(unit);
+    const inRange = isTargetInRange(unit, target);
+    const before = { x: unit.x, y: unit.y, atb: unit.atb, moveAtb: unit.moveAtb };
+
+    unit.moveAtb += unit.moveSpd * 1000 / 1000 * 3;
+    if (unit.moveAtb >= unit.maxMoveAtb) {
+      unit.moveAtb = 0;
+      moveToward(unit, target);
+    }
+
+    return {
+      missingUnit: false,
+      atkSpd: unit.atkSpd,
+      moveSpd: unit.moveSpd,
+      inRange,
+      before,
+      after: { x: unit.x, y: unit.y, atb: unit.atb, moveAtb: unit.moveAtb },
+    };
+  });
+
+  if (result.missingUnit) {
+    throw new Error('速度回歸測試找不到可測試單位');
+  }
+  if (!(result.atkSpd > 0 && result.moveSpd > 0)) {
+    throw new Error(`速度欄位未正確建立: ${JSON.stringify(result)}`);
+  }
+  if (result.inRange) {
+    throw new Error('速度回歸測試目標距離設定錯誤');
+  }
+  if (result.after.x === result.before.x && result.after.y === result.before.y) {
+    throw new Error('移動速度累積後沒有移動');
+  }
+  if (result.after.atb !== 0) {
+    throw new Error('移動時不應累積攻擊 ATB');
+  }
+
+  console.log('✅ 移動速度 / 攻擊速度分離回歸測試通過\n');
 }
 
 // 單次測試

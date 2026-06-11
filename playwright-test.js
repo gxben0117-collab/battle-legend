@@ -100,14 +100,19 @@ async function runSingleTest(page, testNum) {
     const stage1Button = await page.$('text=1-1');
     if (stage1Button) {
       await stage1Button.click();
-      await page.waitForTimeout(1000);
+      await page.waitForTimeout(2000); // 等待戰鬥初始化
     } else {
       throw new Error('找不到 1-1 關卡按鈕');
     }
 
-    // 3. 設置倍速和自動模式
+    // 3. 等待戰鬥狀態初始化
+    await page.waitForFunction(() => {
+      return typeof B !== 'undefined' && B !== null && B.running === true;
+    }, { timeout: 10000 });
+
+    // 4. 設置倍速和自動模式
     await page.evaluate((speed) => {
-      if (typeof setSpeed === 'function') {
+      if (typeof setSpeed === 'function' && typeof B !== 'undefined' && B) {
         setSpeed(speed);
       }
       if (typeof B !== 'undefined' && B) {
@@ -115,7 +120,7 @@ async function runSingleTest(page, testNum) {
       }
     }, CONFIG.speed);
 
-    // 4. 等待戰鬥結束
+    // 5. 等待戰鬥結束
     const result = await waitForBattleEnd(page);
     const duration = (Date.now() - startTime) / 1000;
     results.times.push(duration);

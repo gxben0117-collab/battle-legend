@@ -2377,13 +2377,20 @@ body {
 
   <!-- v0.7.4：新佈局 - 左中右三欄 -->
   <div class="battle-content">
-    <!-- 左側：手牌區 + 計時器 -->
+    <!-- 左側：計時器 + 能量 + 手牌區 -->
     <div class="battle-left">
-      <!-- v0.8.3：計時器移到左側 -->
+      <!-- v0.8.4：計時器 -->
       <div class="battle-timer-box">
         <div class="battle-timer" id="battle-timer">00:00</div>
       </div>
 
+      <!-- v0.8.4：能量顯示移到左側 -->
+      <div class="energy-display">
+        <div class="energy-label">⚡ 能量</div>
+        <div class="energy-value" id="energy">10/10</div>
+      </div>
+
+      <!-- 手牌區 -->
       <div class="hand-area" id="hand"></div>
     </div>
 
@@ -2394,12 +2401,8 @@ body {
       <div class="speed-indicator" id="speed-indicator" style="display:none">⚡ 1×</div>
     </div>
 
-    <!-- 右側：能量+控制 -->
+    <!-- 右側：控制按鈕（移除能量顯示） -->
     <div class="battle-right">
-      <div class="energy-display">
-        <div class="energy-label">⚡ 能量</div>
-        <div class="energy-value" id="energy">10/10</div>
-      </div>
       <div class="control-buttons">
         <button id="btn-auto" class="ctrl-btn">🤖 自動</button>
         <button id="btn-manual" class="ctrl-btn active">👆 手動</button>

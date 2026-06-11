@@ -4589,10 +4589,11 @@ function getCellCenter(x, y) {
   if (!bf) return {x:0,y:0};
   const bfRect = bf.getBoundingClientRect();
   const mainRect = document.querySelector('.battle-main').getBoundingClientRect();
-  const cellSize = 60; // 58px + 2px gap
+  const cellSize = 64; // v0.7.4：與戰場格子大小一致
+  const gap = 2; // 格子間距
   return {
-    x: (bfRect.left - mainRect.left) + x * cellSize + 30,
-    y: (bfRect.top - mainRect.top) + y * cellSize + 30,
+    x: (bfRect.left - mainRect.left) + x * (cellSize + gap) + cellSize / 2,
+    y: (bfRect.top - mainRect.top) + y * (cellSize + gap) + cellSize / 2,
   };
 }
 

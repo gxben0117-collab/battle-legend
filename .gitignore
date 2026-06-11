@@ -29,3 +29,5 @@ npm-debug.log*
 # 暫存文件
 tmp/
 temp/
+
+.vercel

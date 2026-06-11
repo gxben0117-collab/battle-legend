@@ -3035,6 +3035,302 @@ body {
     min-height: 690px;
   }
 }
+
+/* v0.8.5：手機 / iPad 觸控版面 */
+:root {
+  --battle-cell: 64px;
+  --battle-gap: 2px;
+}
+
+.battlefield {
+  grid-template-columns: repeat(9, var(--battle-cell));
+  grid-template-rows: repeat(9, var(--battle-cell));
+  gap: var(--battle-gap);
+}
+
+.cell {
+  width: var(--battle-cell);
+  height: var(--battle-cell);
+}
+
+.unit {
+  width: calc(var(--battle-cell) - 4px);
+  height: calc(var(--battle-cell) - 4px);
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .btn,
+  .ctrl-btn,
+  .speed-btn,
+  .retreat-btn,
+  .menu-item,
+  .stage-item,
+  .hand-card,
+  .collect-card,
+  .shop-card {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .ctrl-btn,
+  .retreat-btn,
+  .speed-btn {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 1024px) {
+  body {
+    overflow: auto;
+    overflow-x: hidden;
+    min-height: 100dvh;
+    height: auto;
+  }
+
+  .screen {
+    width: 100%;
+    min-height: 100dvh;
+    height: auto;
+    overflow-x: hidden;
+  }
+
+  .hub-header {
+    height: auto;
+    min-height: 64px;
+    padding: 10px 14px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .hub-nav {
+    width: 100%;
+    margin-left: 0;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .hub-nav .btn,
+  .hub-header .btn {
+    min-height: 42px;
+    white-space: nowrap;
+  }
+
+  .hub-body,
+  .shop-body,
+  .upgrade-body,
+  .production-body {
+    grid-template-columns: 1fr;
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .deck-body {
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+  }
+
+  .deck-sidebar {
+    border-left: 0;
+    border-top: 1px solid var(--border);
+    max-height: none;
+  }
+
+  .card-collection {
+    grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  }
+
+  #screen-battle {
+    min-height: 100dvh;
+  }
+
+  .battle-content {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+    padding: 10px;
+    gap: 10px;
+    overflow: visible;
+  }
+
+  .battle-left {
+    order: 1;
+    display: grid;
+    grid-template-columns: auto minmax(92px, auto) 1fr;
+    align-items: stretch;
+    gap: 8px;
+    padding: 10px;
+    border-radius: 14px;
+  }
+
+  .battle-left::before {
+    display: none;
+  }
+
+  .battle-timer-box,
+  .energy-display {
+    min-width: 86px;
+    padding: 8px 10px;
+  }
+
+  .battle-timer {
+    font-size: 20px;
+  }
+
+  .energy-label {
+    margin-bottom: 4px;
+    font-size: 10px;
+  }
+
+  .energy-value {
+    font-size: 22px;
+  }
+
+  .hand-area,
+  .hand-section {
+    min-width: 0;
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding: 2px 4px 8px;
+    scrollbar-width: thin;
+  }
+
+  .hand-card {
+    width: 76px;
+    min-width: 76px;
+    max-width: 76px;
+    min-height: 94px;
+    padding: 8px 6px;
+  }
+
+  .hand-card:hover {
+    transform: none;
+  }
+
+  .battle-main {
+    order: 2;
+    flex: 1;
+    min-height: auto;
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 16px;
+    overflow: visible;
+  }
+
+  .battle-main::before {
+    width: 520px;
+    height: 520px;
+  }
+
+  .battlefield {
+    padding: 8px;
+    border-radius: 12px;
+    align-self: center;
+  }
+
+  .unit-icon {
+    font-size: clamp(14px, calc(var(--battle-cell) * 0.36), 22px);
+  }
+
+  .unit-name {
+    font-size: clamp(6px, calc(var(--battle-cell) * 0.15), 9px);
+  }
+
+  .unit-hp-text {
+    font-size: clamp(6px, calc(var(--battle-cell) * 0.14), 9px);
+  }
+
+  .battle-right {
+    width: 100%;
+    min-height: 0;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px;
+    border-radius: 14px;
+  }
+
+  .battle-right .control-buttons,
+  .battle-right .speed-controls {
+    display: flex;
+    flex: 1 1 180px;
+    min-width: 0;
+    gap: 6px;
+  }
+
+  .battle-right .ctrl-btn,
+  .battle-right .speed-btn,
+  .battle-right .retreat-btn {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 8px;
+    font-size: 13px;
+  }
+
+  .battle-right .retreat-btn {
+    flex: 1 1 92px;
+  }
+
+  .speed-indicator {
+    top: 10px;
+    right: 10px;
+  }
+}
+
+@media (max-width: 560px) {
+  .logo-title {
+    font-size: 40px;
+    letter-spacing: 4px;
+  }
+
+  .home-btns {
+    width: min(100%, 280px);
+  }
+
+  .hub-title {
+    font-size: 16px;
+  }
+
+  .battle-content {
+    padding: 6px;
+    gap: 6px;
+  }
+
+  .battle-left {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .hand-area,
+  .hand-section {
+    grid-column: 1 / -1;
+  }
+
+  .battle-main {
+    padding: 8px;
+  }
+
+  .battlefield {
+    padding: 6px;
+  }
+
+  .battle-right {
+    padding: 8px;
+  }
+
+  .battle-right .control-buttons,
+  .battle-right .speed-controls {
+    flex-basis: 100%;
+  }
+
+  .result-box {
+    width: calc(100vw - 28px);
+    padding: 28px 18px;
+  }
+
+  .result-title {
+    font-size: 36px;
+  }
+}
 </style>
 </head>
 <body>
@@ -4148,8 +4444,8 @@ let G = {
 // 戰鬥狀態
 let B = null;
 
-// v0.8.1：戰場格子大小常量（全局）
-const CELL_SIZE = 64; // 9×9 戰場格子大小
+// v0.8.1：戰場格子大小（全局）
+let CELL_SIZE = 64;   // 9×9 戰場格子大小，行動裝置會依螢幕更新
 const CELL_GAP = 2;   // 格子間距
 
 // v0.3：當前選擇的章節
@@ -5009,7 +5305,33 @@ function makeUnit(uid, template, x, y, isMy, isCommander) {
 // ============================================================
 // 戰場渲染
 // ============================================================
+function updateBattleCellMetrics() {
+  const main = document.querySelector('.battle-main');
+  const root = document.documentElement;
+  const styles = main ? getComputedStyle(main) : null;
+  const paddingX = styles ? parseFloat(styles.paddingLeft) + parseFloat(styles.paddingRight) : 0;
+  const availableWidth = (main ? main.clientWidth : window.innerWidth) - paddingX - 20;
+  const nextSize = Math.floor(Math.min(64, Math.max(34, (availableWidth - CELL_GAP * 8) / 9)));
+
+  CELL_SIZE = Number.isFinite(nextSize) ? nextSize : 64;
+  root.style.setProperty('--battle-cell', CELL_SIZE + 'px');
+  root.style.setProperty('--battle-gap', CELL_GAP + 'px');
+}
+
+function resizeBattlefield() {
+  updateBattleCellMetrics();
+  if (B && B.units) B.units.forEach(u => placeUnit(u));
+
+  const canvas = document.getElementById('battleCanvas');
+  const battleMain = document.querySelector('.battle-main');
+  if (canvas && battleMain) {
+    canvas.width = window.innerWidth;
+    canvas.height = battleMain.offsetHeight;
+  }
+}
+
 function setupBattlefield() {
+  updateBattleCellMetrics();
   const bf = document.getElementById('battlefield');
   bf.innerHTML = '';
   // v0.7.3：改回 9×9 戰場
@@ -5061,7 +5383,6 @@ function setupBattlefield() {
 
   // 設定 Canvas 大小
   const canvas = document.getElementById('battleCanvas');
-  const bfRect = document.getElementById('battlefield').getBoundingClientRect();
   canvas.width = window.innerWidth;
   canvas.height = document.querySelector('.battle-main').offsetHeight;
 }
@@ -5099,18 +5420,23 @@ function placeUnit(u) {
     u.el = el;
   }
 
-  // v0.3：修復 - 直接使用格子坐標計算位置，不依賴 getBoundingClientRect
-  const borderSize = 1; // 格子邊框
-  let left = u.x * (CELL_SIZE + borderSize) + 3; // +3 居中調整
-  let top = u.y * (CELL_SIZE + borderSize) + 3;
+  // v0.8.5：使用目前格子尺寸定位，避免手機縮放後單位跑位
+  const unitInset = Math.max(2, Math.round(CELL_SIZE * 0.06));
+  let left = u.x * (CELL_SIZE + CELL_GAP) + unitInset;
+  let top = u.y * (CELL_SIZE + CELL_GAP) + unitInset;
 
   // v0.3：BOSS 佔據 4×4，放大顯示
   if (u.isBoss && u.bossSize) {
     const size = u.bossSize;
-    el.style.width = (CELL_SIZE * size + borderSize * (size - 1)) + 'px';
-    el.style.height = (CELL_SIZE * size + borderSize * (size - 1)) + 'px';
-    el.style.fontSize = '80px'; // 放大圖示
+    const bossPixelSize = CELL_SIZE * size + CELL_GAP * (size - 1) - unitInset * 2;
+    el.style.width = bossPixelSize + 'px';
+    el.style.height = bossPixelSize + 'px';
+    el.style.fontSize = Math.max(42, Math.round(CELL_SIZE * 1.25)) + 'px';
     el.style.zIndex = '15'; // 提高層級
+  } else {
+    el.style.width = '';
+    el.style.height = '';
+    el.style.fontSize = '';
   }
 
   el.style.left = left + 'px';
@@ -5626,8 +5952,8 @@ function applyDamage(unit, dmg, isCrit = false) {
 // v0.7.4：顯示浮動傷害數字
 function showFloatingDamage(unit, dmg, isCrit = false) {
   const mainRect = document.querySelector('.battle-main').getBoundingClientRect();
-  const unitX = unit.x * (CELL_SIZE + 2) + CELL_SIZE / 2;
-  const unitY = unit.y * (CELL_SIZE + 2) + CELL_SIZE / 2;
+  const unitX = unit.x * (CELL_SIZE + CELL_GAP) + CELL_SIZE / 2;
+  const unitY = unit.y * (CELL_SIZE + CELL_GAP) + CELL_SIZE / 2;
 
   const div = document.createElement('div');
   div.className = 'damage-float' + (isCrit ? ' crit' : '');
@@ -6302,7 +6628,7 @@ function getCellCenter(x, y) {
   if (!bf) return {x:0,y:0};
   const bfRect = bf.getBoundingClientRect();
   const mainRect = document.querySelector('.battle-main').getBoundingClientRect();
-  const gap = 2; // 格子間距
+  const gap = CELL_GAP; // 格子間距
   return {
     x: (bfRect.left - mainRect.left) + x * (CELL_SIZE + gap) + CELL_SIZE / 2,
     y: (bfRect.top - mainRect.top) + y * (CELL_SIZE + gap) + CELL_SIZE / 2,
@@ -7193,6 +7519,9 @@ window.onload = () => {
   document.getElementById('btn-continue').style.opacity = hasSave ? '1' : '0.4';
   if (hasSave) loadGame();
 };
+
+window.addEventListener('resize', resizeBattlefield);
+window.addEventListener('orientationchange', () => setTimeout(resizeBattlefield, 250));
 </script>
 </body>
 </html>

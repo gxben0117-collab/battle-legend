@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "description": "戰棋傳說自動化測試",
   "scripts": {
+    "build": "node scripts/verify-production.js",
+    "check": "node --check playwright-test.js && node scripts/verify-production.js",
     "test": "node playwright-test.js",
     "install-browser": "npx playwright install chromium"
   },

@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>戰棋傳說 v0.7.3</title>
+<title>戰棋傳說 v0.8.2</title>
 <style>
 /* ===== 設計系統 ===== */
 :root {
@@ -2267,6 +2267,596 @@ body {
   z-index: 15;
 }
 
+/* ============================================================
+   UI v0.8.2：Cinematic Glass Interface
+   ============================================================ */
+:root {
+  --glass-bg: rgba(14, 18, 28, 0.66);
+  --glass-bg-strong: rgba(18, 23, 35, 0.82);
+  --glass-border: rgba(255,255,255,0.13);
+  --glass-highlight: rgba(255,255,255,0.28);
+  --aura-cyan: #4cc9f0;
+  --aura-mint: #72efdd;
+  --aura-rose: #ff4d6d;
+  --ink: #05070b;
+}
+
+body {
+  background:
+    radial-gradient(circle at 18% 12%, rgba(114,239,221,0.13), transparent 28%),
+    radial-gradient(circle at 78% 18%, rgba(240,200,74,0.12), transparent 26%),
+    radial-gradient(circle at 50% 88%, rgba(255,77,109,0.10), transparent 30%),
+    linear-gradient(145deg, #05070b 0%, #0b1018 48%, #07080d 100%);
+  letter-spacing: 0;
+}
+
+.screen {
+  isolation: isolate;
+}
+
+#screen-home {
+  justify-content: center;
+  align-items: stretch;
+  padding: 48px;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.04), transparent 34%),
+    radial-gradient(circle at 24% 30%, rgba(76,201,240,0.20), transparent 27%),
+    radial-gradient(circle at 72% 62%, rgba(240,200,74,0.18), transparent 28%),
+    radial-gradient(circle at 54% 110%, rgba(255,77,109,0.16), transparent 32%),
+    #05070b;
+}
+
+#screen-home::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(rgba(255,255,255,0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(circle at 50% 45%, #000 0%, transparent 72%);
+  pointer-events: none;
+}
+
+#screen-home::after {
+  content: '';
+  position: absolute;
+  inset: auto 8% 4% 8%;
+  height: 30%;
+  background: radial-gradient(ellipse at center, rgba(240,200,74,0.18), transparent 68%);
+  filter: blur(18px);
+  pointer-events: none;
+}
+
+.home-deco {
+  background:
+    radial-gradient(circle at 18% 22%, rgba(255,255,255,0.14), transparent 4px),
+    radial-gradient(circle at 74% 30%, rgba(255,255,255,0.11), transparent 3px),
+    radial-gradient(circle at 60% 74%, rgba(255,255,255,0.10), transparent 3px);
+  opacity: 0.75;
+}
+
+.home-deco::before {
+  width: 52vw;
+  height: 52vw;
+  top: -20vw;
+  left: auto;
+  right: -18vw;
+  transform: none;
+  border-radius: 999px;
+  background: conic-gradient(from 180deg, transparent, rgba(76,201,240,0.22), rgba(240,200,74,0.24), transparent);
+  filter: blur(26px);
+  animation: home-orbit 18s linear infinite;
+}
+
+@keyframes home-orbit {
+  to { transform: rotate(360deg); }
+}
+
+.home-shell {
+  width: min(1180px, 100%);
+  margin: auto;
+  display: grid;
+  grid-template-columns: minmax(360px, 0.9fr) minmax(420px, 1.1fr);
+  gap: 72px;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.game-logo {
+  text-align: left;
+  margin: 0;
+}
+
+.logo-sub {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(238,240,244,0.72);
+  letter-spacing: 3px;
+  margin-bottom: 18px;
+}
+
+.logo-sub::before {
+  content: '';
+  width: 42px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--gold-bright), transparent);
+}
+
+.logo-title {
+  font-size: clamp(64px, 8vw, 112px);
+  letter-spacing: 0;
+  line-height: 0.92;
+  background: linear-gradient(115deg, #fff 0%, #f8e9b0 38%, #f0c84a 58%, #72efdd 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 28px 55px rgba(0,0,0,0.45));
+}
+
+.logo-ver {
+  margin-top: 22px;
+  max-width: 560px;
+  color: rgba(238,240,244,0.66);
+  letter-spacing: 0;
+  line-height: 1.8;
+  font-size: 15px;
+}
+
+.home-btns {
+  width: 100%;
+  max-width: 430px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 34px;
+}
+
+.home-btns .btn-danger {
+  grid-column: 1 / -1;
+}
+
+.btn {
+  border-radius: 999px;
+  min-height: 48px;
+  transition: transform 0.28s ease, border-color 0.28s ease, background 0.28s ease, box-shadow 0.28s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #fff3b8 0%, #f0c84a 52%, #ad7f24 100%);
+  box-shadow: 0 18px 44px rgba(240,200,74,0.22), inset 0 1px 0 rgba(255,255,255,0.65);
+}
+
+.btn-secondary {
+  background: rgba(255,255,255,0.08);
+  border-color: var(--glass-border);
+  color: rgba(255,255,255,0.88);
+  backdrop-filter: blur(20px);
+}
+
+.btn-danger {
+  background: rgba(255,77,109,0.08);
+  color: #ffb3c1;
+  border-color: rgba(255,77,109,0.22);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.home-showcase {
+  min-height: 620px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  perspective: 1100px;
+}
+
+.hero-board {
+  width: min(560px, 100%);
+  aspect-ratio: 1;
+  border-radius: 30px;
+  padding: 24px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.18), rgba(255,255,255,0.04)),
+    rgba(14,18,28,0.54);
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow:
+    0 48px 120px rgba(0,0,0,0.62),
+    0 0 70px rgba(76,201,240,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.28);
+  backdrop-filter: blur(28px) saturate(1.25);
+  transform: rotateX(58deg) rotateZ(-36deg) translateY(20px);
+  animation: hero-board-float 6s ease-in-out infinite;
+}
+
+@keyframes hero-board-float {
+  50% { transform: rotateX(58deg) rotateZ(-36deg) translateY(2px); }
+}
+
+.hero-board-grid {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  gap: 8px;
+}
+
+.hero-board-grid span {
+  border-radius: 12px;
+  background: rgba(255,255,255,0.055);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.09);
+}
+
+.hero-board-grid span:nth-child(8),
+.hero-board-grid span:nth-child(15),
+.hero-board-grid span:nth-child(22) {
+  background: rgba(76,201,240,0.22);
+  border-color: rgba(76,201,240,0.35);
+}
+
+.hero-board-grid span:nth-child(17),
+.hero-board-grid span:nth-child(24),
+.hero-board-grid span:nth-child(29) {
+  background: rgba(255,77,109,0.22);
+  border-color: rgba(255,77,109,0.35);
+}
+
+.hero-piece {
+  position: absolute;
+  width: 96px;
+  height: 96px;
+  border-radius: 24px;
+  display: grid;
+  place-items: center;
+  font-size: 48px;
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 28px 70px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.35);
+  backdrop-filter: blur(18px);
+}
+
+.hero-piece.knight { right: 7%; top: 20%; color: var(--gold-bright); }
+.hero-piece.mage { left: 10%; bottom: 19%; color: var(--aura-cyan); }
+.hero-piece.enemy { right: 24%; bottom: 12%; color: var(--aura-rose); }
+
+.hero-metric {
+  position: absolute;
+  left: 4%;
+  top: 13%;
+  min-width: 184px;
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.16);
+  color: rgba(255,255,255,0.86);
+  box-shadow: 0 24px 70px rgba(0,0,0,0.36);
+  backdrop-filter: blur(22px);
+}
+
+.hero-metric strong {
+  display: block;
+  color: #fff;
+  font-size: 28px;
+  margin-bottom: 4px;
+}
+
+#screen-hub,
+#screen-stage,
+#screen-deck,
+#screen-shop,
+#screen-upgrade,
+#screen-production,
+#screen-equipment {
+  background:
+    radial-gradient(circle at 20% 12%, rgba(76,201,240,0.12), transparent 26%),
+    radial-gradient(circle at 78% 0%, rgba(240,200,74,0.10), transparent 24%),
+    linear-gradient(145deg, #070a10 0%, #10151f 100%) !important;
+}
+
+.hub-header {
+  height: 72px;
+  padding: 0 28px;
+  background: rgba(9,12,18,0.72);
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 12px 44px rgba(0,0,0,0.22);
+  backdrop-filter: blur(22px) saturate(1.15);
+}
+
+.hub-title {
+  color: rgba(255,255,255,0.92);
+  letter-spacing: 0;
+  font-size: 18px;
+}
+
+.resource-badge,
+.hub-panel,
+.chapter-card,
+.stage-item,
+.deck-card,
+.shop-card,
+.upgrade-card,
+.equipment-card,
+.production-card {
+  background: var(--glass-bg);
+  border-color: var(--glass-border);
+  box-shadow: 0 18px 46px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.08);
+  backdrop-filter: blur(18px) saturate(1.1);
+}
+
+.hub-body {
+  gap: 22px;
+  padding: 28px;
+}
+
+.hub-panel {
+  border-radius: 18px;
+  padding: 20px;
+}
+
+.hub-panel-title {
+  letter-spacing: 1.5px;
+  color: rgba(240,200,74,0.78);
+  border-bottom-color: rgba(255,255,255,0.10);
+}
+
+.menu-item {
+  min-height: 108px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.065);
+  border-color: rgba(255,255,255,0.10);
+  transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.menu-item:hover {
+  transform: translateY(-4px);
+  background: rgba(255,255,255,0.10);
+  border-color: rgba(240,200,74,0.38);
+  box-shadow: 0 18px 36px rgba(0,0,0,0.28);
+}
+
+#screen-battle {
+  background:
+    radial-gradient(circle at 50% 48%, rgba(76,201,240,0.11), transparent 30%),
+    radial-gradient(circle at 38% 56%, rgba(240,200,74,0.08), transparent 22%),
+    linear-gradient(145deg, #030509 0%, #090d14 46%, #05060a 100%);
+}
+
+.battle-top-spacer {
+  height: 0;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+}
+
+.battle-content {
+  display: grid;
+  grid-template-columns: 252px minmax(620px, 1fr) 190px;
+  gap: 22px;
+  padding: 24px;
+  align-items: stretch;
+}
+
+.battle-left,
+.battle-right {
+  width: auto;
+  padding: 14px;
+  border-radius: 24px;
+  background: rgba(12,16,25,0.66);
+  border: 1px solid rgba(255,255,255,0.11);
+  box-shadow: 0 28px 70px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,255,255,0.09);
+  backdrop-filter: blur(20px) saturate(1.08);
+}
+
+.battle-left::before,
+.battle-right::before {
+  content: 'COMMAND';
+  color: rgba(255,255,255,0.38);
+  font-size: 10px;
+  letter-spacing: 2px;
+  padding: 2px 4px 8px;
+}
+
+.battle-left::before { content: 'HAND / ENERGY'; }
+
+.battle-main {
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(255,255,255,0.07), transparent 34%),
+    linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 34px 90px rgba(0,0,0,0.44);
+}
+
+.battle-main::before {
+  content: '';
+  position: absolute;
+  width: 760px;
+  height: 760px;
+  border-radius: 999px;
+  background: conic-gradient(from 70deg, rgba(76,201,240,0.18), rgba(240,200,74,0.12), rgba(255,77,109,0.16), rgba(76,201,240,0.18));
+  filter: blur(34px);
+  opacity: 0.42;
+  animation: battle-aura 14s linear infinite;
+}
+
+@keyframes battle-aura {
+  to { transform: rotate(360deg); }
+}
+
+.battlefield {
+  padding: 10px;
+  border-radius: 18px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.11), rgba(255,255,255,0.03)),
+    rgba(3,5,9,0.82);
+  border: 1px solid rgba(255,255,255,0.13);
+  box-shadow: 0 34px 80px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+.cell {
+  background: rgba(255,255,255,0.035);
+  border-color: rgba(124,154,208,0.22);
+  border-radius: 6px;
+}
+
+.cell.my-zone {
+  background: rgba(51,116,255,0.13);
+  border-color: rgba(92,154,255,0.36);
+}
+
+.cell.enemy-zone {
+  background: rgba(255,55,86,0.13);
+  border-color: rgba(255,85,111,0.36);
+}
+
+.cell.neutral-zone {
+  background: rgba(255,255,255,0.026);
+}
+
+.cell.commander-cell {
+  border-color: rgba(240,200,74,0.78);
+  box-shadow: inset 0 0 22px rgba(240,200,74,0.12);
+}
+
+.battle-timer-box,
+.energy-display,
+.hand-area {
+  border-radius: 18px;
+  background: rgba(255,255,255,0.065);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 18px 42px rgba(0,0,0,0.24);
+}
+
+.battle-timer-box {
+  border-color: rgba(240,200,74,0.34);
+  padding: 16px;
+}
+
+.battle-timer {
+  font-size: 30px;
+  letter-spacing: 0;
+}
+
+.energy-display {
+  border-color: rgba(76,201,240,0.26);
+  animation: none;
+}
+
+.energy-value {
+  font-size: 34px;
+  animation: none;
+}
+
+.hand-area {
+  padding: 10px;
+  gap: 10px;
+}
+
+.hand-card {
+  max-width: none;
+  min-height: 112px;
+  border-radius: 16px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.13), rgba(255,255,255,0.04)),
+    rgba(13,17,27,0.72);
+  border-width: 1px;
+  box-shadow: 0 16px 36px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.11);
+}
+
+.hand-card:hover {
+  transform: translateY(-4px) scale(1.015);
+}
+
+.hand-card .card-icon {
+  font-size: 32px;
+}
+
+.hand-card .card-name {
+  color: rgba(255,255,255,0.78);
+  font-size: 12px;
+}
+
+.hand-card .card-stats {
+  color: rgba(255,255,255,0.40);
+}
+
+.ctrl-btn,
+.speed-btn,
+.retreat-btn {
+  min-height: 42px;
+  border-radius: 13px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.ctrl-btn.active,
+.speed-btn.active {
+  background: linear-gradient(135deg, rgba(76,201,240,0.36), rgba(240,200,74,0.18));
+  border-color: rgba(76,201,240,0.44);
+  color: #fff;
+}
+
+.retreat-btn {
+  color: #ffb3c1;
+  border-color: rgba(255,77,109,0.35);
+}
+
+.unit {
+  border-radius: 12px;
+  clip-path: none;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.38);
+}
+
+.unit.my-unit,
+.unit.enemy-unit {
+  animation: none;
+}
+
+.unit-icon {
+  animation: none;
+}
+
+.unit-icon::before,
+.unit-icon::after {
+  animation: none;
+}
+
+@media (max-width: 1120px) {
+  .home-shell {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .home-showcase {
+    min-height: 420px;
+  }
+  .battle-content {
+    grid-template-columns: 220px minmax(600px, 1fr) 170px;
+    padding: 16px;
+    gap: 14px;
+  }
+}
+
+@media (max-width: 860px) {
+  body { overflow: auto; }
+  .screen { min-height: 100vh; height: auto; }
+  #screen-home { padding: 28px; }
+  .home-btns { grid-template-columns: 1fr; }
+  .home-showcase { display: none; }
+  .hub-body { grid-template-columns: 1fr; }
+  .battle-content {
+    grid-template-columns: 1fr;
+    overflow: auto;
+  }
+  .battle-main {
+    min-height: 690px;
+  }
+}
 </style>
 </head>
 <body>
@@ -2274,15 +2864,35 @@ body {
 <!-- 首頁 -->
 <div id="screen-home" class="screen active">
   <div class="home-deco"></div>
-  <div class="game-logo">
-    <div class="logo-sub">Fantasy Strategy</div>
-    <div class="logo-title">戰棋傳說</div>
-    <div class="logo-ver">v0.2 · HTML Edition · 物魔分離系統</div>
-  </div>
-  <div class="home-btns">
-    <button class="btn btn-primary" onclick="startNewGame()">⚔ 開始遊戲</button>
-    <button class="btn btn-secondary" onclick="continueGame()" id="btn-continue">▶ 繼續遊戲</button>
-    <button class="btn btn-danger" onclick="clearSave()">⚠ 清除存檔</button>
+  <div class="home-shell">
+    <div>
+      <div class="game-logo">
+        <div class="logo-sub">Fantasy Strategy</div>
+        <div class="logo-title">戰棋傳說</div>
+        <div class="logo-ver">v0.8.2 · Cinematic HTML Edition · 物魔分離戰棋系統</div>
+      </div>
+      <div class="home-btns">
+        <button class="btn btn-primary" onclick="startNewGame()">⚔ 開始遊戲</button>
+        <button class="btn btn-secondary" onclick="continueGame()" id="btn-continue">▶ 繼續遊戲</button>
+        <button class="btn btn-danger" onclick="clearSave()">⚠ 清除存檔</button>
+      </div>
+    </div>
+    <div class="home-showcase" aria-hidden="true">
+      <div class="hero-metric"><strong>9 × 9</strong><span>real-time tactical board</span></div>
+      <div class="hero-board">
+        <div class="hero-board-grid">
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+      <div class="hero-piece knight">🛡️</div>
+      <div class="hero-piece mage">❄️</div>
+      <div class="hero-piece enemy">🪓</div>
+    </div>
   </div>
 </div>
 
@@ -2884,41 +3494,6 @@ const SKELETON_TEMPLATE = {
   hp:25, patk:8, matk:0, pdef:2, mdef:2, spd:60, acc:75, crit:3, critDmg:130,
   move:2, range:1, color:'#3a1a4a', dmgType:'physical',
   skillType:'none', isSummon:true,
-};
-
-// v0.2：羈絆資料
-const SYNERGIES = {
-  // 種族羈絆
-  '人類': {
-    2: { desc: '命中 +5%', effect: (units) => units.forEach(u => { if (u.race === '人類') u.acc += 5; }) },
-    4: { desc: '命中 +10%', effect: (units) => units.forEach(u => { if (u.race === '人類') u.acc += 10; }) },
-    6: { desc: '命中 +15%、暴擊率 +5%', effect: (units) => units.forEach(u => { if (u.race === '人類') { u.acc += 15; u.crit += 5; } }) },
-  },
-  '獸人': {
-    2: { desc: '生命 +10%', effect: (units) => units.forEach(u => { if (u.race === '獸人') { u.maxHp = Math.round(u.maxHp * 1.1); u.hp = u.maxHp; } }) },
-    4: { desc: '生命 +20%、物攻 +10%', effect: (units) => units.forEach(u => { if (u.race === '獸人') { u.maxHp = Math.round(u.maxHp * 1.2); u.hp = u.maxHp; u.patk = Math.round(u.patk * 1.1); } }) },
-  },
-  '精靈': {
-    2: { desc: '速度 +10', effect: (units) => units.forEach(u => { if (u.race === '精靈') u.spd += 10; }) },
-    3: { desc: '速度 +20、閃避 +5%', effect: (units) => units.forEach(u => { if (u.race === '精靈') { u.spd += 20; u.acc += 5; } }) },
-  },
-  '亡靈': {
-    2: { desc: '魔攻 +15%', effect: (units) => units.forEach(u => { if (u.race === '亡靈') u.matk = Math.round(u.matk * 1.15); }) },
-    3: { desc: '魔攻 +30%、魔防 +20%', effect: (units) => units.forEach(u => { if (u.race === '亡靈') { u.matk = Math.round(u.matk * 1.3); u.mdef = Math.round(u.mdef * 1.2); } }) },
-  },
-  '天使': {
-    1: { desc: '全體魔防 +3', effect: (units) => units.forEach(u => u.mdef += 3) },
-    2: { desc: '全體魔防 +6、生命回復', effect: (units) => units.forEach(u => u.mdef += 6) },
-  },
-  // 職業羈絆
-  '戰士': {
-    2: { desc: '物防 +3', effect: (units) => units.forEach(u => { if (u.job === '戰士') u.pdef += 3; }) },
-    4: { desc: '物防 +6、生命 +10%', effect: (units) => units.forEach(u => { if (u.job === '戰士') { u.pdef += 6; u.maxHp = Math.round(u.maxHp * 1.1); u.hp = u.maxHp; } }) },
-  },
-  '射手': {
-    2: { desc: '射程 +1', effect: (units) => units.forEach(u => { if (u.job === '射手') u.range += 1; }) },
-    3: { desc: '射程 +1、物攻 +10%', effect: (units) => units.forEach(u => { if (u.job === '射手') { u.range += 1; u.patk = Math.round(u.patk * 1.1); } }) },
-  },
 };
 
 // v0.2：關卡資料（含地形障礙）
@@ -3676,7 +4251,6 @@ function startBattle(stageId, isBossRaid = false) {
   B = createBattleState(stage, raid);
   showScreen('battle');
   setupBattlefield();
-  applySynergies(); // v0.2：計算並應用羈絆
   renderHand();
   renderEnergy();
 
@@ -3878,54 +4452,6 @@ function makeUnit(uid, template, x, y, isMy, isCommander) {
   }
 
   return unit;
-}
-
-// ============================================================
-// v0.2：羈絆系統
-// ============================================================
-function calculateSynergies(isMy) {
-  const myUnits = B.units.filter(u => u.alive && u.isMy === isMy && !u.isCommander);
-  const counts = {};
-
-  // 統計種族和職業（同名卡只算1個）
-  const uniqueCards = new Set();
-  myUnits.forEach(u => {
-    if (!uniqueCards.has(u.cardId)) {
-      uniqueCards.add(u.cardId);
-      const card = CARD_DB[u.cardId];
-      if (card) {
-        counts[card.race] = (counts[card.race] || 0) + 1;
-        counts[card.job] = (counts[card.job] || 0) + 1;
-      }
-    }
-  });
-
-  // 找出生效的羈絆
-  const activeSynergies = [];
-  Object.keys(SYNERGIES).forEach(key => {
-    const count = counts[key] || 0;
-    const tiers = Object.keys(SYNERGIES[key]).map(Number).sort((a,b) => b-a);
-    for (const tier of tiers) {
-      if (count >= tier) {
-        activeSynergies.push({ type: key, tier, desc: SYNERGIES[key][tier].desc });
-        SYNERGIES[key][tier].effect(myUnits);
-        break;
-      }
-    }
-  });
-
-  return activeSynergies;
-}
-
-function applySynergies() {
-  // v0.2：開戰時計算羈絆
-  const mySynergies = calculateSynergies(true);
-  B.mySynergies = mySynergies;
-
-  // 暫不處理敵方羈絆（可擴展）
-  if (mySynergies.length > 0) {
-    console.log('生效羈絆:', mySynergies);
-  }
 }
 
 // ============================================================
@@ -4141,8 +4667,13 @@ function startBattleLoop() {
       // v0.8.1：捕獲戰鬥循環錯誤
       console.error('戰鬥循環錯誤:', error);
       console.error('錯誤堆疊:', error.stack);
-      alert('戰鬥發生錯誤: ' + error.message + '\n請按 F12 查看控制台');
-      B.running = false;
+      if (B) {
+        B.lastError = error.message;
+        B.running = false;
+      }
+      if (typeof alert === 'function' && !window.__PLAYWRIGHT_TEST__) {
+        alert('戰鬥發生錯誤: ' + error.message + '\n請按 F12 查看控制台');
+      }
     }
   }
   B.animFrameId = requestAnimationFrame(loop);
@@ -4738,12 +5269,18 @@ function drawCard(state) {
 // 指揮官 HP 更新
 // ============================================================
 function updateCommanderHp() {
+  if (!B || !B.myCommander || !B.enemyCommander) return;
   const myPct = Math.max(0, B.myCommander.hp) / B.myCommander.maxHp * 100;
   const enPct = Math.max(0, B.enemyCommander.hp) / B.enemyCommander.maxHp * 100;
-  document.getElementById('my-hp-bar').style.width = myPct + '%';
-  document.getElementById('enemy-hp-bar').style.width = enPct + '%';
-  document.getElementById('my-hp-text').textContent = `${Math.max(0,Math.round(B.myCommander.hp))}/${B.myCommander.maxHp}`;
-  document.getElementById('enemy-hp-text').textContent = `${Math.max(0,Math.round(B.enemyCommander.hp))}/${B.enemyCommander.maxHp}`;
+  const myBar = document.getElementById('my-hp-bar');
+  const enemyBar = document.getElementById('enemy-hp-bar');
+  const myText = document.getElementById('my-hp-text');
+  const enemyText = document.getElementById('enemy-hp-text');
+
+  if (myBar) myBar.style.width = myPct + '%';
+  if (enemyBar) enemyBar.style.width = enPct + '%';
+  if (myText) myText.textContent = `${Math.max(0,Math.round(B.myCommander.hp))}/${B.myCommander.maxHp}`;
+  if (enemyText) enemyText.textContent = `${Math.max(0,Math.round(B.enemyCommander.hp))}/${B.enemyCommander.maxHp}`;
 }
 
 // ============================================================
@@ -4753,11 +5290,16 @@ function updateTimer() {
   const t = Math.floor(B.timer / 1000);
   const m = String(Math.floor(t/60)).padStart(2,'0');
   const s = String(t%60).padStart(2,'0');
-  document.getElementById('battle-timer').textContent = `${m}:${s}`;
+  const timerEl = document.getElementById('battle-timer');
+  if (timerEl) {
+    timerEl.textContent = `${m}:${s}`;
+  }
   // v0.2：取消指揮官鎖定倒數，改為顯示回合數
   const roundEl = document.getElementById('battle-round');
-  roundEl.textContent = '戰鬥中';
-  roundEl.style.color = 'var(--text-dim)';
+  if (roundEl) {
+    roundEl.textContent = '戰鬥中';
+    roundEl.style.color = 'var(--text-dim)';
+  }
 }
 
 function renderEnergy() {
@@ -4887,6 +5429,7 @@ function toggleAutoPlay() {
 // ============================================================
 function endBattle(result) {
   B.running = false;
+  B.result = result;
   if (B.animFrameId) cancelAnimationFrame(B.animFrameId);
 
   const isWin = result === 'win';

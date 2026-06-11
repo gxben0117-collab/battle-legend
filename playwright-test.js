@@ -3,14 +3,16 @@
 // ============================================================
 
 const { chromium } = require('playwright');
+const path = require('path');
+const { pathToFileURL } = require('url');
 
 // 測試配置
 const CONFIG = {
-  url: 'https://gxben0117-collab.github.io/battle-legend/',
-  rounds: 10,        // 測試次數
-  speed: 3,          // 倍速
+  url: process.env.TEST_URL || pathToFileURL(path.join(__dirname, 'index.html')).href,
+  rounds: Number(process.env.TEST_ROUNDS || 10), // 測試次數
+  speed: Number(process.env.TEST_SPEED || 3),    // 倍速
   timeout: 300000,   // 單局超時（5分鐘）
-  headless: false,   // false = 顯示瀏覽器，true = 無頭模式
+  headless: process.env.HEADLESS !== 'false',    // false = 顯示瀏覽器，true = 無頭模式
 };
 
 // 測試結果
@@ -45,6 +47,9 @@ async function runTests() {
   });
 
   const page = await context.newPage();
+  await page.addInitScript(() => {
+    window.__PLAYWRIGHT_TEST__ = true;
+  });
 
   // 監聽控制台錯誤
   page.on('console', msg => {
@@ -61,6 +66,11 @@ async function runTests() {
       error: error.message,
       stack: error.stack,
     });
+  });
+
+  page.on('dialog', async dialog => {
+    console.log('⚠️ 對話框:', dialog.message());
+    await dialog.dismiss();
   });
 
   try {
@@ -90,24 +100,26 @@ async function runSingleTest(page, testNum) {
   try {
     // 1. 返回大廳
     await page.evaluate(() => {
+      document.getElementById('screen-result')?.classList.remove('show');
       if (typeof showScreen === 'function') {
         showScreen('hub');
       }
     });
     await page.waitForTimeout(500);
 
-    // 2. 直接調用 startStage 進入關卡
+    // 2. 直接調用 startBattle 進入關卡
     await page.evaluate(() => {
-      if (typeof startStage === 'function' && typeof STAGES !== 'undefined') {
-        const stage = STAGES['1-1'];
-        if (stage) {
-          startStage(stage);
-        } else {
-          throw new Error('STAGES["1-1"] 不存在');
-        }
-      } else {
-        throw new Error('startStage 或 STAGES 未定義');
+      if (typeof startBattle !== 'function') {
+        throw new Error('startBattle 未定義');
       }
+      if (typeof STAGES === 'undefined' || !Array.isArray(STAGES)) {
+        throw new Error('STAGES 未定義或格式錯誤');
+      }
+      const stage = STAGES.find(s => s.id === '1-1');
+      if (!stage) {
+        throw new Error('STAGES 中找不到 1-1');
+      }
+      startBattle('1-1');
     });
 
     await page.waitForTimeout(2000); // 等待戰鬥初始化
@@ -173,6 +185,10 @@ async function waitForBattleEnd(page) {
 
   while (Date.now() - startTime < maxWait) {
     const result = await page.evaluate(() => {
+      if (typeof B !== 'undefined' && B && B.lastError) {
+        return `error:${B.lastError}`;
+      }
+
       // 檢查戰鬥是否結束
       if (typeof B === 'undefined' || !B || !B.running) {
         // 判斷結果
@@ -187,7 +203,7 @@ async function waitForBattleEnd(page) {
           if (titleEl) {
             const text = titleEl.textContent;
             if (text.includes('勝利')) return 'win';
-            if (text.includes('失敗')) return 'lose';
+            if (text.includes('失敗') || text.includes('敗北')) return 'lose';
             if (text.includes('平局')) return 'draw';
           }
         }
@@ -261,6 +277,10 @@ function displayResults() {
     console.log('⚠️ 良好，但仍有改進空間');
   } else {
     console.log('❌ 需要修復！穩定性較差');
+  }
+
+  if (results.crashes.length > 0 || results.errors.length > 0) {
+    process.exitCode = 1;
   }
 }
 

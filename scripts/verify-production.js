@@ -43,7 +43,15 @@ assertIncludes(indexHtml, 'function startBattle(', 'battle entrypoint');
 assertIncludes(indexHtml, 'function updateCommanderHp()', 'commander HP updater');
 assertIncludes(indexHtml, 'B.result = result;', 'battle result state');
 assertIncludes(indexHtml, 'UI v0.8.2', 'current UI layer');
+assertIncludes(indexHtml, 'B._handRenderEnergy !== B.energy', 'energy-to-hand refresh guard');
+assertIncludes(indexHtml, 'function autoBuildDeck', 'deck auto-build helper');
+assertIncludes(indexHtml, 'function getCardMaxCopies', 'shared deck copy limit helper');
+assertIncludes(indexHtml, 'G.player.gold -= price;', 'single-card purchase gold deduction');
+assertIncludes(indexHtml, 'G.player.gold -= cost;', 'pack or upgrade gold deduction');
 assertIncludes(testScript, 'pathToFileURL', 'local file test target');
+assertIncludes(testScript, 'runManualCardClickRegression', 'manual card click regression');
+assertIncludes(testScript, 'runShopPurchaseRegression', 'shop purchase regression');
+assertIncludes(testScript, 'runDeckAutoBuildRegression', 'deck auto-build regression');
 
 assertNotIncludes(indexHtml, 'const SYNERGIES', 'removed synergy table');
 assertNotIncludes(indexHtml, 'applySynergies();', 'removed synergy startup call');
@@ -51,6 +59,8 @@ assertNotIncludes(indexHtml, "console.log('生效羈絆:", 'removed synergy log'
 assertNotIncludes(indexHtml, "document.getElementById('battle-timer').textContent", 'unguarded battle timer write');
 assertNotIncludes(indexHtml, "document.getElementById('my-hp-bar').style", 'unguarded commander HP write');
 assertNotIncludes(indexHtml, "document.getElementById('enemy-hp-bar').style", 'unguarded enemy HP write');
+assertNotIncludes(indexHtml, '// G.player.gold -= price;', 'disabled single-card gold deduction');
+assertNotIncludes(indexHtml, '// G.player.gold -= cost;', 'disabled cost gold deduction');
 assertNotIncludes(testScript, "https://gxben0117-collab.github.io/battle-legend/", 'remote-only test target');
 assertNotIncludes(testScript, 'startStage', 'old test battle entrypoint');
 

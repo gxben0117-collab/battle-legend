@@ -1970,6 +1970,40 @@ body {
   text-align: center;
 }
 .deck-count-num { color: var(--gold-bright); font-weight: 700; }
+.deck-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.deck-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 4px 0 8px;
+}
+.deck-summary-item {
+  padding: 8px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.055);
+  border: 1px solid rgba(255,255,255,0.10);
+  text-align: center;
+}
+.deck-summary-label {
+  display: block;
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-bottom: 3px;
+}
+.deck-summary-value {
+  color: var(--text-white);
+  font-weight: 800;
+  font-size: 13px;
+}
+.deck-card-row.auto-added {
+  border-color: rgba(114,239,221,0.55);
+  box-shadow: 0 0 16px rgba(114,239,221,0.18);
+}
 
 /* v0.3：牌組下方卡片列表 - 8×4 Grid 布局 */
 #deck-card-list {
@@ -3047,7 +3081,10 @@ body {
     <button class="btn btn-secondary btn-sm" onclick="showScreen('hub')">← 返回</button>
     <span class="hub-title" style="font-size:14px">牌組編輯</span>
     <span style="font-size:12px;color:var(--text-dim)">點擊卡牌加入 / 移除牌組</span>
-    <div style="margin-left:auto;display:flex;gap:8px;">
+    <div class="deck-tools" style="margin-left:auto;">
+      <button class="btn btn-secondary btn-sm" onclick="autoBuildDeck('balanced')">✨ 一鍵組隊</button>
+      <button class="btn btn-secondary btn-sm" onclick="autoBuildDeck('lowcost')">⚡ 補滿低費</button>
+      <button class="btn btn-secondary btn-sm" onclick="clearTempDeck()">🧹 清空</button>
       <button class="btn btn-primary btn-sm" onclick="saveDeck()">💾 儲存</button>
     </div>
   </div>
@@ -3056,6 +3093,7 @@ body {
     <div class="deck-sidebar">
       <div class="deck-sidebar-title">目前牌組</div>
       <div class="deck-count-label">已選 <span class="deck-count-num" id="deck-count">0</span> / 30</div>
+      <div class="deck-summary" id="deck-summary"></div>
       <div id="deck-card-list"></div>
     </div>
   </div>
@@ -5311,6 +5349,16 @@ function renderEnergy() {
     energyEl.textContent = `${B.energy}/${B.maxEnergy}`;
   }
 
+  // v0.8.3：能量或手動/自動模式變化時，同步刷新手牌可點擊狀態。
+  // 卡片 onclick 取決於 renderHand 當下的能量；若只更新能量文字，剛恢復到足夠能量的牌會保持不可點。
+  if (
+    B._handRenderEnergy !== B.energy ||
+    B._handRenderAutoPlay !== B.autoPlay ||
+    B._handRenderSize !== B.hand.length
+  ) {
+    renderHand();
+  }
+
   // 舊版能量點（如果存在）
   const pips = document.getElementById('energy-pips');
   if (pips) {
@@ -5333,6 +5381,9 @@ function renderEnergy() {
 function renderHand() {
   const hs = document.getElementById('hand');
   if (!hs) return; // v0.7.4：防止找不到元素
+  B._handRenderEnergy = B.energy;
+  B._handRenderAutoPlay = B.autoPlay;
+  B._handRenderSize = B.hand.length;
   hs.innerHTML = '';
   B.hand.slice(0, 6).forEach(cardId => {
     const card = CARD_DB[cardId];
@@ -5780,6 +5831,76 @@ function renderCanvas(dt) {
 // 牌組畫面
 // ============================================================
 let tempDeck = [];
+
+function getCardMaxCopies(card) {
+  return card.cardType === 'hero' ? 1 : 3;
+}
+
+function getCardRole(card) {
+  const text = `${card.name || ''} ${card.job || ''} ${card.skillDesc || ''} ${card.passiveDesc || ''}`;
+  if (/治療|恢復|護盾|僧|牧|祭/.test(text)) return 'support';
+  if (card.dmgType === 'magic' || card.matk > card.patk) return 'magic';
+  if ((card.range || 1) > 1) return 'ranged';
+  if ((card.hp || 0) + (card.pdef || 0) * 8 + (card.mdef || 0) * 8 >= 115) return 'frontline';
+  if (/刺|影|風/.test(text)) return 'assassin';
+  return 'frontline';
+}
+
+function getCardPowerScore(card) {
+  const rarityScore = { N: 0, R: 18, SR: 42, SSR: 72, UR: 110 }[card.rarity] || 0;
+  const offense = Math.max(card.patk || 0, card.matk || 0) * 2.4;
+  const defense = (card.hp || 0) * 0.55 + (card.pdef || 0) * 3 + (card.mdef || 0) * 3;
+  const utility = (card.range || 1) * 5 + (card.spd || 0) * 0.35 + (card.crit || 0) * 1.1;
+  const costPenalty = Math.max(0, (card.cost || 1) - 3) * 8;
+  return rarityScore + offense + defense + utility - costPenalty;
+}
+
+function getAvailableDeckCandidates() {
+  const candidates = [];
+  Object.entries(G.collection).forEach(([cardId, owned]) => {
+    const card = CARD_DB[cardId];
+    if (!card || owned <= 0 || card.cardType === 'boss') return;
+    const copies = Math.min(owned, getCardMaxCopies(card));
+    for (let i = 0; i < copies; i++) {
+      candidates.push({
+        cardId,
+        card,
+        role: getCardRole(card),
+        score: getCardPowerScore(card),
+      });
+    }
+  });
+  return candidates;
+}
+
+function getDeckStats(deck) {
+  const stats = {
+    count: deck.length,
+    avgCost: 0,
+    low: 0,
+    mid: 0,
+    high: 0,
+    frontline: 0,
+    ranged: 0,
+    magic: 0,
+    support: 0,
+    assassin: 0,
+  };
+
+  let totalCost = 0;
+  deck.forEach(cardId => {
+    const card = CARD_DB[cardId];
+    if (!card) return;
+    totalCost += card.cost || 0;
+    if ((card.cost || 0) <= 2) stats.low++;
+    else if ((card.cost || 0) <= 3) stats.mid++;
+    else stats.high++;
+    stats[getCardRole(card)]++;
+  });
+  stats.avgCost = deck.length ? (totalCost / deck.length).toFixed(1) : '0.0';
+  return stats;
+}
+
 function renderDeckScreen() {
   tempDeck = [...G.deck];
   renderCardCollection();
@@ -5809,6 +5930,7 @@ function renderDeckSidebar() {
   const el = document.getElementById('deck-card-list');
   el.innerHTML = '';
   document.getElementById('deck-count').textContent = tempDeck.length;
+  renderDeckSummary();
 
   // 統計每張卡的數量和索引
   const cardGroups = {};
@@ -5821,7 +5943,7 @@ function renderDeckSidebar() {
   const sortedCardIds = Object.keys(cardGroups).sort((a, b) => {
     const cardA = CARD_DB[a];
     const cardB = CARD_DB[b];
-    const rarityOrder = {N: 0, R: 1, SR: 2, SSR: 3};
+    const rarityOrder = {N: 0, R: 1, SR: 2, SSR: 3, UR: 4};
     if (rarityOrder[cardA.rarity] !== rarityOrder[cardB.rarity]) {
       return rarityOrder[cardA.rarity] - rarityOrder[cardB.rarity];
     }
@@ -5858,6 +5980,17 @@ function renderDeckSidebar() {
   });
 }
 
+function renderDeckSummary() {
+  const el = document.getElementById('deck-summary');
+  if (!el) return;
+  const stats = getDeckStats(tempDeck);
+  el.innerHTML = `
+    <div class="deck-summary-item"><span class="deck-summary-label">平均費用</span><span class="deck-summary-value">${stats.avgCost}</span></div>
+    <div class="deck-summary-item"><span class="deck-summary-label">低/中/高費</span><span class="deck-summary-value">${stats.low}/${stats.mid}/${stats.high}</span></div>
+    <div class="deck-summary-item"><span class="deck-summary-label">前排</span><span class="deck-summary-value">${stats.frontline}</span></div>
+    <div class="deck-summary-item"><span class="deck-summary-label">遠程/魔法</span><span class="deck-summary-value">${stats.ranged + stats.magic}</span></div>`;
+}
+
 function addToDeck(cardId) {
   if (tempDeck.length >= 30) { showToast('牌組已達30張上限'); return; }
 
@@ -5868,7 +6001,7 @@ function addToDeck(cardId) {
   const owned = G.collection[cardId] || 0;
 
   // v0.2：牌組張數限制
-  const maxCopies = card.cardType === 'hero' ? 1 : 3;
+  const maxCopies = getCardMaxCopies(card);
   if (inDeck >= maxCopies) {
     showToast(`${card.cardType === 'hero' ? '英雄卡' : '一般卡'}同名最多 ${maxCopies} 張`);
     return;
@@ -5883,6 +6016,64 @@ function removeFromDeck(cardId) {
   const idx = tempDeck.lastIndexOf(cardId);
   if (idx !== -1) tempDeck.splice(idx, 1);
   renderDeckSidebar();
+}
+
+function clearTempDeck() {
+  tempDeck = [];
+  renderDeckSidebar();
+  showToast('已清空目前牌組');
+}
+
+function autoBuildDeck(mode = 'balanced') {
+  const candidates = getAvailableDeckCandidates();
+  if (candidates.length === 0) {
+    showToast('沒有可用卡牌');
+    return;
+  }
+
+  const picked = [];
+  const pickedCounts = {};
+  const canPick = item => {
+    const owned = G.collection[item.cardId] || 0;
+    const maxCopies = Math.min(owned, getCardMaxCopies(item.card));
+    return (pickedCounts[item.cardId] || 0) < maxCopies && picked.length < 30;
+  };
+  const pick = item => {
+    if (!canPick(item)) return false;
+    picked.push(item.cardId);
+    pickedCounts[item.cardId] = (pickedCounts[item.cardId] || 0) + 1;
+    return true;
+  };
+
+  if (mode === 'lowcost') {
+    candidates
+      .sort((a, b) => (a.card.cost - b.card.cost) || (b.score - a.score))
+      .forEach(pick);
+  } else {
+    const roleTargets = { frontline: 8, ranged: 6, magic: 6, support: 4, assassin: 3 };
+    Object.entries(roleTargets).forEach(([role, target]) => {
+      candidates
+        .filter(item => item.role === role)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, target * 2)
+        .forEach(item => {
+          if (picked.filter(cardId => getCardRole(CARD_DB[cardId]) === role).length < target) pick(item);
+        });
+    });
+
+    candidates
+      .sort((a, b) => {
+        const costBandA = a.card.cost <= 3 ? 0 : 1;
+        const costBandB = b.card.cost <= 3 ? 0 : 1;
+        return costBandA - costBandB || b.score - a.score;
+      })
+      .forEach(pick);
+  }
+
+  tempDeck = picked.slice(0, 30);
+  renderDeckSidebar();
+  const stats = getDeckStats(tempDeck);
+  showToast(`✅ 已組成 ${tempDeck.length} 張牌組，平均費用 ${stats.avgCost}`);
 }
 
 function saveDeck() {
@@ -5915,18 +6106,26 @@ function renderShopScreen() {
 }
 
 function buyCard(cardId, price) {
-  // [測試] 金幣無限
-  // G.player.gold -= price;
+  if (G.player.gold < price) {
+    showToast('💰 金幣不足');
+    return;
+  }
+
+  G.player.gold -= price;
   G.collection[cardId] = (G.collection[cardId] || 0) + 1;
   saveGame();
-  document.getElementById('shop-gold').textContent = G.player.gold;
+  renderShopScreen();
   showToast(`獲得 ${CARD_DB[cardId].name}！`);
 }
 
 function buyPack(type) {
   const cost = type === 'normal' ? 100 : 300;
-  // [測試] 金幣無限
-  // G.player.gold -= cost;
+  if (G.player.gold < cost) {
+    showToast('💰 金幣不足');
+    return;
+  }
+
+  G.player.gold -= cost;
   const rolls = type === 'normal' ? [60,25,10,4,1] : [30,35,25,8,2];
   const pool = Object.values(CARD_DB);
   const roll = Math.random() * 100;
@@ -6001,8 +6200,12 @@ function upgradeCard(cardId) {
   const level = G.cardLevels[cardId] || 1;
   if (level >= 30) { showToast('已達最高等級！'); return; }
   const cost = level * 50;
-  // [測試] 金幣無限
-  // G.player.gold -= cost;
+  if (G.player.gold < cost) {
+    showToast('💰 金幣不足');
+    return;
+  }
+
+  G.player.gold -= cost;
   G.cardLevels[cardId] = level + 1;
   saveGame();
   document.getElementById('upgrade-gold').textContent = G.player.gold;

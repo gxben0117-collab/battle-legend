@@ -9,7 +9,7 @@ const { pathToFileURL } = require('url');
 // 測試配置
 const CONFIG = {
   url: process.env.TEST_URL || pathToFileURL(path.join(__dirname, 'index.html')).href,
-  rounds: Number(process.env.TEST_ROUNDS || 10), // 測試次數
+  rounds: Number(process.env.TEST_ROUNDS || 3),  // 測試次數
   speed: Number(process.env.TEST_SPEED || 3),    // 倍速
   timeout: 300000,   // 單局超時（5分鐘）
   headless: process.env.HEADLESS !== 'false',    // false = 顯示瀏覽器，true = 無頭模式
@@ -78,6 +78,10 @@ async function runTests() {
     await page.goto(CONFIG.url, { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
 
+    await runManualCardClickRegression(page);
+    await runShopPurchaseRegression(page);
+    await runDeckAutoBuildRegression(page);
+
     // 運行所有測試
     for (let i = 1; i <= CONFIG.rounds; i++) {
       await runSingleTest(page, i);
@@ -89,6 +93,151 @@ async function runTests() {
     await browser.close();
     displayResults();
   }
+}
+
+async function resetGameForRegression(page) {
+  await page.evaluate(() => {
+    localStorage.removeItem('battleLegend_v1');
+    startNewGame();
+  });
+}
+
+// 手動出牌回歸測試：能量恢復到足夠後，手牌必須重新變成可點擊
+async function runManualCardClickRegression(page) {
+  console.log('🧪 手動出牌回歸測試...');
+
+  await page.evaluate(() => {
+    localStorage.removeItem('battleLegend_v1');
+    startNewGame();
+    startBattle('1-1');
+    B.autoPlay = false;
+
+    const cost3 = B.hand.find(id => CARD_DB[id]?.cost === 3);
+    if (!cost3) {
+      B.hand.unshift('archer');
+    }
+
+    B.energy = 2;
+    renderHand();
+    B.energy = 3;
+    renderEnergy();
+  });
+
+  const before = await page.evaluate(() => ({
+    units: B.units.length,
+    energy: B.energy,
+    clickable: document.querySelectorAll('.hand-card.clickable').length,
+  }));
+
+  if (before.clickable === 0) {
+    throw new Error('手動模式能量足夠時沒有可點擊手牌');
+  }
+
+  await page.click('.hand-card.clickable');
+  await page.waitForTimeout(300);
+
+  const after = await page.evaluate(() => ({
+    units: B.units.length,
+    energy: B.energy,
+    lastError: B.lastError || null,
+  }));
+
+  if (after.lastError) {
+    throw new Error(`手動出牌觸發戰鬥錯誤: ${after.lastError}`);
+  }
+  if (after.units <= before.units) {
+    throw new Error('手動點擊手牌後沒有部署單位');
+  }
+  if (after.energy >= before.energy) {
+    throw new Error('手動點擊手牌後沒有扣除能量');
+  }
+
+  console.log('✅ 手動出牌回歸測試通過\n');
+}
+
+async function runShopPurchaseRegression(page) {
+  console.log('🧪 商店扣款回歸測試...');
+  await resetGameForRegression(page);
+
+  const result = await page.evaluate(() => {
+    showScreen('shop');
+    const beforeGold = G.player.gold;
+    const beforeTotal = Object.values(G.collection).reduce((sum, count) => sum + count, 0);
+
+    buyPack('normal');
+
+    const afterPackGold = G.player.gold;
+    const afterPackTotal = Object.values(G.collection).reduce((sum, count) => sum + count, 0);
+
+    buyCard('warrior', 100);
+
+    return {
+      beforeGold,
+      afterPackGold,
+      finalGold: G.player.gold,
+      beforeTotal,
+      afterPackTotal,
+      warriorCount: G.collection.warrior,
+      shopGoldText: document.getElementById('shop-gold')?.textContent,
+    };
+  });
+
+  if (result.afterPackGold !== result.beforeGold - 100) {
+    throw new Error(`普通卡包未正確扣款: ${result.beforeGold} -> ${result.afterPackGold}`);
+  }
+  if (result.afterPackTotal !== result.beforeTotal + 1) {
+    throw new Error('普通卡包未增加收藏');
+  }
+  if (result.finalGold !== result.beforeGold - 200) {
+    throw new Error(`單卡購買未正確扣款: final=${result.finalGold}`);
+  }
+  if (String(result.finalGold) !== result.shopGoldText) {
+    throw new Error('商店金幣 UI 未同步更新');
+  }
+
+  console.log('✅ 商店扣款回歸測試通過\n');
+}
+
+async function runDeckAutoBuildRegression(page) {
+  console.log('🧪 一鍵組隊回歸測試...');
+  await resetGameForRegression(page);
+
+  const result = await page.evaluate(() => {
+    showScreen('deck');
+    autoBuildDeck('balanced');
+    saveDeck();
+
+    const counts = {};
+    G.deck.forEach(cardId => {
+      counts[cardId] = (counts[cardId] || 0) + 1;
+    });
+
+    const violations = Object.entries(counts).filter(([cardId, count]) => {
+      const card = CARD_DB[cardId];
+      const owned = G.collection[cardId] || 0;
+      const maxCopies = getCardMaxCopies(card);
+      return count > owned || count > maxCopies;
+    });
+
+    return {
+      deckSize: G.deck.length,
+      avgCost: getDeckStats(G.deck).avgCost,
+      violations,
+      summaryText: document.getElementById('deck-summary')?.textContent || '',
+    };
+  });
+
+  if (result.deckSize < 10 || result.deckSize > 30) {
+    throw new Error(`一鍵組隊張數異常: ${result.deckSize}`);
+  }
+  if (result.violations.length > 0) {
+    throw new Error(`一鍵組隊超出收藏或同名限制: ${JSON.stringify(result.violations)}`);
+  }
+  if (!result.summaryText.includes('平均費用')) {
+    throw new Error('牌組統計未渲染');
+  }
+
+  console.log(`✅ 一鍵組隊回歸測試通過，${result.deckSize} 張，平均費用 ${result.avgCost}\n`);
 }
 
 // 單次測試

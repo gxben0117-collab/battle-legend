@@ -299,6 +299,92 @@ body {
   font-size: 12px;
   color: var(--text-dim);
 }
+.custom-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(360px, 1fr);
+  gap: 18px;
+  padding: 20px;
+}
+.custom-hero-card,
+.custom-hero-panel,
+.tower-panel {
+  background: rgba(16, 22, 34, 0.82);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 18px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.35);
+  backdrop-filter: blur(18px);
+  padding: 20px;
+}
+.custom-hero-preview { text-align: center; padding: 18px; }
+.custom-hero-icon { font-size: 64px; filter: drop-shadow(0 0 18px rgba(64,180,255,0.5)); }
+.custom-hero-name { font-size: 24px; font-weight: 900; color: var(--gold-bright); margin-top: 10px; }
+.custom-hero-meta { color: var(--text-dim); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 6px; }
+.class-picker {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+.class-btn {
+  min-height: 74px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.05);
+  color: var(--text-silver);
+  cursor: pointer;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease;
+}
+.class-btn:hover,
+.class-btn.active {
+  transform: translateY(-2px);
+  border-color: rgba(84, 196, 255, 0.8);
+  background: linear-gradient(135deg, rgba(53,180,255,0.22), rgba(255,218,87,0.12));
+}
+.class-btn-icon { display: block; font-size: 24px; margin-bottom: 6px; }
+.custom-stat-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+.custom-stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.045);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.custom-stat-row button {
+  min-width: 38px;
+  height: 30px;
+  border: 0;
+  border-radius: 10px;
+  color: #05121d;
+  font-weight: 900;
+  background: linear-gradient(135deg, #53d7ff, #ffdf5d);
+  cursor: pointer;
+}
+.tower-panel {
+  margin-top: 14px;
+  max-width: 760px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+.tower-panel-title { color: var(--gold-bright); font-weight: 900; font-size: 18px; }
+.tower-panel-desc { color: var(--text-dim); font-size: 12px; margin-top: 6px; }
+.battle-mode-info {
+  color: var(--gold-bright);
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 16px rgba(255,213,74,0.35);
+  min-height: 18px;
+}
 .stage-item:hover { background: var(--bg-hover); border-color: var(--border-gold); }
 .stage-item.locked { opacity: 0.4; cursor: not-allowed; }
 .stage-num { font-size: 11px; color: var(--text-dim); width: 28px; }
@@ -3029,6 +3115,10 @@ body {
           <div class="menu-item-icon">⚔️</div>
           <div class="menu-item-label">裝備</div>
         </div>
+        <div class="menu-item" onclick="showScreen('custom')">
+          <div class="menu-item-icon">🧑‍🚀</div>
+          <div class="menu-item-label">自訂角色</div>
+        </div>
         <div class="menu-item" onclick="showScreen('upgrade')">
           <div class="menu-item-icon">⬆️</div>
           <div class="menu-item-label">強化</div>
@@ -3066,6 +3156,7 @@ body {
     <!-- v0.3：關卡列表視圖（點擊章節後顯示）-->
     <div id="stage-list-view" style="display:none;">
       <div class="stage-list" id="stage-list-main" style="max-width:600px;"></div>
+      <div id="event-tower-panel" class="tower-panel" style="display:none;"></div>
       <div class="stage-start-panel" id="stage-start-panel">
         <div>
           <div class="stage-start-title" id="stage-selected-title">尚未選擇關卡</div>
@@ -3106,6 +3197,7 @@ body {
     <!-- 中間：戰場 -->
     <div class="battle-main">
       <canvas id="battleCanvas"></canvas>
+      <div class="battle-mode-info" id="battle-mode-info"></div>
       <div class="battlefield" id="battlefield"></div>
       <div class="speed-indicator" id="speed-indicator" style="display:none">⚡ 1×</div>
       <!-- 地圖下方：戰鬥控制 -->
@@ -3135,6 +3227,39 @@ body {
         <button class="btn btn-primary" onclick="collectReward()">✓ 領取獎勵</button>
         <button class="btn btn-secondary" onclick="exitBattle()">返回大廳</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- 自訂角色 -->
+<div id="screen-custom" class="screen" style="flex-direction:column;background:var(--bg-dark);">
+  <div class="hub-header">
+    <button class="btn btn-secondary btn-sm" onclick="showScreen('hub')">← 返回</button>
+    <span class="hub-title" style="font-size:14px">自訂角色</span>
+    <div class="resource-badge"><span>💎</span><span class="resource-val" id="custom-essence">0</span></div>
+  </div>
+  <div class="custom-hero-grid">
+    <div class="custom-hero-card">
+      <div class="custom-hero-preview">
+        <div class="custom-hero-icon" id="custom-hero-icon">⚔️</div>
+        <div class="custom-hero-name" id="custom-hero-name">遠征者</div>
+        <div class="custom-hero-meta" id="custom-hero-meta">Lv.1 / 戰士</div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="addCustomHeroToDeck()">加入牌組</button>
+      <button class="btn btn-secondary" style="width:100%;margin-top:10px;" onclick="levelUpCustomHero()">等級訓練</button>
+    </div>
+    <div class="custom-hero-panel">
+      <div class="hub-panel-title">職業</div>
+      <div class="class-picker" id="custom-class-picker"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:18px;">
+        <div>
+          <div class="hub-panel-title">強化點數</div>
+          <div style="color:var(--text-dim);font-size:12px;">消耗精華取得點數，再分配到核心屬性</div>
+        </div>
+        <div class="resource-badge"><span>點數</span><span class="resource-val" id="custom-points">0</span></div>
+      </div>
+      <div class="custom-stat-list" id="custom-stat-list"></div>
+      <div style="color:var(--text-dim);font-size:12px;margin-top:14px;" id="custom-card-summary"></div>
     </div>
   </div>
 </div>
@@ -3950,12 +4075,54 @@ const CHAPTERS = [
   {
     id: 'chapter-event',
     name: '活動副本',
-    subtitle: '限時挑戰',
-    icon: '🎊',
+    subtitle: '無限塔',
+    icon: '🗼',
     type: 'event',
-    locked: true,
+    unlocked: true,
   },
 ];
+
+const CUSTOM_HERO_ID = 'custom-hero';
+const CUSTOM_HERO_CLASSES = {
+  warrior: {
+    job:'戰士', icon:'⚔️', color:'#4f78ff', dmgType:'physical',
+    base:{hp:72, patk:15, matk:0, pdef:8, mdef:4, spd:68, acc:86, crit:8, critDmg:160, move:2, range:1, cost:3},
+    skill:'英勇斬擊', skillDesc:'造成170%物理傷害', passiveDesc:'血量低於40%時物防+20%', skillType:'melee', skillMult:1.7,
+  },
+  archer: {
+    job:'射手', icon:'🏹', color:'#31a96b', dmgType:'physical',
+    base:{hp:48, patk:14, matk:0, pdef:3, mdef:4, spd:88, acc:94, crit:18, critDmg:185, move:3, range:4, cost:3},
+    skill:'精準連射', skillDesc:'連射3次，每次70%物理傷害', passiveDesc:'距離越遠暴擊越穩定', skillType:'ranged', skillMult:0.7, skillHits:3,
+  },
+  mage: {
+    job:'法師', icon:'🔮', color:'#7357ff', dmgType:'magic',
+    base:{hp:44, patk:2, matk:21, pdef:2, mdef:9, spd:72, acc:95, crit:10, critDmg:165, move:2, range:4, cost:4},
+    skill:'星火爆裂', skillDesc:'對3×3範圍造成160%魔法傷害', passiveDesc:'技能傷害隨等級提升', skillType:'aoe', skillMult:1.6,
+  },
+  priest: {
+    job:'牧師', icon:'✨', color:'#d6b44c', dmgType:'magic',
+    base:{hp:56, patk:1, matk:14, pdef:4, mdef:12, spd:66, acc:90, crit:4, critDmg:130, move:2, range:3, cost:3},
+    skill:'誓約治癒', skillDesc:'治療最低血友軍並提供護盾', passiveDesc:'在無限塔中特別適合穩住主堡', skillType:'heal', skillMult:0.32,
+  },
+};
+
+const CUSTOM_HERO_STAT_UPGRADES = {
+  hp: { label:'生命', step:10 },
+  patk: { label:'物攻', step:2 },
+  matk: { label:'魔攻', step:2 },
+  pdef: { label:'物防', step:1 },
+  mdef: { label:'魔防', step:1 },
+  spd: { label:'速度', step:3 },
+};
+
+const EVENT_TOWER_STAGE = {
+  id:'event-tower',
+  name:'無限塔',
+  type:'活動',
+  enemy:[],
+  obstacles:[],
+  reward:{gold:2500, essence:240},
+};
 
 
 // ============================================================
@@ -3974,6 +4141,8 @@ let G = {
     accessory: null, // 飾品槽
   },
   equipmentInventory: {}, // equipId -> count
+  customHero: null,
+  eventTowerBestWave: 0,
 };
 
 // 戰鬥狀態
@@ -4070,19 +4239,93 @@ function saveGame() {
 }
 function loadGame() {
   const s = localStorage.getItem('battleLegend_v1');
-  if (s) { G = JSON.parse(s); return true; }
+  if (s) {
+    G = JSON.parse(s);
+    migrateGameState();
+    return true;
+  }
   return false;
+}
+
+function createDefaultCustomHero() {
+  return {
+    name:'遠征者',
+    classKey:'warrior',
+    level:1,
+    points:3,
+    spent:{ hp:0, patk:0, matk:0, pdef:0, mdef:0, spd:0 },
+  };
+}
+
+function migrateGameState() {
+  if (!G.collection) G.collection = {};
+  if (!Array.isArray(G.deck)) G.deck = [];
+  if (!G.stageCleared) G.stageCleared = {};
+  if (!G.customHero) G.customHero = createDefaultCustomHero();
+  if (!G.customHero.spent) G.customHero.spent = createDefaultCustomHero().spent;
+  if (typeof G.customHero.points !== 'number') G.customHero.points = 0;
+  if (!G.customHero.classKey || !CUSTOM_HERO_CLASSES[G.customHero.classKey]) G.customHero.classKey = 'warrior';
+  if (typeof G.eventTowerBestWave !== 'number') G.eventTowerBestWave = 0;
+  syncCustomHeroCard();
+}
+
+function getCustomHeroCard() {
+  const hero = G.customHero || createDefaultCustomHero();
+  const cls = CUSTOM_HERO_CLASSES[hero.classKey] || CUSTOM_HERO_CLASSES.warrior;
+  const spent = hero.spent || {};
+  const levelBonus = Math.max(0, (hero.level || 1) - 1);
+  const stat = key => (cls.base[key] || 0) + ((spent[key] || 0) * (CUSTOM_HERO_STAT_UPGRADES[key]?.step || 0));
+
+  return {
+    id:CUSTOM_HERO_ID,
+    name:hero.name || '遠征者',
+    icon:cls.icon,
+    rarity:'UR',
+    cardType:'hero',
+    race:'自訂',
+    job:cls.job,
+    cost:cls.base.cost,
+    hp:stat('hp') + levelBonus * 6,
+    patk:stat('patk') + (cls.dmgType === 'physical' ? levelBonus : 0),
+    matk:stat('matk') + (cls.dmgType === 'magic' ? levelBonus : 0),
+    pdef:stat('pdef') + Math.floor(levelBonus / 2),
+    mdef:stat('mdef') + Math.floor(levelBonus / 2),
+    spd:stat('spd'),
+    acc:cls.base.acc,
+    crit:cls.base.crit + Math.floor(levelBonus / 3),
+    critDmg:cls.base.critDmg,
+    move:cls.base.move,
+    range:cls.base.range,
+    color:cls.color,
+    dmgType:cls.dmgType,
+    skill:cls.skill,
+    skillDesc:cls.skillDesc,
+    passive:'自我鍛鍊',
+    passiveDesc:cls.passiveDesc,
+    skillType:cls.skillType,
+    skillMult:cls.skillMult + Math.min(0.35, levelBonus * 0.015),
+    skillHits:cls.skillHits || 1,
+    isCustomHero:true,
+  };
+}
+
+function syncCustomHeroCard() {
+  if (!G.customHero) G.customHero = createDefaultCustomHero();
+  CARD_DB[CUSTOM_HERO_ID] = getCustomHeroCard();
+  G.collection[CUSTOM_HERO_ID] = 1;
 }
 
 // ============================================================
 // 初始卡牌
 // ============================================================
 function initStarterCards() {
+  G.customHero = createDefaultCustomHero();
   // v0.3：添加新卡牌到初始收藏
   G.collection = {
     knight:3, warrior:3, archer:3, mage:1, assassin:1, tank:1,
     'shield-guard':2, 'light-cavalry':2, 'sniper':1, 'sword-master':1, 'aerial-archer':1,
-    'novice-monk':2, 'thunder-mage':1, 'ice-mage':1, 'wind-walker':1, 'inferno-mage':0
+    'novice-monk':2, 'thunder-mage':1, 'ice-mage':1, 'wind-walker':1, 'inferno-mage':0,
+    [CUSTOM_HERO_ID]:1
   };
   // v0.3：初始牌組（只用初始收藏的卡片，不足 30 張）
   G.deck = [
@@ -4101,6 +4344,7 @@ function initStarterCards() {
     'thunder-mage',                        // 雷法師 x1
     'ice-mage',                            // 冰法師 x1
     'wind-walker',                         // 風行者 x1
+    CUSTOM_HERO_ID,                         // 自訂角色 x1
   ];
   // 共 22 張，玩家需要通過抽卡/購買來補滿 30 張
 
@@ -4111,6 +4355,8 @@ function initStarterCards() {
     'leather-armor': 1,
     'speed-boots': 1,
   };
+  G.eventTowerBestWave = 0;
+  syncCustomHeroCard();
 
   saveGame();
 }
@@ -4147,8 +4393,114 @@ function showScreen(name) {
   if (name === 'production') renderProductionScreen();
   if (name === 'stage') renderStageScreen();
   if (name === 'equipment') renderEquipmentScreen(); // v0.4：裝備界面
+  if (name === 'custom') renderCustomHeroScreen();
 }
 function showHub() { showScreen('hub'); }
+
+function renderCustomHeroScreen() {
+  migrateGameState();
+  const hero = G.customHero;
+  const card = getCustomHeroCard();
+  document.getElementById('custom-essence').textContent = G.player.essence;
+  document.getElementById('custom-hero-icon').textContent = card.icon;
+  document.getElementById('custom-hero-name').textContent = card.name;
+  document.getElementById('custom-hero-meta').textContent = `Lv.${hero.level} / ${card.job} / COST ${card.cost}`;
+  document.getElementById('custom-points').textContent = hero.points;
+
+  const picker = document.getElementById('custom-class-picker');
+  picker.innerHTML = '';
+  Object.entries(CUSTOM_HERO_CLASSES).forEach(([key, cls]) => {
+    const btn = document.createElement('button');
+    btn.className = 'class-btn' + (hero.classKey === key ? ' active' : '');
+    btn.innerHTML = `<span class="class-btn-icon">${cls.icon}</span>${cls.job}`;
+    btn.onclick = () => selectCustomHeroJob(key);
+    picker.appendChild(btn);
+  });
+
+  const statsEl = document.getElementById('custom-stat-list');
+  statsEl.innerHTML = '';
+  Object.entries(CUSTOM_HERO_STAT_UPGRADES).forEach(([key, cfg]) => {
+    const row = document.createElement('div');
+    row.className = 'custom-stat-row';
+    row.innerHTML = `
+      <span>${cfg.label}</span>
+      <strong>${card[key]}</strong>
+      <button onclick="upgradeCustomHeroStat('${key}')">+</button>`;
+    statsEl.appendChild(row);
+  });
+
+  document.getElementById('custom-card-summary').textContent =
+    `${card.skillDesc}。${card.passiveDesc}。訓練費用：${getCustomHeroLevelCost()} 精華；加點費用：${getCustomHeroStatCost()} 精華。`;
+}
+
+function selectCustomHeroJob(classKey) {
+  if (!CUSTOM_HERO_CLASSES[classKey]) return;
+  G.customHero.classKey = classKey;
+  syncCustomHeroCard();
+  saveGame();
+  renderCustomHeroScreen();
+  showToast(`已切換為${CUSTOM_HERO_CLASSES[classKey].job}`);
+}
+
+function getCustomHeroStatCost() {
+  const spent = Object.values(G.customHero?.spent || {}).reduce((sum, n) => sum + n, 0);
+  return 25 + spent * 5;
+}
+
+function getCustomHeroLevelCost() {
+  return 80 + (G.customHero.level - 1) * 40;
+}
+
+function upgradeCustomHeroStat(statKey) {
+  migrateGameState();
+  if (!CUSTOM_HERO_STAT_UPGRADES[statKey]) return;
+  if (G.customHero.points <= 0) {
+    showToast('強化點數不足，請先等級訓練');
+    return;
+  }
+  const cost = getCustomHeroStatCost();
+  if (G.player.essence < cost) {
+    showToast('💎 精華不足');
+    return;
+  }
+  G.player.essence -= cost;
+  G.customHero.points--;
+  G.customHero.spent[statKey] = (G.customHero.spent[statKey] || 0) + 1;
+  syncCustomHeroCard();
+  saveGame();
+  renderCustomHeroScreen();
+}
+
+function levelUpCustomHero() {
+  migrateGameState();
+  const cost = getCustomHeroLevelCost();
+  if (G.player.essence < cost) {
+    showToast('💎 精華不足');
+    return;
+  }
+  G.player.essence -= cost;
+  G.customHero.level++;
+  G.customHero.points += 2;
+  syncCustomHeroCard();
+  saveGame();
+  renderCustomHeroScreen();
+  showToast(`自訂角色提升到 Lv.${G.customHero.level}`);
+}
+
+function addCustomHeroToDeck() {
+  migrateGameState();
+  if (!G.deck.includes(CUSTOM_HERO_ID)) {
+    if (G.deck.length >= 30) {
+      showToast('牌組已達30張上限');
+      return;
+    }
+    G.deck.push(CUSTOM_HERO_ID);
+    saveGame();
+    showToast('自訂角色已加入牌組');
+  } else {
+    showToast('自訂角色已在牌組中');
+  }
+}
 
 // ============================================================
 // 大廳
@@ -4186,6 +4538,7 @@ function renderStageScreen() {
   selectedStageForStart = null;
   document.getElementById('chapter-selection-view').style.display = 'block';
   document.getElementById('stage-list-view').style.display = 'none';
+  document.getElementById('event-tower-panel').style.display = 'none';
   document.getElementById('stage-screen-title').textContent = '選擇章節';
   document.getElementById('stage-back-btn').onclick = () => showScreen('hub');
 
@@ -4246,12 +4599,38 @@ function enterChapter(chapter) {
   document.getElementById('stage-back-btn').onclick = () => renderStageScreen();
 
   // 渲染關卡列表
+  document.getElementById('event-tower-panel').style.display = 'none';
+  document.getElementById('stage-start-panel').style.display = 'flex';
+
   if (chapter.type === 'boss') {
     renderBossRaidList();
+  } else if (chapter.type === 'event') {
+    renderEventDungeonList();
   } else {
     renderChapterStageList(chapter);
   }
   renderSelectedStagePanel();
+}
+
+function renderEventDungeonList() {
+  document.getElementById('stage-list-main').innerHTML = '';
+  document.getElementById('stage-start-panel').style.display = 'none';
+  const panel = document.getElementById('event-tower-panel');
+  panel.style.display = 'flex';
+  panel.innerHTML = `
+    <div>
+      <div class="tower-panel-title">🗼 無限塔 · 100 波防衛</div>
+      <div class="tower-panel-desc">
+        主堡位於 9×9 中央，怪物從四角每 60 秒追加一波。卡牌戰死會回到手牌，能量足夠即可再次召喚。
+        最高紀錄：第 ${G.eventTowerBestWave || 0} 波
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="startEventTower()">開始活動副本</button>`;
+}
+
+function startEventTower() {
+  lastStageChapter = CHAPTERS.find(c => c.type === 'event') || lastStageChapter;
+  startBattle(EVENT_TOWER_STAGE.id, false, 'tower');
 }
 
 // v0.3：渲染章節的關卡列表
@@ -4363,12 +4742,16 @@ function getChapterForStage(stageId, isBossRaid = false) {
 // ============================================================
 // 戰鬥系統
 // ============================================================
-function startBattle(stageId, isBossRaid = false) {
-  lastStageChapter = getChapterForStage(stageId, isBossRaid);
+function startBattle(stageId, isBossRaid = false, battleMode = 'normal') {
+  lastStageChapter = battleMode === 'tower'
+    ? (CHAPTERS.find(c => c.type === 'event') || lastStageChapter)
+    : getChapterForStage(stageId, isBossRaid);
   let stage;
   let raid = null;
 
-  if (isBossRaid) {
+  if (battleMode === 'tower') {
+    stage = { ...EVENT_TOWER_STAGE };
+  } else if (isBossRaid) {
     // v0.3：BOSS 副本模式
     raid = BOSS_RAIDS.find(r => r.id === stageId);
     if (!raid) return;
@@ -4391,9 +4774,11 @@ function startBattle(stageId, isBossRaid = false) {
   // G.player.stamina--;
   saveGame();
 
-  B = createBattleState(stage, raid);
+  B = createBattleState(stage, raid, battleMode);
   showScreen('battle');
   setupBattlefield();
+  const modeInfo = document.getElementById('battle-mode-info');
+  if (modeInfo) modeInfo.textContent = B.isEventTower ? '無限塔  第 1/100 波' : '';
   renderHand();
   renderEnergy();
 
@@ -4418,7 +4803,7 @@ function startBattle(stageId, isBossRaid = false) {
   startBattleLoop();
 }
 
-function createBattleState(stage, raid = null) {
+function createBattleState(stage, raid = null, battleMode = 'normal') {
   const state = {
     stage,
     units: [],
@@ -4446,6 +4831,15 @@ function createBattleState(stage, raid = null) {
     isBossRaid: !!raid,
     bossRaid: raid,
     bossOccupiedCells: [],  // BOSS 佔據的格子
+    battleMode,
+    isEventTower: battleMode === 'tower',
+    tower: battleMode === 'tower' ? {
+      wave: 0,
+      maxWave: window.__PLAYWRIGHT_TEST__ ? 3 : 100,
+      interval: window.__PLAYWRIGHT_TEST__ ? 5000 : 60000,
+      nextWaveAt: 0,
+      spawnPoints: [{x:0,y:0},{x:8,y:0},{x:0,y:8},{x:8,y:8}],
+    } : null,
   };
 
   // 洗牌
@@ -4459,19 +4853,27 @@ function createBattleState(stage, raid = null) {
 
   // v0.2：放我方主堡（靜態建築，永不移動）
   // v0.7.3：9×9 戰場，主堡在下方中央 (4,8)
+  const myFortressPos = state.isEventTower ? {x:4, y:4} : {x:4, y:8};
+  const myFortressHp = state.isEventTower ? 600 : 100;
+  state.myCommander = { hp: myFortressHp, maxHp: myFortressHp };
   state.units.push(makeUnit('cmdr_my', {
     id:'fortress',
     name:'我方主堡',
     icon:'🏰',
-    hp:100,
+    hp: myFortressHp,
     patk:0, matk:0, pdef:0, mdef:0,
     spd:0, acc:0, crit:0, critDmg:100,
     range:0, move:0,
     skillType:'none',
     color:'#2a4a8a'
-  }, 4, 8, true, true));
+  }, myFortressPos.x, myFortressPos.y, true, true));
 
-  if (raid) {
+  if (state.isEventTower) {
+    state.enemyCommander.hp = 999999;
+    state.enemyCommander.maxHp = 999999;
+    spawnTowerWave(state);
+    state.tower.nextWaveAt = state.tower.interval;
+  } else if (raid) {
     // v0.3：BOSS 副本模式 - 無敵方主堡，創建 BOSS
     createBoss(state, raid.boss, raid.bossPosition);
   } else {
@@ -4513,7 +4915,9 @@ function createBattleState(stage, raid = null) {
   usedIdxs.forEach(idx => state.deck.splice(idx, 1));
 
   // v0.7.3：9×9 戰場開場位置（我方中下 3×3 區域）
-  const startPositions = [ {x:3,y:7}, {x:4,y:7}, {x:5,y:7} ];
+  const startPositions = state.isEventTower
+    ? [ {x:3,y:4}, {x:5,y:4}, {x:4,y:3}, {x:4,y:5} ]
+    : [ {x:3,y:7}, {x:4,y:7}, {x:5,y:7} ];
   startCards.forEach((sc, i) => {
     const pos = startPositions[i];
     const u = makeUnit('my' + state.unitIdCounter++, CARD_DB[sc.cardId], pos.x, pos.y, true, false);
@@ -4613,14 +5017,21 @@ function setupBattlefield() {
       const cell = document.createElement('div');
       cell.id = `cell-${col}-${row}`;
       cell.className = 'cell';
-      // v0.7.3：陣地改為中上 3×3 和中下 3×3
-      // 我方陣地：中下 3×3（x=3~5, y=6~8）
-      if (col >= 3 && col <= 5 && row >= 6) cell.classList.add('my-zone');
-      // 敵方陣地：中上 3×3（x=3~5, y=0~2）
-      else if (col >= 3 && col <= 5 && row <= 2) cell.classList.add('enemy-zone');
-      else cell.classList.add('neutral-zone');
-      // 主堡位置：我方 (4,8) 下方中央、敵方 (4,0) 上方中央
-      if ((col === 4 && row === 8) || (col === 4 && row === 0)) cell.classList.add('commander-cell');
+      if (B.isEventTower) {
+        if (col >= 3 && col <= 5 && row >= 3 && row <= 5) cell.classList.add('my-zone');
+        else if ((col === 0 || col === 8) && (row === 0 || row === 8)) cell.classList.add('enemy-zone');
+        else cell.classList.add('neutral-zone');
+        if (col === 4 && row === 4) cell.classList.add('commander-cell');
+      } else {
+        // v0.7.3：陣地改為中上 3×3 和中下 3×3
+        // 我方陣地：中下 3×3（x=3~5, y=6~8）
+        if (col >= 3 && col <= 5 && row >= 6) cell.classList.add('my-zone');
+        // 敵方陣地：中上 3×3（x=3~5, y=0~2）
+        else if (col >= 3 && col <= 5 && row <= 2) cell.classList.add('enemy-zone');
+        else cell.classList.add('neutral-zone');
+        // 主堡位置：我方 (4,8) 下方中央、敵方 (4,0) 上方中央
+        if ((col === 4 && row === 8) || (col === 4 && row === 0)) cell.classList.add('commander-cell');
+      }
 
       // v0.2：渲染障礙物
       if (B.obstacles) {
@@ -4766,7 +5177,7 @@ function startBattleLoop() {
       updateTimer();
 
       // v0.7：平局判定改為 10 分鐘（遊戲時間）
-      if (B.timer > 600000) { endBattle('draw'); return; }
+      if (!B.isEventTower && B.timer > 600000) { endBattle('draw'); return; }
 
       // v0.6.2：能量恢復使用真實時間（不受倍速影響）
       B.energyTimer += rawDt;
@@ -4779,6 +5190,7 @@ function startBattleLoop() {
 
       // AI 打牌
       aiPlayCard();
+      updateTowerWaves();
 
       // v0.8.5：攻擊速度與移動速度分開計算。
       // atkSpd 控制在射程內的出手頻率；moveSpd 控制不在射程時的走位頻率。
@@ -4811,7 +5223,12 @@ function startBattleLoop() {
       // v0.3：勝負判定（支持 BOSS 副本模式）
       if (B.myCommander.hp <= 0) { endBattle('lose'); return; }
 
-      if (B.isBossRaid) {
+      if (B.isEventTower) {
+        if (B.tower.wave >= B.tower.maxWave && !B.units.some(u => u.alive && !u.isMy)) {
+          endBattle('win');
+          return;
+        }
+      } else if (B.isBossRaid) {
         // BOSS 副本模式：擊敗 BOSS 獲勝
         const boss = B.units.find(u => u.isBoss && u.alive);
         if (!boss || boss.hp <= 0) {
@@ -4838,6 +5255,68 @@ function startBattleLoop() {
     }
   }
   B.animFrameId = requestAnimationFrame(loop);
+}
+
+function updateTowerWaves() {
+  if (!B || !B.isEventTower || !B.tower) return;
+  while (B.tower.wave < B.tower.maxWave && B.timer >= B.tower.nextWaveAt) {
+    spawnTowerWave(B);
+    B.tower.nextWaveAt += B.tower.interval;
+  }
+  const info = document.getElementById('battle-mode-info');
+  if (info) {
+    const next = B.tower.wave >= B.tower.maxWave
+      ? '最後波次'
+      : `${Math.max(0, Math.ceil((B.tower.nextWaveAt - B.timer) / 1000))} 秒後下一波`;
+    info.textContent = `無限塔  第 ${B.tower.wave}/${B.tower.maxWave} 波  ${next}`;
+  }
+  G.eventTowerBestWave = Math.max(G.eventTowerBestWave || 0, B.tower.wave);
+}
+
+function spawnTowerWave(state) {
+  if (!state || !state.tower || state.tower.wave >= state.tower.maxWave) return;
+  state.tower.wave++;
+  const wave = state.tower.wave;
+  const monsterIds = ['warrior', 'archer', 'assassin', 'mage', 'tank'];
+  const count = Math.min(4 + Math.floor(wave / 5), 14);
+  for (let i = 0; i < count; i++) {
+    const point = state.tower.spawnPoints[i % state.tower.spawnPoints.length];
+    const free = findFreeTowerSpawnCell(state, point.x, point.y);
+    if (!free) continue;
+    const base = CARD_DB[monsterIds[(wave + i) % monsterIds.length]];
+    const template = {
+      ...base,
+      id:`tower-${base.id}`,
+      name:`塔影${base.name}`,
+      hp:Math.round(base.hp * (1 + wave * 0.08)),
+      patk:Math.round(base.patk * (1 + wave * 0.055)),
+      matk:Math.round(base.matk * (1 + wave * 0.055)),
+      pdef:Math.round(base.pdef * (1 + wave * 0.035)),
+      mdef:Math.round(base.mdef * (1 + wave * 0.035)),
+      spd:Math.min(115, (base.spd || 60) + Math.floor(wave / 8)),
+      cost:0,
+    };
+    const unit = makeUnit(`tw${wave}-${i}-${state.unitIdCounter++}`, template, free.x, free.y, false, false);
+    state.units.push(unit);
+    if (state === B) placeUnit(unit);
+  }
+  if (state === B) {
+    showToast(`無限塔 第 ${wave} 波來襲`);
+  }
+}
+
+function findFreeTowerSpawnCell(state, x, y) {
+  const candidates = [
+    {x,y},
+    {x: x === 0 ? 1 : 7, y},
+    {x, y: y === 0 ? 1 : 7},
+    {x: x === 0 ? 1 : 7, y: y === 0 ? 1 : 7},
+  ];
+  return candidates.find(pos =>
+    pos.x >= 0 && pos.x <= 8 && pos.y >= 0 && pos.y <= 8 &&
+    !(pos.x === 4 && pos.y === 4) &&
+    !state.units.some(u => u.alive && u.x === pos.x && u.y === pos.y)
+  ) || null;
 }
 
 // ============================================================
@@ -5152,14 +5631,22 @@ function killUnit(unit) {
   unit.alive = false;
   unit.hp = 0;
   removeUnitEl(unit);
+  if (B && B.isEventTower && unit.isMy && !unit.isCommander && !unit.isSummon && unit.cardId) {
+    B.hand.push(unit.cardId);
+    renderHand();
+    showToast(`${unit.name} 戰死，已回到手牌`);
+  }
 }
 
 // v0.2：檢查某格是否可通行（邊界、指揮官格、障礙物、其他單位）
 function isCellWalkable(x, y, u) {
   // v0.7.3：9×9 戰場邊界檢查
   if (x < 0 || x > 8 || y < 0 || y > 8) return false;
-  // 主堡位置：(4,8) 我方和 (4,0) 敵方
-  if (!u.isCommander && ((x===4&&y===8)||(x===4&&y===0))) return false;
+  // 主堡位置
+  if (!u.isCommander) {
+    if (B.isEventTower && x === 4 && y === 4) return false;
+    if (!B.isEventTower && ((x===4&&y===8)||(x===4&&y===0))) return false;
+  }
   // v0.2：檢查障礙物
   if (B.obstacles && B.obstacles.some(obs => obs.x === x && obs.y === y)) return false;
   // v0.3：檢查 BOSS 佔據的格子
@@ -5351,6 +5838,13 @@ function moveUnitTo(u, nx, ny) {
 }
 
 function findFreeCell(isMy) {
+  if (B.isEventTower && isMy) {
+    const spots = [
+      {x:3,y:4},{x:5,y:4},{x:4,y:3},{x:4,y:5},
+      {x:3,y:3},{x:5,y:3},{x:3,y:5},{x:5,y:5}
+    ];
+    return spots.find(pos => !B.units.some(u=>u.alive&&u.x===pos.x&&u.y===pos.y)) || null;
+  }
   // v0.7.3：9×9 戰場
   // 我方陣地：中下 3×3（x=3~5, y=6~8）
   // 敵方陣地：中上 3×3（x=3~5, y=0~2）
@@ -5623,6 +6117,9 @@ function endBattle(result) {
 
   if (isWin) { G.player.wins++; G.stageCleared[B.stage.id] = true; }
   else if (!isDraw) G.player.losses++;
+  if (B.isEventTower && B.tower) {
+    G.eventTowerBestWave = Math.max(G.eventTowerBestWave || 0, B.tower.wave || 0);
+  }
 
   const reward = isWin ? B.stage.reward : { gold: Math.floor(B.stage.reward.gold * 0.2), essence: 0 };
 
@@ -5973,6 +6470,7 @@ function renderCanvas(dt) {
 let tempDeck = [];
 
 function getCardMaxCopies(card) {
+  if (card?.isCustomHero) return 1;
   return card.cardType === 'hero' ? 1 : 3;
 }
 
@@ -6250,7 +6748,7 @@ function renderShopScreen() {
 }
 
 function isPurchasableCard(card) {
-  return card && (card.cardType === 'unit' || card.cardType === 'hero') && !card.isBoss && !card.isSummon && (card.cost || 0) > 0;
+  return card && (card.cardType === 'unit' || card.cardType === 'hero') && !card.isBoss && !card.isSummon && !card.isCustomHero && (card.cost || 0) > 0;
 }
 
 function buyCard(cardId, price) {

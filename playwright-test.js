@@ -85,6 +85,8 @@ async function runTests() {
     await runSplitSpeedRegression(page);
     await runStageStartFlowRegression(page);
     await runBattleControlsRegression(page);
+    await runCustomHeroRegression(page);
+    await runEventTowerRegression(page);
 
     // 運行所有測試
     for (let i = 1; i <= CONFIG.rounds; i++) {
@@ -414,6 +416,106 @@ async function runBattleControlsRegression(page) {
   }
 
   console.log('✅ 戰鬥控制列回歸測試通過\n');
+}
+
+async function runCustomHeroRegression(page) {
+  console.log('🧪 自訂角色回歸測試...');
+  await resetGameForRegression(page);
+
+  const result = await page.evaluate(() => {
+    showScreen('custom');
+    const beforeClass = G.customHero.classKey;
+    selectCustomHeroJob('mage');
+    const cardAfterClass = CARD_DB[CUSTOM_HERO_ID];
+
+    G.player.essence = 999;
+    const beforeLevel = G.customHero.level;
+    levelUpCustomHero();
+    upgradeCustomHeroStat('matk');
+    addCustomHeroToDeck();
+
+    startBattle('1-1');
+    B.autoPlay = false;
+    B.energy = 10;
+    B.hand.unshift(CUSTOM_HERO_ID);
+    playCardById(CUSTOM_HERO_ID);
+    const customUnit = B.units.find(u => u.cardId === CUSTOM_HERO_ID);
+
+    return {
+      beforeClass,
+      classKey: G.customHero.classKey,
+      job: cardAfterClass.job,
+      cost: cardAfterClass.cost,
+      level: G.customHero.level,
+      points: G.customHero.points,
+      owned: G.collection[CUSTOM_HERO_ID],
+      deckCopies: G.deck.filter(id => id === CUSTOM_HERO_ID).length,
+      customUnit: customUnit ? { name: customUnit.name, isMy: customUnit.isMy, matk: customUnit.matk } : null,
+      screenActive: document.getElementById('screen-custom')?.classList.contains('active'),
+    };
+  });
+
+  if (result.classKey !== 'mage' || result.job !== '法師') {
+    throw new Error(`自訂角色職業切換失敗: ${JSON.stringify(result)}`);
+  }
+  if (result.cost <= 0 || result.owned !== 1 || result.deckCopies !== 1) {
+    throw new Error(`自訂角色卡牌資料異常: ${JSON.stringify(result)}`);
+  }
+  if (result.level <= 1 || !result.customUnit || !result.customUnit.isMy) {
+    throw new Error(`自訂角色沒有升級或沒有參戰: ${JSON.stringify(result)}`);
+  }
+
+  console.log('✅ 自訂角色回歸測試通過\n');
+}
+
+async function runEventTowerRegression(page) {
+  console.log('🧪 活動副本無限塔回歸測試...');
+  await resetGameForRegression(page);
+
+  const result = await page.evaluate(() => {
+    showScreen('stage');
+    const eventChapter = [...document.querySelectorAll('.chapter-card')]
+      .find(card => card.textContent.includes('活動副本'));
+    eventChapter?.click();
+    const panelVisible = document.getElementById('event-tower-panel')?.style.display !== 'none';
+    startEventTower();
+
+    const commander = B.units.find(u => u.isMy && u.isCommander);
+    const initialWave = B.tower.wave;
+    B.timer = B.tower.interval;
+    updateTowerWaves();
+
+    const myUnit = B.units.find(u => u.isMy && !u.isCommander && !u.isSummon);
+    const beforeHand = B.hand.length;
+    if (myUnit) killUnit(myUnit);
+
+    return {
+      panelVisible,
+      isTower: B.isEventTower,
+      commanderPos: commander ? { x: commander.x, y: commander.y, hp: commander.maxHp } : null,
+      initialWave,
+      waveAfterTick: B.tower.wave,
+      enemies: B.units.filter(u => u.alive && !u.isMy).length,
+      handReturned: B.hand.length > beforeHand,
+      handHasDeadCard: myUnit ? B.hand.includes(myUnit.cardId) : false,
+      bestWave: G.eventTowerBestWave,
+    };
+  });
+
+  if (!result.panelVisible || !result.isTower) {
+    throw new Error(`無限塔入口或模式未啟動: ${JSON.stringify(result)}`);
+  }
+  if (!result.commanderPos || result.commanderPos.x !== 4 || result.commanderPos.y !== 4 || result.commanderPos.hp < 500) {
+    throw new Error(`無限塔主堡沒有在中央或血量異常: ${JSON.stringify(result)}`);
+  }
+  if (result.initialWave < 1 || result.waveAfterTick <= result.initialWave || result.enemies === 0) {
+    throw new Error(`無限塔波次沒有正確追加: ${JSON.stringify(result)}`);
+  }
+  if (!result.handReturned || !result.handHasDeadCard) {
+    throw new Error(`無限塔我方戰死未回手牌: ${JSON.stringify(result)}`);
+  }
+
+  console.log('✅ 活動副本無限塔回歸測試通過\n');
 }
 
 // 單次測試

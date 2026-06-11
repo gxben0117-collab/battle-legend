@@ -4001,6 +4001,8 @@ function placeUnit(u) {
 }
 
 function updateUnitBar(u) {
+  if (!u || !u.uid) return; // v0.8.1：安全檢查
+
   const hpEl = document.getElementById('uhp-' + u.uid);
   const shieldEl = document.getElementById('ushield-' + u.uid);
   const atbEl = document.getElementById('uatb-' + u.uid);
@@ -4045,59 +4047,67 @@ function removeUnitEl(u) {
 function startBattleLoop() {
   B.lastTime = performance.now();
   function loop(now) {
-    if (!B || !B.running) return;
-    const rawDt = Math.min(now - B.lastTime, 100);
-    B.lastTime = now;
-    const dt = rawDt * B.speed;
+    try {
+      if (!B || !B.running) return;
+      const rawDt = Math.min(now - B.lastTime, 100);
+      B.lastTime = now;
+      const dt = rawDt * B.speed;
 
-    B.timer += rawDt;
-    updateTimer();
+      B.timer += rawDt;
+      updateTimer();
 
-    // v0.7：平局判定改為 10 分鐘
-    if (B.timer > 600000) { endBattle('draw'); return; }
+      // v0.7：平局判定改為 10 分鐘
+      if (B.timer > 600000) { endBattle('draw'); return; }
 
-    // v0.6.2：能量恢復使用真實時間（不受倍速影響）
-    B.energyTimer += rawDt;
-    while (B.energyTimer >= B.energyRate && B.energy < B.maxEnergy) {
-      B.energy++;
-      B.energyTimer -= B.energyRate;
-    }
-    // 每幀更新能量顯示（包含倒數計時）
-    renderEnergy();
-
-    // AI 打牌
-    aiPlayCard();
-
-    // v0.7：ATB 更新（增加速度以提高出招頻率）
-    B.units.filter(u => u.alive).forEach(u => {
-      u.atb += u.spd * dt / 1000 * 3;  // 從 ×2 增加到 ×3
-      if (u.skillCd > 0) u.skillCd -= dt;
-      if (u.atb >= u.maxAtb) {
-        u.atb = 0;
-        unitAction(u);
+      // v0.6.2：能量恢復使用真實時間（不受倍速影響）
+      B.energyTimer += rawDt;
+      while (B.energyTimer >= B.energyRate && B.energy < B.maxEnergy) {
+        B.energy++;
+        B.energyTimer -= B.energyRate;
       }
-      updateUnitBar(u);
-    });
+      // 每幀更新能量顯示（包含倒數計時）
+      renderEnergy();
 
-    // Canvas 特效
-    renderCanvas(dt);
+      // AI 打牌
+      aiPlayCard();
 
-    // v0.3：勝負判定（支持 BOSS 副本模式）
-    if (B.myCommander.hp <= 0) { endBattle('lose'); return; }
+      // v0.7：ATB 更新（增加速度以提高出招頻率）
+      B.units.filter(u => u.alive).forEach(u => {
+        u.atb += u.spd * dt / 1000 * 3;  // 從 ×2 增加到 ×3
+        if (u.skillCd > 0) u.skillCd -= dt;
+        if (u.atb >= u.maxAtb) {
+          u.atb = 0;
+          unitAction(u);
+        }
+        updateUnitBar(u);
+      });
 
-    if (B.isBossRaid) {
-      // BOSS 副本模式：擊敗 BOSS 獲勝
-      const boss = B.units.find(u => u.isBoss && u.alive);
-      if (!boss || boss.hp <= 0) {
-        endBattle('win');
-        return;
+      // Canvas 特效
+      renderCanvas(dt);
+
+      // v0.3：勝負判定（支持 BOSS 副本模式）
+      if (B.myCommander.hp <= 0) { endBattle('lose'); return; }
+
+      if (B.isBossRaid) {
+        // BOSS 副本模式：擊敗 BOSS 獲勝
+        const boss = B.units.find(u => u.isBoss && u.alive);
+        if (!boss || boss.hp <= 0) {
+          endBattle('win');
+          return;
+        }
+      } else {
+        // 普通戰鬥：摧毀敵方主堡獲勝
+        if (B.enemyCommander.hp <= 0) { endBattle('win'); return; }
       }
-    } else {
-      // 普通戰鬥：摧毀敵方主堡獲勝
-      if (B.enemyCommander.hp <= 0) { endBattle('win'); return; }
-    }
 
-    B.animFrameId = requestAnimationFrame(loop);
+      B.animFrameId = requestAnimationFrame(loop);
+    } catch (error) {
+      // v0.8.1：捕獲戰鬥循環錯誤
+      console.error('戰鬥循環錯誤:', error);
+      console.error('錯誤堆疊:', error.stack);
+      alert('戰鬥發生錯誤: ' + error.message + '\n請按 F12 查看控制台');
+      B.running = false;
+    }
   }
   B.animFrameId = requestAnimationFrame(loop);
 }
@@ -4715,6 +4725,8 @@ function updateTimer() {
 }
 
 function renderEnergy() {
+  if (!B) return; // v0.8.1：安全檢查
+
   // v0.7.4：新佈局 - 更新能量顯示
   const energyEl = document.getElementById('energy');
   if (energyEl) {
@@ -4991,8 +5003,19 @@ function showMagicBolt(fromX, fromY, toX, toY) {
 // ============================================================
 // Canvas 特效
 // ============================================================
-function getCanvas() { return document.getElementById('battleCanvas'); }
-function getCtx() { return getCanvas().getContext('2d'); }
+function getCanvas() {
+  const canvas = document.getElementById('battleCanvas');
+  if (!canvas) {
+    console.error('Canvas 元素不存在');
+  }
+  return canvas;
+}
+
+function getCtx() {
+  const canvas = getCanvas();
+  if (!canvas) return null;
+  return canvas.getContext('2d');
+}
 
 function getCellCenter(x, y) {
   const bf = document.getElementById('battlefield');
@@ -5070,7 +5093,11 @@ function spawnHitParticle(target) {
 function renderCanvas(dt) {
   if (!B) return;
   const canvas = getCanvas();
+  if (!canvas) return; // v0.8.1：安全檢查
+
   const ctx = getCtx();
+  if (!ctx) return; // v0.8.1：安全檢查
+
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   const dtSec = dt / 1000;
 

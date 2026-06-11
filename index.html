@@ -3682,11 +3682,13 @@ function startBattle(stageId, isBossRaid = false) {
     B.autoPlay = true;
     document.getElementById('btn-auto').classList.add('active');
     document.getElementById('btn-manual').classList.remove('active');
+    renderHand(); // v0.8.4：重新渲染手牌以更新點擊事件
   };
   document.getElementById('btn-manual').onclick = () => {
     B.autoPlay = false;
     document.getElementById('btn-manual').classList.add('active');
     document.getElementById('btn-auto').classList.remove('active');
+    renderHand(); // v0.8.4：重新渲染手牌以綁定點擊事件
   };
   document.getElementById('btn-speed-1').onclick = () => setSpeed(1);
   document.getElementById('btn-speed-2').onclick = () => setSpeed(2);

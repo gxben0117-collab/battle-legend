@@ -4621,7 +4621,8 @@ function renderEventDungeonList() {
     <div>
       <div class="tower-panel-title">🗼 無限塔 · 100 波防衛</div>
       <div class="tower-panel-desc">
-        主堡位於 9×9 中央，怪物從四角每 60 秒追加一波。卡牌戰死會回到手牌，能量足夠即可再次召喚。
+        主堡位於 9×9 中央，怪物從四角每 60 秒追加一波。卡牌戰死會回到手牌，能量足夠即可再次召喚。<br>
+        <span style="color:var(--gold-bright)">✨ 前3波為簡單模式（怪物數量減半）</span><br>
         最高紀錄：第 ${G.eventTowerBestWave || 0} 波
       </div>
     </div>
@@ -5277,8 +5278,19 @@ function spawnTowerWave(state) {
   if (!state || !state.tower || state.tower.wave >= state.tower.maxWave) return;
   state.tower.wave++;
   const wave = state.tower.wave;
+
+  // v0.9：前3波怪物數量減半（新手友善機制）
+  const isEasyWave = wave <= 3;
   const monsterIds = ['warrior', 'archer', 'assassin', 'mage', 'tank'];
-  const count = Math.min(4 + Math.floor(wave / 5), 14);
+  let baseCount = Math.min(4 + Math.floor(wave / 5), 14);
+
+  // 前3波：怪物數量減半（最少1隻）
+  if (isEasyWave) {
+    baseCount = Math.max(1, Math.floor(baseCount / 2));
+  }
+
+  const count = baseCount;
+
   for (let i = 0; i < count; i++) {
     const point = state.tower.spawnPoints[i % state.tower.spawnPoints.length];
     const free = findFreeTowerSpawnCell(state, point.x, point.y);
@@ -5301,7 +5313,8 @@ function spawnTowerWave(state) {
     if (state === B) placeUnit(unit);
   }
   if (state === B) {
-    showToast(`無限塔 第 ${wave} 波來襲`);
+    const waveLabel = isEasyWave ? `無限塔 第 ${wave} 波來襲 [簡單模式]` : `無限塔 第 ${wave} 波來襲`;
+    showToast(waveLabel);
   }
 }
 

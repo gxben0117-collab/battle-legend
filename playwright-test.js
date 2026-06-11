@@ -96,14 +96,21 @@ async function runSingleTest(page, testNum) {
     });
     await page.waitForTimeout(500);
 
-    // 2. 點擊第一關
-    const stage1Button = await page.$('text=1-1');
-    if (stage1Button) {
-      await stage1Button.click();
-      await page.waitForTimeout(2000); // 等待戰鬥初始化
-    } else {
-      throw new Error('找不到 1-1 關卡按鈕');
-    }
+    // 2. 直接調用 startStage 進入關卡
+    await page.evaluate(() => {
+      if (typeof startStage === 'function' && typeof STAGES !== 'undefined') {
+        const stage = STAGES['1-1'];
+        if (stage) {
+          startStage(stage);
+        } else {
+          throw new Error('STAGES["1-1"] 不存在');
+        }
+      } else {
+        throw new Error('startStage 或 STAGES 未定義');
+      }
+    });
+
+    await page.waitForTimeout(2000); // 等待戰鬥初始化
 
     // 3. 等待戰鬥狀態初始化
     await page.waitForFunction(() => {

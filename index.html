@@ -420,6 +420,25 @@ body {
   flex-shrink: 0;
 }
 
+/* v0.8.3：留空區域（原計時器位置） */
+.battle-top-spacer {
+  background: transparent;
+  border-bottom: none;
+  /* 保持高度但透明 */
+}
+
+/* v0.8.3：戰場下方區域（計時器和血量條） */
+.battle-bottom {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .commander-bar {
   display: flex;
   align-items: center;
@@ -2332,25 +2351,9 @@ body {
 
 <!-- 戰鬥畫面 -->
 <div id="screen-battle" class="screen">
-  <div class="battle-top">
-    <div class="commander-bar">
-      <span class="commander-label">🏰 我方主堡</span>
-      <div class="hp-bar-wrap">
-        <div class="hp-bar-fill" id="my-hp-bar" style="width:100%"></div>
-        <span class="hp-text" id="my-hp-text">100/100</span>
-      </div>
-    </div>
-    <div class="battle-info">
-      <div class="battle-timer" id="battle-timer">00:00</div>
-      <div class="battle-round" id="battle-round">ROUND 1</div>
-    </div>
-    <div class="commander-bar">
-      <div class="hp-bar-wrap">
-        <div class="hp-bar-fill enemy" id="enemy-hp-bar" style="width:100%"></div>
-        <span class="hp-text" id="enemy-hp-text">100/100</span>
-      </div>
-      <span class="commander-label">🚩 敵方主堡</span>
-    </div>
+  <!-- v0.8.3：原計時器位置 - 保留留空 -->
+  <div class="battle-top battle-top-spacer">
+    <!-- 留空區域 -->
   </div>
 
   <!-- v0.7.4：新佈局 - 左中右三欄 -->
@@ -2365,6 +2368,28 @@ body {
       <canvas id="battleCanvas"></canvas>
       <div class="battlefield" id="battlefield"></div>
       <div class="speed-indicator" id="speed-indicator" style="display:none">⚡ 1×</div>
+
+      <!-- v0.8.3：計時器和血量條移到戰場下方 -->
+      <div class="battle-bottom">
+        <div class="commander-bar">
+          <span class="commander-label">🏰 我方主堡</span>
+          <div class="hp-bar-wrap">
+            <div class="hp-bar-fill" id="my-hp-bar" style="width:100%"></div>
+            <span class="hp-text" id="my-hp-text">100/100</span>
+          </div>
+        </div>
+        <div class="battle-info">
+          <div class="battle-timer" id="battle-timer">00:00</div>
+          <div class="battle-round" id="battle-round">ROUND 1</div>
+        </div>
+        <div class="commander-bar">
+          <div class="hp-bar-wrap">
+            <div class="hp-bar-fill enemy" id="enemy-hp-bar" style="width:100%"></div>
+            <span class="hp-text" id="enemy-hp-text">100/100</span>
+          </div>
+          <span class="commander-label">🚩 敵方主堡</span>
+        </div>
+      </div>
     </div>
 
     <!-- 右側：能量+控制 -->

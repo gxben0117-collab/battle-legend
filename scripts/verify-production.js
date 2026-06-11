@@ -51,6 +51,10 @@ assertIncludes(indexHtml, 'atkSpd: template.atkSpd || template.spd', 'attack spe
 assertIncludes(indexHtml, 'moveSpd: template.moveSpd ||', 'movement speed stat');
 assertIncludes(indexHtml, 'function findTargetForAction', 'target helper for split speed');
 assertIncludes(indexHtml, 'function isTargetInRange', 'range helper for split speed');
+assertIncludes(indexHtml, 'function startSelectedStage', 'stage start button handler');
+assertIncludes(indexHtml, 'stage-start-panel', 'stage start panel');
+assertIncludes(indexHtml, "exitBattle('stage')", 'reward returns to stage menu');
+assertIncludes(indexHtml, 'btn-speed-5', '5x speed button');
 assertIncludes(indexHtml, 'G.player.gold -= price;', 'single-card purchase gold deduction');
 assertIncludes(indexHtml, 'G.player.gold -= cost;', 'pack or upgrade gold deduction');
 assertIncludes(testScript, 'pathToFileURL', 'local file test target');
@@ -59,6 +63,8 @@ assertIncludes(testScript, 'runShopPurchaseRegression', 'shop purchase regressio
 assertIncludes(testScript, 'runDeckAutoBuildRegression', 'deck auto-build regression');
 assertIncludes(testScript, 'runCardCostRegression', 'card cost regression');
 assertIncludes(testScript, 'runSplitSpeedRegression', 'split speed regression');
+assertIncludes(testScript, 'runStageStartFlowRegression', 'stage start flow regression');
+assertIncludes(testScript, 'runBattleControlsRegression', 'battle controls regression');
 
 assertNotIncludes(indexHtml, 'const SYNERGIES', 'removed synergy table');
 assertNotIncludes(indexHtml, 'applySynergies();', 'removed synergy startup call');

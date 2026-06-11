@@ -83,6 +83,8 @@ async function runTests() {
     await runDeckAutoBuildRegression(page);
     await runCardCostRegression(page);
     await runSplitSpeedRegression(page);
+    await runStageStartFlowRegression(page);
+    await runBattleControlsRegression(page);
 
     // 運行所有測試
     for (let i = 1; i <= CONFIG.rounds; i++) {
@@ -332,6 +334,86 @@ async function runSplitSpeedRegression(page) {
   }
 
   console.log('✅ 移動速度 / 攻擊速度分離回歸測試通過\n');
+}
+
+async function runStageStartFlowRegression(page) {
+  console.log('🧪 關卡開始與結算返回回歸測試...');
+  await resetGameForRegression(page);
+
+  const result = await page.evaluate(() => {
+    showScreen('stage');
+    const firstChapter = document.querySelector('.chapter-card:not(.locked)');
+    firstChapter?.click();
+
+    const startButtonBefore = document.getElementById('btn-start-selected-stage');
+    const disabledBeforeSelect = startButtonBefore?.disabled;
+    const firstStage = document.querySelector('#stage-list-main .stage-item:not(.locked)');
+    firstStage?.click();
+
+    const selectedTitle = document.getElementById('stage-selected-title')?.textContent || '';
+    const startButtonAfter = document.getElementById('btn-start-selected-stage');
+    const enabledAfterSelect = startButtonAfter && !startButtonAfter.disabled;
+    startButtonAfter?.click();
+
+    const battleStarted = !!B && B.running === true && document.getElementById('screen-battle')?.classList.contains('active');
+    endBattle('win');
+    collectReward();
+
+    return {
+      disabledBeforeSelect,
+      selectedTitle,
+      enabledAfterSelect,
+      battleStarted,
+      returnedToStage: document.getElementById('screen-stage')?.classList.contains('active'),
+      stageListVisible: document.getElementById('stage-list-view')?.style.display === 'block',
+      title: document.getElementById('stage-screen-title')?.textContent || '',
+    };
+  });
+
+  if (!result.disabledBeforeSelect) {
+    throw new Error('未選關卡時開始戰鬥按鈕應該停用');
+  }
+  if (!result.selectedTitle.includes('1-1') || !result.enabledAfterSelect) {
+    throw new Error(`選取關卡後開始戰鬥按鈕未啟用: ${JSON.stringify(result)}`);
+  }
+  if (!result.battleStarted) {
+    throw new Error('點擊開始戰鬥後沒有進入戰鬥');
+  }
+  if (!result.returnedToStage || !result.stageListVisible) {
+    throw new Error(`領獎後沒有返回關卡列表: ${JSON.stringify(result)}`);
+  }
+
+  console.log('✅ 關卡開始與結算返回回歸測試通過\n');
+}
+
+async function runBattleControlsRegression(page) {
+  console.log('🧪 戰鬥控制列回歸測試...');
+  await resetGameForRegression(page);
+
+  const result = await page.evaluate(() => {
+    startBattle('1-1');
+    const speedLabels = [...document.querySelectorAll('.speed-controls .speed-btn')].map(btn => btn.textContent.trim());
+    document.getElementById('btn-speed-5')?.click();
+    const controlsParentClass = document.querySelector('.battle-right')?.parentElement?.className || '';
+    return {
+      speedLabels,
+      speed: B.speed,
+      btn5Active: document.getElementById('btn-speed-5')?.classList.contains('active'),
+      controlsInsideBattleMain: controlsParentClass.includes('battle-main'),
+    };
+  });
+
+  if (result.speedLabels.join(',') !== '1×,3×,5×') {
+    throw new Error(`倍速按鈕應為 1×/3×/5×: ${result.speedLabels.join(',')}`);
+  }
+  if (result.speed !== 5 || !result.btn5Active) {
+    throw new Error('5× 倍速按鈕未正確設定戰鬥速度');
+  }
+  if (!result.controlsInsideBattleMain) {
+    throw new Error('戰鬥控制列沒有放在 9×9 地圖區下方');
+  }
+
+  console.log('✅ 戰鬥控制列回歸測試通過\n');
 }
 
 // 單次測試

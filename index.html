@@ -271,6 +271,34 @@ body {
   cursor: pointer;
   transition: all 0.15s;
 }
+.stage-item.selected {
+  border-color: rgba(240,200,74,0.78);
+  background: rgba(240,200,74,0.11);
+  box-shadow: 0 0 0 1px rgba(240,200,74,0.24), 0 18px 36px rgba(0,0,0,0.28);
+}
+.stage-start-panel {
+  max-width: 600px;
+  margin-top: 14px;
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  box-shadow: 0 18px 44px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.08);
+  backdrop-filter: blur(18px);
+}
+.stage-start-title {
+  font-weight: 800;
+  color: var(--text-white);
+  margin-bottom: 5px;
+}
+.stage-start-desc {
+  font-size: 12px;
+  color: var(--text-dim);
+}
 .stage-item:hover { background: var(--bg-hover); border-color: var(--border-gold); }
 .stage-item.locked { opacity: 0.4; cursor: not-allowed; }
 .stage-num { font-size: 11px; color: var(--text-dim); width: 28px; }
@@ -533,17 +561,20 @@ body {
 .battle-main {
   flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 18px;
   position: relative;
   overflow: hidden;
 }
 
 /* 右側：能量+控制 */
 .battle-right {
-  width: 160px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
   gap: 12px;
   flex-shrink: 0;
 }
@@ -619,7 +650,6 @@ body {
 
 .control-buttons {
   display: flex;
-  flex-direction: column;
   gap: 6px;
 }
 
@@ -703,7 +733,7 @@ body {
 
 .speed-controls {
   display: flex;
-  gap: 4px;
+  gap: 8px;
 }
 
 .speed-btn {
@@ -2669,7 +2699,7 @@ body {
 
 .battle-content {
   display: grid;
-  grid-template-columns: 252px minmax(620px, 1fr) 190px;
+  grid-template-columns: 252px minmax(620px, 1fr);
   gap: 22px;
   padding: 24px;
   align-items: stretch;
@@ -2696,6 +2726,7 @@ body {
 }
 
 .battle-left::before { content: 'HAND / ENERGY'; }
+.battle-right::before { content: none; }
 
 .battle-main {
   border-radius: 30px;
@@ -2704,6 +2735,33 @@ body {
     linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
   border: 1px solid rgba(255,255,255,0.10);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 34px 90px rgba(0,0,0,0.44);
+  padding: 28px;
+}
+
+.battle-right {
+  width: min(760px, 100%);
+  min-height: 74px;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 22px;
+}
+
+.battle-right .control-buttons {
+  flex-direction: row;
+}
+
+.battle-right .ctrl-btn {
+  min-width: 126px;
+}
+
+.battle-right .speed-controls {
+  min-width: 210px;
+}
+
+.battle-right .retreat-btn {
+  min-width: 126px;
 }
 
 .battle-main::before {
@@ -2870,7 +2928,7 @@ body {
     min-height: 420px;
   }
   .battle-content {
-    grid-template-columns: 220px minmax(600px, 1fr) 170px;
+    grid-template-columns: 220px minmax(600px, 1fr);
     padding: 16px;
     gap: 14px;
   }
@@ -3008,6 +3066,13 @@ body {
     <!-- v0.3：關卡列表視圖（點擊章節後顯示）-->
     <div id="stage-list-view" style="display:none;">
       <div class="stage-list" id="stage-list-main" style="max-width:600px;"></div>
+      <div class="stage-start-panel" id="stage-start-panel">
+        <div>
+          <div class="stage-start-title" id="stage-selected-title">尚未選擇關卡</div>
+          <div class="stage-start-desc" id="stage-selected-desc">請先從上方列表選擇一個關卡</div>
+        </div>
+        <button class="btn btn-primary" id="btn-start-selected-stage" onclick="startSelectedStage()" disabled>開始戰鬥</button>
+      </div>
     </div>
   </div>
 </div>
@@ -3043,20 +3108,19 @@ body {
       <canvas id="battleCanvas"></canvas>
       <div class="battlefield" id="battlefield"></div>
       <div class="speed-indicator" id="speed-indicator" style="display:none">⚡ 1×</div>
-    </div>
-
-    <!-- 右側：控制按鈕（移除能量顯示） -->
-    <div class="battle-right">
+      <!-- 地圖下方：戰鬥控制 -->
+      <div class="battle-right">
       <div class="control-buttons">
         <button id="btn-auto" class="ctrl-btn">🤖 自動</button>
         <button id="btn-manual" class="ctrl-btn active">👆 手動</button>
       </div>
       <div class="speed-controls">
         <button id="btn-speed-1" class="speed-btn active">1×</button>
-        <button id="btn-speed-2" class="speed-btn">2×</button>
         <button id="btn-speed-3" class="speed-btn">3×</button>
+        <button id="btn-speed-5" class="speed-btn">5×</button>
       </div>
       <button id="btn-retreat" class="retreat-btn">🏳️ 撤退</button>
+      </div>
     </div>
   </div>
 </div>
@@ -3921,6 +3985,8 @@ const CELL_GAP = 2;   // 格子間距
 
 // v0.3：當前選擇的章節
 let currentChapter = null;
+let lastStageChapter = null;
+let selectedStageForStart = null;
 
 // v0.4：裝備數據庫
 const EQUIPMENT_DB = {
@@ -4117,6 +4183,7 @@ function renderStageListHub() {
 function renderStageScreen() {
   // 重置為章節選擇視圖
   currentChapter = null;
+  selectedStageForStart = null;
   document.getElementById('chapter-selection-view').style.display = 'block';
   document.getElementById('stage-list-view').style.display = 'none';
   document.getElementById('stage-screen-title').textContent = '選擇章節';
@@ -4169,6 +4236,8 @@ function renderChapterSelection() {
 // v0.3：進入章節（顯示關卡列表）
 function enterChapter(chapter) {
   currentChapter = chapter;
+  lastStageChapter = chapter;
+  selectedStageForStart = null;
 
   // 切換視圖
   document.getElementById('chapter-selection-view').style.display = 'none';
@@ -4182,6 +4251,7 @@ function enterChapter(chapter) {
   } else {
     renderChapterStageList(chapter);
   }
+  renderSelectedStagePanel();
 }
 
 // v0.3：渲染章節的關卡列表
@@ -4212,10 +4282,7 @@ function renderChapterStageList(chapter) {
       <span class="stage-stars">${cleared ? '★★★' : ''}</span>`;
 
     if (!locked) {
-      div.onclick = () => {
-        showScreen('hub');
-        startBattle(s.id);
-      };
+      div.onclick = () => selectStageForStart({ id: s.id, name: s.name, type: s.type, reward: s.reward, isBossRaid: false });
     }
 
     el.appendChild(div);
@@ -4244,10 +4311,7 @@ function renderBossRaidList() {
       <span class="stage-stars">${locked ? '🔒' : ''}</span>`;
 
     if (!locked) {
-      div.onclick = () => {
-        showScreen('hub');
-        startBattle(raid.id, true);
-      };
+      div.onclick = () => selectStageForStart({ id: raid.id, name: raid.name, type: 'Boss', reward: raid.reward, isBossRaid: true });
       div.style.background = 'linear-gradient(135deg, #2a0a0e 0%, #4a1018 100%)';
       div.style.borderColor = '#cc2233';
     }
@@ -4256,10 +4320,51 @@ function renderBossRaidList() {
   });
 }
 
+function selectStageForStart(stageInfo) {
+  selectedStageForStart = stageInfo;
+  document.querySelectorAll('#stage-list-main .stage-item').forEach(item => item.classList.remove('selected'));
+  const items = Array.from(document.querySelectorAll('#stage-list-main .stage-item'));
+  const selectedItem = items.find(item => item.textContent.includes(stageInfo.id) || item.textContent.includes(stageInfo.name));
+  if (selectedItem) selectedItem.classList.add('selected');
+  renderSelectedStagePanel();
+}
+
+function renderSelectedStagePanel() {
+  const titleEl = document.getElementById('stage-selected-title');
+  const descEl = document.getElementById('stage-selected-desc');
+  const btn = document.getElementById('btn-start-selected-stage');
+  if (!titleEl || !descEl || !btn) return;
+
+  if (!selectedStageForStart) {
+    titleEl.textContent = '尚未選擇關卡';
+    descEl.textContent = '請先從上方列表選擇一個關卡';
+    btn.disabled = true;
+    return;
+  }
+
+  titleEl.textContent = `${selectedStageForStart.id} · ${selectedStageForStart.name}`;
+  descEl.textContent = `[${selectedStageForStart.type}] 獎勵 💰${selectedStageForStart.reward.gold} / 💎${selectedStageForStart.reward.essence}`;
+  btn.disabled = false;
+}
+
+function startSelectedStage() {
+  if (!selectedStageForStart) {
+    showToast('請先選擇關卡');
+    return;
+  }
+  startBattle(selectedStageForStart.id, selectedStageForStart.isBossRaid);
+}
+
+function getChapterForStage(stageId, isBossRaid = false) {
+  if (isBossRaid) return CHAPTERS.find(c => c.type === 'boss') || lastStageChapter;
+  return CHAPTERS.find(c => c.stagePrefix && stageId.startsWith(c.stagePrefix)) || lastStageChapter;
+}
+
 // ============================================================
 // 戰鬥系統
 // ============================================================
 function startBattle(stageId, isBossRaid = false) {
+  lastStageChapter = getChapterForStage(stageId, isBossRaid);
   let stage;
   let raid = null;
 
@@ -4306,8 +4411,8 @@ function startBattle(stageId, isBossRaid = false) {
     renderHand(); // v0.8.4：重新渲染手牌以綁定點擊事件
   };
   document.getElementById('btn-speed-1').onclick = () => setSpeed(1);
-  document.getElementById('btn-speed-2').onclick = () => setSpeed(2);
   document.getElementById('btn-speed-3').onclick = () => setSpeed(3);
+  document.getElementById('btn-speed-5').onclick = () => setSpeed(5);
   document.getElementById('btn-retreat').onclick = () => exitBattle();
 
   startBattleLoop();
@@ -5471,7 +5576,7 @@ function setTactic(t) {
 function setSpeed(n) {
   B.speed = n;
   // v0.7.4：支援新舊兩種按鈕 ID
-  [1, 2, 3, 4].forEach(v => {
+  [1, 2, 3, 4, 5].forEach(v => {
     const oldBtn = document.getElementById('spd-' + v);
     if (oldBtn) oldBtn.classList.toggle('active', v === n);
     const newBtn = document.getElementById('btn-speed-' + v);
@@ -5536,14 +5641,19 @@ function endBattle(result) {
 
 function collectReward() {
   document.getElementById('screen-result').classList.remove('show');
-  exitBattle();
+  exitBattle('stage');
 }
 
-function exitBattle() {
-  B.running = false;
+function exitBattle(destination = 'hub') {
+  if (B) B.running = false;
   if (B && B.animFrameId) cancelAnimationFrame(B.animFrameId);
   B = null;
-  showScreen('hub');
+  if (destination === 'stage' && lastStageChapter) {
+    showScreen('stage');
+    enterChapter(lastStageChapter);
+  } else {
+    showScreen('hub');
+  }
 }
 
 // ============================================================

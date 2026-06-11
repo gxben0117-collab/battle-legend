@@ -3272,6 +3272,10 @@ let G = {
 // 戰鬥狀態
 let B = null;
 
+// v0.8.1：戰場格子大小常量（全局）
+const CELL_SIZE = 64; // 9×9 戰場格子大小
+const CELL_GAP = 2;   // 格子間距
+
 // v0.3：當前選擇的章節
 let currentChapter = null;
 
@@ -3979,16 +3983,15 @@ function placeUnit(u) {
   }
 
   // v0.3：修復 - 直接使用格子坐標計算位置，不依賴 getBoundingClientRect
-  const cellSize = 64; // v0.7.4：9×9 戰場格子大小（左右佈局可以更大）
   const borderSize = 1; // 格子邊框
-  let left = u.x * (cellSize + borderSize) + 3; // +3 居中調整
-  let top = u.y * (cellSize + borderSize) + 3;
+  let left = u.x * (CELL_SIZE + borderSize) + 3; // +3 居中調整
+  let top = u.y * (CELL_SIZE + borderSize) + 3;
 
   // v0.3：BOSS 佔據 4×4，放大顯示
   if (u.isBoss && u.bossSize) {
     const size = u.bossSize;
-    el.style.width = (cellSize * size + borderSize * (size - 1)) + 'px';
-    el.style.height = (cellSize * size + borderSize * (size - 1)) + 'px';
+    el.style.width = (CELL_SIZE * size + borderSize * (size - 1)) + 'px';
+    el.style.height = (CELL_SIZE * size + borderSize * (size - 1)) + 'px';
     el.style.fontSize = '80px'; // 放大圖示
     el.style.zIndex = '15'; // 提高層級
   }
@@ -4394,8 +4397,8 @@ function applyDamage(unit, dmg, isCrit = false) {
 // v0.7.4：顯示浮動傷害數字
 function showFloatingDamage(unit, dmg, isCrit = false) {
   const mainRect = document.querySelector('.battle-main').getBoundingClientRect();
-  const unitX = unit.x * (cellSize + 2) + cellSize / 2;
-  const unitY = unit.y * (cellSize + 2) + cellSize / 2;
+  const unitX = unit.x * (CELL_SIZE + 2) + CELL_SIZE / 2;
+  const unitY = unit.y * (CELL_SIZE + 2) + CELL_SIZE / 2;
 
   const div = document.createElement('div');
   div.className = 'damage-float' + (isCrit ? ' crit' : '');
@@ -5022,11 +5025,10 @@ function getCellCenter(x, y) {
   if (!bf) return {x:0,y:0};
   const bfRect = bf.getBoundingClientRect();
   const mainRect = document.querySelector('.battle-main').getBoundingClientRect();
-  const cellSize = 64; // v0.7.4：與戰場格子大小一致
   const gap = 2; // 格子間距
   return {
-    x: (bfRect.left - mainRect.left) + x * (cellSize + gap) + cellSize / 2,
-    y: (bfRect.top - mainRect.top) + y * (cellSize + gap) + cellSize / 2,
+    x: (bfRect.left - mainRect.left) + x * (CELL_SIZE + gap) + CELL_SIZE / 2,
+    y: (bfRect.top - mainRect.top) + y * (CELL_SIZE + gap) + CELL_SIZE / 2,
   };
 }
 

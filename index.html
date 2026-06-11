@@ -4081,10 +4081,11 @@ function startBattleLoop() {
       B.lastTime = now;
       const dt = rawDt * B.speed;
 
-      B.timer += rawDt;
+      // v0.8.3：計時器受倍速影響
+      B.timer += dt;
       updateTimer();
 
-      // v0.7：平局判定改為 10 分鐘
+      // v0.7：平局判定改為 10 分鐘（遊戲時間）
       if (B.timer > 600000) { endBattle('draw'); return; }
 
       // v0.6.2：能量恢復使用真實時間（不受倍速影響）

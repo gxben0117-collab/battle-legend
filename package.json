@@ -1,0 +1,12 @@
+{
+  "name": "battle-legend-test",
+  "version": "1.0.0",
+  "description": "戰棋傳說自動化測試",
+  "scripts": {
+    "test": "node playwright-test.js",
+    "install-browser": "npx playwright install chromium"
+  },
+  "dependencies": {
+    "playwright": "^1.40.0"
+  }
+}

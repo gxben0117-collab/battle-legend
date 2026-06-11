@@ -510,24 +510,73 @@ body {
   flex-shrink: 0;
 }
 
+/* v0.8.0：精美化能量顯示 */
 .energy-display {
-  background: var(--bg-panel);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 12px;
+  background: linear-gradient(145deg,
+    rgba(28, 34, 53, 0.95) 0%,
+    rgba(22, 27, 42, 0.98) 100%);
+  border: 2px solid var(--energy-blue);
+  border-radius: 8px;
+  padding: 16px;
   text-align: center;
+
+  /* 發光效果 */
+  box-shadow:
+    0 0 20px rgba(52, 152, 219, 0.3),
+    inset 0 1px 0 rgba(255,255,255,0.1),
+    inset 0 -1px 0 rgba(0,0,0,0.3);
+
+  /* 脈衝動畫 */
+  animation: energy-pulse 2s ease-in-out infinite;
+}
+
+@keyframes energy-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 20px rgba(52, 152, 219, 0.3),
+      inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+  50% {
+    box-shadow:
+      0 0 30px rgba(52, 152, 219, 0.5),
+      inset 0 1px 0 rgba(255,255,255,0.2);
+  }
 }
 
 .energy-label {
   font-size: 11px;
   color: var(--text-dim);
-  margin-bottom: 4px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .energy-value {
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 32px;
+  font-weight: 900;
   color: var(--energy-blue);
+
+  /* 發光文字效果 */
+  text-shadow:
+    0 0 10px rgba(52, 152, 219, 0.8),
+    0 0 20px rgba(52, 152, 219, 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.8);
+
+  /* 數字跳動動畫 */
+  animation: energy-value-glow 2s ease-in-out infinite;
+}
+
+@keyframes energy-value-glow {
+  0%, 100% {
+    text-shadow:
+      0 0 10px rgba(52, 152, 219, 0.8),
+      0 0 20px rgba(52, 152, 219, 0.4);
+  }
+  50% {
+    text-shadow:
+      0 0 20px rgba(52, 152, 219, 1),
+      0 0 40px rgba(52, 152, 219, 0.6);
+  }
 }
 
 .control-buttons {
@@ -536,20 +585,76 @@ body {
   gap: 6px;
 }
 
+/* v0.8.0：精美化控制按鈕 */
 .ctrl-btn {
-  padding: 10px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 4px;
+  padding: 12px;
+  background: linear-gradient(145deg,
+    rgba(28, 34, 53, 0.9) 0%,
+    rgba(22, 27, 42, 0.95) 100%);
+  border: 2px solid var(--border);
+  border-radius: 6px;
   color: var(--text-white);
   cursor: pointer;
   font-size: 13px;
-  transition: all 0.2s;
+  font-weight: 600;
+  transition: all 0.3s ease-out;
+
+  /* 立體感 */
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.3),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+
+  position: relative;
+  overflow: hidden;
+}
+
+/* 按鈕光效背景 */
+.ctrl-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255,255,255,0.1) 50%,
+    transparent 100%);
+  transition: left 0.5s;
 }
 
 .ctrl-btn:hover {
-  background: var(--bg-panel);
+  background: linear-gradient(145deg,
+    rgba(52, 152, 219, 0.2) 0%,
+    rgba(41, 128, 185, 0.25) 100%);
   border-color: var(--energy-blue);
+  transform: translateY(-2px);
+  box-shadow:
+    0 4px 8px rgba(0,0,0,0.4),
+    0 0 15px rgba(52, 152, 219, 0.4);
+}
+
+.ctrl-btn:hover::before {
+  left: 100%;
+}
+
+.ctrl-btn:active {
+  transform: translateY(0);
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.3),
+    inset 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.ctrl-btn.active {
+  background: linear-gradient(145deg,
+    rgba(52, 152, 219, 0.4) 0%,
+    rgba(41, 128, 185, 0.5) 100%);
+  border-color: var(--energy-blue);
+  box-shadow:
+    0 0 20px rgba(52, 152, 219, 0.5),
+    inset 0 0 10px rgba(52, 152, 219, 0.3);
+  color: #fff;
+}
 }
 
 .ctrl-btn.active {
@@ -699,10 +804,20 @@ body {
   /* v0.2.3：平滑移動動畫 */
   transition: left 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
               top 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-              transform 0.12s;
+              transform 0.15s ease-out;
   overflow: visible;
   /* 角落剪裁感 */
   clip-path: polygon(6px 0%, 100% 0%, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0% 100%, 0% 6px);
+
+  /* v0.8.0：懸停互動效果 */
+  cursor: pointer;
+}
+
+/* v0.8.0：懸停放大和發光 */
+.unit:hover {
+  transform: scale(1.1);
+  z-index: 100;
+  transition: transform 0.2s ease-out;
 }
 
 /* 我方：藍色系，左上角三角標、外發光 */
@@ -713,6 +828,33 @@ body {
     0 0 0 1px rgba(58,127,255,0.3),
     0 0 10px rgba(58,127,255,0.25),
     inset 0 1px 0 rgba(100,160,255,0.2);
+
+  /* v0.8.0：藍色光環動畫 */
+  animation: my-unit-aura 3s ease-in-out infinite;
+}
+
+@keyframes my-unit-aura {
+  0%, 100% {
+    box-shadow:
+      0 0 0 1px rgba(58,127,255,0.3),
+      0 0 10px rgba(58,127,255,0.4),
+      0 0 20px rgba(58,127,255,0.2),
+      inset 0 1px 0 rgba(100,160,255,0.2);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(58,127,255,0.5),
+      0 0 15px rgba(58,127,255,0.6),
+      0 0 30px rgba(58,127,255,0.3),
+      inset 0 1px 0 rgba(100,160,255,0.3);
+  }
+}
+
+.unit.my-unit:hover {
+  box-shadow:
+    0 0 0 2px rgba(58,127,255,0.8),
+    0 0 20px rgba(58,127,255,0.8),
+    0 0 40px rgba(58,127,255,0.5);
 }
 .unit.my-unit::before {
   content: '';
@@ -741,6 +883,33 @@ body {
     0 0 0 1px rgba(204,34,51,0.3),
     0 0 10px rgba(204,34,51,0.25),
     inset 0 1px 0 rgba(255,80,80,0.15);
+
+  /* v0.8.0：紅色光環動畫 */
+  animation: enemy-unit-aura 3s ease-in-out infinite;
+}
+
+@keyframes enemy-unit-aura {
+  0%, 100% {
+    box-shadow:
+      0 0 0 1px rgba(204,34,51,0.3),
+      0 0 10px rgba(204,34,51,0.4),
+      0 0 20px rgba(204,34,51,0.2),
+      inset 0 1px 0 rgba(255,80,80,0.15);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(204,34,51,0.5),
+      0 0 15px rgba(204,34,51,0.6),
+      0 0 30px rgba(204,34,51,0.3),
+      inset 0 1px 0 rgba(255,80,80,0.25);
+  }
+}
+
+.unit.enemy-unit:hover {
+  box-shadow:
+    0 0 0 2px rgba(204,34,51,0.8),
+    0 0 20px rgba(204,34,51,0.8),
+    0 0 40px rgba(204,34,51,0.5);
 }
 .unit.enemy-unit::before {
   content: '';
@@ -775,7 +944,91 @@ body {
   border-color: var(--border-gold) transparent transparent transparent !important;
 }
 
-.unit-icon { font-size: 28px; line-height: 1; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8)); }
+/* v0.8.0：精美化圖標系統 */
+.unit-icon {
+  font-size: 28px;
+  line-height: 1;
+  position: relative;
+  display: inline-block;
+
+  /* 多層陰影增強立體感 */
+  filter:
+    drop-shadow(0 0 8px currentColor)
+    drop-shadow(0 0 4px rgba(255,215,0,0.6))
+    drop-shadow(0 3px 6px rgba(0,0,0,0.8));
+
+  /* 發光動畫 */
+  animation: icon-glow 3s ease-in-out infinite;
+}
+
+@keyframes icon-glow {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 8px currentColor)
+      drop-shadow(0 0 4px rgba(255,215,0,0.6))
+      drop-shadow(0 3px 6px rgba(0,0,0,0.8));
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 16px currentColor)
+      drop-shadow(0 0 10px rgba(255,215,0,0.9))
+      drop-shadow(0 3px 6px rgba(0,0,0,0.8));
+  }
+}
+
+/* 單位圖標裝飾邊框 */
+.unit-icon::before {
+  content: '⬡';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 48px;
+  z-index: -1;
+  opacity: 0.5;
+  animation: frame-rotate 6s linear infinite;
+}
+
+@keyframes frame-rotate {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* 我方單位 - 藍色光環 */
+.my-unit .unit-icon::before {
+  color: rgba(100, 150, 255, 0.6);
+  text-shadow: 0 0 15px rgba(100, 150, 255, 0.8);
+}
+
+/* 敵方單位 - 紅色光環 */
+.enemy-unit .unit-icon::before {
+  color: rgba(255, 100, 100, 0.6);
+  text-shadow: 0 0 15px rgba(255, 100, 100, 0.8);
+}
+
+/* 指揮官單位 - 金色光環 */
+.commander-unit .unit-icon::before {
+  color: rgba(255, 215, 0, 0.8);
+  text-shadow: 0 0 20px rgba(255, 215, 0, 1);
+  font-size: 56px;
+}
+
+/* 稀有度標記（右上角星星） */
+.unit-icon::after {
+  content: '✦';
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  font-size: 10px;
+  color: #ffd700;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 1);
+  animation: star-twinkle 2s ease-in-out infinite;
+}
+
+@keyframes star-twinkle {
+  0%, 100% { opacity: 0.8; transform: scale(1) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1.2) rotate(180deg); }
+}
 .unit-name {
   font-size: 7px;
   font-weight: 700;
@@ -833,7 +1086,66 @@ body {
 }
 .unit.boss-unit .unit-icon {
   font-size: 80px;
-  filter: drop-shadow(0 0 10px rgba(255,50,50,0.8));
+
+  /* v0.8.0：BOSS 超強發光效果 */
+  filter:
+    drop-shadow(0 0 20px rgba(255,50,50,1))
+    drop-shadow(0 0 40px rgba(255,50,50,0.8))
+    drop-shadow(0 0 60px rgba(255,0,100,0.6))
+    drop-shadow(0 4px 8px rgba(0,0,0,0.9));
+
+  animation: boss-icon-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes boss-icon-glow {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 20px rgba(255,50,50,1))
+      drop-shadow(0 0 40px rgba(255,50,50,0.8))
+      drop-shadow(0 0 60px rgba(255,0,100,0.6));
+    transform: scale(1);
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 30px rgba(255,50,50,1))
+      drop-shadow(0 0 60px rgba(255,50,50,1))
+      drop-shadow(0 0 90px rgba(255,0,100,0.8));
+    transform: scale(1.05);
+  }
+}
+
+/* BOSS 圖標邊框 - 雙重六角形 */
+.unit.boss-unit .unit-icon::before {
+  content: '⬢';
+  font-size: 120px;
+  color: rgba(255, 0, 100, 0.8);
+  text-shadow: 0 0 30px rgba(255, 0, 100, 1);
+  animation: boss-frame-pulse 2s ease-in-out infinite;
+}
+
+@keyframes boss-frame-pulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(180deg) scale(1.1);
+  }
+}
+
+/* BOSS 皇冠標記 */
+.unit.boss-unit .unit-icon::after {
+  content: '👑';
+  font-size: 20px;
+  top: -15px;
+  right: -10px;
+  animation: crown-float 3s ease-in-out infinite;
+}
+
+@keyframes crown-float {
+  0%, 100% { transform: translateY(0) rotate(-10deg); }
+  50% { transform: translateY(-5px) rotate(10deg); }
 }
 .unit.boss-unit .unit-name {
   color: #ff4466;
@@ -1136,31 +1448,128 @@ body {
 .hand-card {
   width: 100%;
   max-width: 180px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 8px;
+  background: linear-gradient(145deg,
+    rgba(28, 34, 53, 0.95) 0%,
+    rgba(22, 27, 42, 0.98) 100%);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
   text-align: center;
-  cursor: default;
-  transition: all 0.15s;
+  cursor: pointer;
+  transition: all 0.3s ease-out;
   position: relative;
   flex-shrink: 0;
+
+  /* v0.8.0：卡片立體感 */
+  box-shadow:
+    0 4px 8px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.1),
+    inset 0 -1px 0 rgba(0,0,0,0.3);
+
+  /* v0.8.0：稀有度光環（默認） */
+  outline: 2px solid transparent;
+  outline-offset: -2px;
 }
-.hand-card:hover { transform: translateX(-4px); border-color: var(--border-gold); }
+
+/* v0.8.0：懸停效果 - 3D 抬起 */
+.hand-card:hover {
+  transform: translateY(-12px) scale(1.05);
+  border-color: var(--border-gold);
+  box-shadow:
+    0 8px 16px rgba(0,0,0,0.6),
+    0 0 20px rgba(200,168,75,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.2);
+  z-index: 10;
+}
+
+/* v0.8.0：稀有度邊框光效 */
+.hand-card[data-rarity="N"] {
+  outline-color: rgba(122,128,144,0.3);
+}
+.hand-card[data-rarity="R"] {
+  outline-color: rgba(74,144,217,0.5);
+  box-shadow:
+    0 4px 8px rgba(0,0,0,0.4),
+    0 0 10px rgba(74,144,217,0.3);
+}
+.hand-card[data-rarity="SR"] {
+  outline-color: rgba(155,89,182,0.6);
+  box-shadow:
+    0 4px 8px rgba(0,0,0,0.4),
+    0 0 15px rgba(155,89,182,0.4);
+}
+.hand-card[data-rarity="SSR"] {
+  outline-color: rgba(243,156,18,0.8);
+  box-shadow:
+    0 4px 8px rgba(0,0,0,0.4),
+    0 0 20px rgba(243,156,18,0.5);
+  animation: ssr-glow 2s ease-in-out infinite;
+}
+
+@keyframes ssr-glow {
+  0%, 100% {
+    outline-color: rgba(243,156,18,0.8);
+    box-shadow:
+      0 4px 8px rgba(0,0,0,0.4),
+      0 0 20px rgba(243,156,18,0.5);
+  }
+  50% {
+    outline-color: rgba(243,156,18,1);
+    box-shadow:
+      0 4px 8px rgba(0,0,0,0.4),
+      0 0 30px rgba(243,156,18,0.8);
+  }
+}
 .hand-card .card-cost {
   position: absolute;
-  top: -8px; right: -8px;
-  width: 20px; height: 20px;
+  top: -10px;
+  right: -10px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  background: var(--energy-blue);
+  background: radial-gradient(circle at 30% 30%,
+    #5ab4ff 0%,
+    var(--energy-blue) 50%,
+    #1e5a8a 100%);
   color: #fff;
-  font-size: 12px;
-  font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-  border: 1px solid #5ab4ff;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  font-size: 14px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #5ab4ff;
+  box-shadow:
+    0 0 10px rgba(58,180,255,0.6),
+    0 3px 6px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.4),
+    inset 0 -1px 0 rgba(0,0,0,0.3);
+
+  /* v0.8.0：水晶發光動畫 */
+  animation: cost-crystal-shine 2s ease-in-out infinite;
 }
-.hand-card .card-icon { font-size: 28px; }
+
+@keyframes cost-crystal-shine {
+  0%, 100% {
+    box-shadow:
+      0 0 10px rgba(58,180,255,0.6),
+      0 3px 6px rgba(0,0,0,0.4);
+  }
+  50% {
+    box-shadow:
+      0 0 20px rgba(58,180,255,0.9),
+      0 3px 6px rgba(0,0,0,0.4);
+  }
+}
+
+.hand-card .card-icon {
+  font-size: 36px;
+  margin: 4px 0;
+
+  /* v0.8.0：卡片圖標發光 */
+  filter:
+    drop-shadow(0 0 8px rgba(255,215,0,0.4))
+    drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+}
 .hand-card .card-name {
   font-size: 11px;
   color: var(--text-silver);
@@ -4340,6 +4749,7 @@ function renderHand() {
     if (!card) return;
     const div = document.createElement('div');
     div.className = `hand-card rarity-${card.rarity}`;
+    div.setAttribute('data-rarity', card.rarity); // v0.8.0：稀有度屬性
 
     // v0.4：能量不足時添加 disabled 樣式
     const canPlay = card.cost <= B.energy;

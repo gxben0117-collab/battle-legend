@@ -775,7 +775,7 @@ body {
   border-color: var(--border-gold) transparent transparent transparent !important;
 }
 
-.unit-icon { font-size: 20px; line-height: 1; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8)); }
+.unit-icon { font-size: 28px; line-height: 1; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8)); }
 .unit-name {
   font-size: 7px;
   font-weight: 700;
@@ -793,12 +793,12 @@ body {
   position: absolute;
   top: 2px;
   right: 2px;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   color: #fff;
   text-shadow: 0 0 3px rgba(0,0,0,0.8), 0 1px 2px rgba(0,0,0,0.5);
   background: rgba(0,0,0,0.5);
-  padding: 1px 3px;
+  padding: 2px 4px;
   border-radius: 2px;
   line-height: 1;
   z-index: 5;
@@ -944,6 +944,61 @@ body {
   100% { opacity: 0; transform: translate(-50%, -50%) rotate(45deg) scale(0.8); }
 }
 
+/* v0.7.4：浮動傷害數字 */
+.damage-float {
+  position: absolute;
+  font-size: 20px;
+  font-weight: 900;
+  color: #ff4444;
+  text-shadow:
+    0 0 8px rgba(255, 68, 68, 0.8),
+    0 2px 4px rgba(0, 0, 0, 0.8),
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
+  pointer-events: none;
+  z-index: 100;
+  animation: damage-float-up 1s ease-out forwards;
+}
+
+.damage-float.heal {
+  color: #44ff88;
+  text-shadow:
+    0 0 8px rgba(68, 255, 136, 0.8),
+    0 2px 4px rgba(0, 0, 0, 0.8),
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
+}
+
+.damage-float.crit {
+  font-size: 26px;
+  color: #ffcc00;
+  text-shadow:
+    0 0 12px rgba(255, 204, 0, 1),
+    0 2px 4px rgba(0, 0, 0, 0.8),
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
+}
+
+@keyframes damage-float-up {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(0.5);
+  }
+  20% {
+    transform: translateY(-10px) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.8);
+  }
+}
+
 /* v0.2：護盾條（疊在 HP 條上方） */
 .unit-shield-bar {
   position: absolute;
@@ -1079,18 +1134,19 @@ body {
 }
 
 .hand-card {
-  width: 68px;
+  width: 100%;
+  max-width: 180px;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 4px;
-  padding: 6px;
+  padding: 8px;
   text-align: center;
   cursor: default;
   transition: all 0.15s;
   position: relative;
   flex-shrink: 0;
 }
-.hand-card:hover { transform: translateY(-4px); border-color: var(--border-gold); }
+.hand-card:hover { transform: translateX(-4px); border-color: var(--border-gold); }
 .hand-card .card-cost {
   position: absolute;
   top: -8px; right: -8px;
@@ -1104,9 +1160,9 @@ body {
   border: 1px solid #5ab4ff;
   box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
-.hand-card .card-icon { font-size: 22px; }
+.hand-card .card-icon { font-size: 28px; }
 .hand-card .card-name {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-silver);
   margin-top: 4px;
   white-space: nowrap;
@@ -1114,7 +1170,7 @@ body {
   font-weight: 600;
 }
 .hand-card .card-stats {
-  font-size: 9px;
+  font-size: 10px;
   color: var(--text-dim);
   margin-top: 2px;
 }
@@ -3082,19 +3138,13 @@ function renderChapterStageList(chapter) {
   chapterStages.forEach((s, i) => {
     const cleared = G.stageCleared[s.id];
 
-    // v0.6.2：修復跨章節解鎖邏輯
+    // v0.7.4：簡化解鎖邏輯 - 只檢查同章節前一關
     let locked = false;
     if (i > 0) {
       // 同章節內檢查前一關
       locked = !G.stageCleared[chapterStages[i - 1].id];
-    } else {
-      // 章節第一關，檢查上一章最後一關
-      const chapterNum = parseInt(chapter.stagePrefix.split('-')[0]);
-      if (chapterNum > 1) {
-        const prevChapterLastStage = `${chapterNum - 1}-10`;
-        locked = !G.stageCleared[prevChapterLastStage];
-      }
     }
+    // 章節第一關永遠開放（因為章節本身已經檢查解鎖條件了）
 
     const div = document.createElement('div');
     div.className = 'stage-item' + (locked ? ' locked' : '');
@@ -3777,7 +3827,7 @@ function attack(attacker, target) {
   }
 
   dmg = Math.round(dmg);
-  applyDamage(target, dmg);
+  applyDamage(target, dmg, isCrit);
   shakeUnit(target);
 
   // v0.2：物理/魔法傷害數字顏色區分
@@ -3902,9 +3952,13 @@ function executeSkill(u, target, allies, enemies) {
   }
 }
 
-function applyDamage(unit, dmg) {
+function applyDamage(unit, dmg, isCrit = false) {
   if (dmg <= 0) return;
   unit.hp -= dmg;
+
+  // v0.7.4：顯示浮動傷害數字
+  showFloatingDamage(unit, dmg, isCrit);
+
   if (unit.isCommander) {
     if (unit.isMy) {
       B.myCommander.hp = unit.hp;
@@ -3916,6 +3970,23 @@ function applyDamage(unit, dmg) {
   }
   updateUnitBar(unit);
   if (unit.hp <= 0) killUnit(unit);
+}
+
+// v0.7.4：顯示浮動傷害數字
+function showFloatingDamage(unit, dmg, isCrit = false) {
+  const mainRect = document.querySelector('.battle-main').getBoundingClientRect();
+  const unitX = unit.x * (cellSize + 2) + cellSize / 2;
+  const unitY = unit.y * (cellSize + 2) + cellSize / 2;
+
+  const div = document.createElement('div');
+  div.className = 'damage-float' + (isCrit ? ' crit' : '');
+  div.textContent = '-' + Math.round(dmg);
+  div.style.left = unitX + 'px';
+  div.style.top = unitY + 'px';
+
+  document.querySelector('.battle-main').appendChild(div);
+
+  setTimeout(() => div.remove(), 1000);
 }
 
 function killUnit(unit) {

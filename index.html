@@ -7371,7 +7371,7 @@ function selectUpgradeCard(cardId) {
   el.innerHTML = `
     <div class="upgrade-icon">${card.icon}</div>
     <div class="upgrade-name">${card.name}</div>
-    <div class="upgrade-level">Lv.${level} / 30</div>
+    <div class="upgrade-level">Lv.${level} / 50</div>
     <div class="upgrade-stats">
       <div class="upgrade-stat-row"><span class="upgrade-stat-label">HP</span><span><span class="upgrade-stat-val">${card.hp+hpBonus}</span> <span class="upgrade-stat-next">→ ${card.hp+hpBonus+5}</span></span></div>
       <div class="upgrade-stat-row"><span class="upgrade-stat-label">物攻</span><span><span class="upgrade-stat-val">${card.patk+patkBonus}</span> <span class="upgrade-stat-next">→ ${card.patk+patkBonus+2}</span></span></div>
@@ -7387,7 +7387,7 @@ function selectUpgradeCard(cardId) {
 function upgradeCard(cardId) {
   if (!G.cardLevels) G.cardLevels = {};
   const level = G.cardLevels[cardId] || 1;
-  if (level >= 30) { showToast('已達最高等級！'); return; }
+  if (level >= 50) { showToast('已達最高等級！'); return; }
   const cost = level * 50;
   if (G.player.gold < cost) {
     showToast('💰 金幣不足');

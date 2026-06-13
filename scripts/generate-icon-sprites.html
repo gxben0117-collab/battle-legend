@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Icon Sprite Generator</title>
+</head>
+<body>
+<h1>圖標 Sprite 生成器</h1>
+<p>這個工具會把 emoji 轉換成 PNG 圖片</p>
+
+<canvas id="canvas" width="64" height="64" style="border:1px solid #ccc"></canvas>
+<div id="output"></div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const output = document.getElementById('output');
+
+// 卡牌 emoji 映射表
+const iconMap = {
+  'knight': '⚔️',
+  'warrior': '🪓',
+  'archer': '🏹',
+  'mage': '🔮',
+  'assassin': '🗡️',
+  'tank': '🛡️',
+  'priest': '✨',
+  'necro': '💀',
+  'shield-guard': '🛡️',
+  'light-cavalry': '🏇',
+  'sniper': '🎯',
+  'sword-master': '⚔️',
+  'aerial-archer': '🦅',
+  'novice-monk': '📿',
+  'thunder-mage': '⚡',
+  'ice-mage': '❄️',
+  'wind-walker': '🌪️',
+  'inferno-mage': '🔥',
+  'boss-shadow-lord': '👹',
+  'boss-inferno-dragon': '🐉',
+  'berserker': '🪓',
+  'paladin': '⚜️',
+  'ranger': '🏹',
+  'battle-mage': '🔮',
+  'shadow-blade': '🗡️',
+  'frost-knight': '🧊',
+  'oracle': '🔯',
+  'demon-hunter': '😈',
+  'earth-shaman': '🌍',
+  'void-walker': '🌀'
+};
+
+// 特效 emoji
+const effectMap = {
+  'slash': '⚔️',
+  'arrow': '🏹',
+  'magic': '🔥'
+};
+
+function generateIcon(id, emoji) {
+  ctx.clearRect(0, 0, 64, 64);
+
+  // 背景
+  const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gradient.addColorStop(0, 'rgba(30, 40, 60, 0.9)');
+  gradient.addColorStop(1, 'rgba(10, 15, 25, 0.95)');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, 64, 64);
+
+  // Emoji
+  ctx.font = '42px "Segoe UI Emoji", "Apple Color Emoji"';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(emoji, 32, 32);
+
+  // 邊框
+  ctx.strokeStyle = 'rgba(100, 150, 200, 0.3)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(1, 1, 62, 62);
+
+  return canvas.toDataURL('image/png');
+}
+
+// 生成所有圖標
+let html = '<h2>卡牌圖標</h2>';
+for (let [id, emoji] of Object.entries(iconMap)) {
+  const dataUrl = generateIcon(id, emoji);
+  html += `
+    <div style="display:inline-block; margin:10px; text-align:center;">
+      <img src="${dataUrl}" style="width:64px; height:64px;">
+      <div>${id}</div>
+      <a href="${dataUrl}" download="${id}.png">下載</a>
+    </div>
+  `;
+}
+
+html += '<h2>特效圖標</h2>';
+for (let [id, emoji] of Object.entries(effectMap)) {
+  const dataUrl = generateIcon(id, emoji);
+  html += `
+    <div style="display:inline-block; margin:10px; text-align:center;">
+      <img src="${dataUrl}" style="width:64px; height:64px;">
+      <div>${id}</div>
+      <a href="${dataUrl}" download="effect-${id}.png">下載</a>
+    </div>
+  `;
+}
+
+output.innerHTML = html;
+
+console.log('生成完成！可以右鍵點擊每個圖標下載，或使用以下腳本批量下載：');
+console.log('所有圖標已生成，請手動下載到 assets/icons/ 目錄');
+</script>
+</body>
+</html>

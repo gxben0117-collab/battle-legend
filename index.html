@@ -658,6 +658,7 @@ body {
 /* 右側：能量+控制 */
 .battle-right {
   display: flex;
+  width: 200px;
   flex-direction: row;
   align-items: center;
   justify-content: center;
@@ -2785,7 +2786,7 @@ body {
 
 .battle-content {
   display: grid;
-  grid-template-columns: 252px minmax(620px, 1fr);
+  grid-template-columns: 252px 1fr auto;
   gap: 22px;
   padding: 24px;
   align-items: stretch;
@@ -2826,8 +2827,8 @@ body {
 
 .battle-right {
   width: min(760px, 100%);
-  grid-column: 2;
-  justify-self: center;
+  
+  
   min-height: 74px;
   flex-direction: row;
   justify-content: center;
@@ -3016,7 +3017,7 @@ body {
     min-height: 420px;
   }
   .battle-content {
-    grid-template-columns: 220px minmax(600px, 1fr);
+    grid-template-columns: 220px 1fr 200px;
     padding: 16px;
     gap: 14px;
   }

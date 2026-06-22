@@ -17,6 +17,7 @@ desktop.ini
 
 # 日誌文件
 *.log
+artifacts-*.png
 
 # Node modules（如果未來添加構建工具）
 node_modules/

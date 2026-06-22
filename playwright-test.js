@@ -85,6 +85,7 @@ async function runTests() {
     await runSplitSpeedRegression(page);
     await runStageStartFlowRegression(page);
     await runBattleControlsRegression(page);
+    await runBattleUxFeatureRegression(page);
     await runCustomHeroRegression(page);
     await runEventTowerRegression(page);
 
@@ -416,6 +417,68 @@ async function runBattleControlsRegression(page) {
   }
 
   console.log('✅ 戰鬥控制列回歸測試通過\n');
+}
+
+async function runBattleUxFeatureRegression(page) {
+  console.log('Testing battle UX additions...');
+  await resetGameForRegression(page);
+
+  const result = await page.evaluate(async () => {
+    const hasNewCard = !!CARD_DB['field-medic'];
+    const starterHasNewCard = G.deck.includes('field-medic') && G.collection['field-medic'] === 1;
+    const shopHasNewCard = Object.values(CARD_DB).filter(isPurchasableCard).some(card => card.id === 'field-medic');
+
+    startBattle('1-1');
+    const initialLogText = document.getElementById('battle-log')?.textContent || '';
+    const beforeTimer = B.timer;
+    document.getElementById('btn-pause')?.click();
+    const paused = B.paused === true;
+    const pauseButtonText = document.getElementById('btn-pause')?.textContent || '';
+    await new Promise(resolve => setTimeout(resolve, 250));
+    const timerFrozen = B.timer === beforeTimer;
+    document.getElementById('btn-pause')?.click();
+    const resumed = B.paused === false;
+
+    B.autoPlay = false;
+    B.energy = 10;
+    B.hand.unshift('field-medic');
+    playCardById('field-medic');
+    const logText = document.getElementById('battle-log')?.textContent || '';
+    const fieldMedicUnit = B.units.find(unit => unit.cardId === 'field-medic' && unit.isMy);
+    const fieldMedicSprite = fieldMedicUnit
+      ? document.querySelector(`#unit-${fieldMedicUnit.uid} .unit-sprite`)?.getAttribute('src') || ''
+      : '';
+
+    return {
+      hasNewCard,
+      starterHasNewCard,
+      shopHasNewCard,
+      paused,
+      resumed,
+      pauseButtonText,
+      timerFrozen,
+      initialLogText,
+      logText,
+      deployed: !!fieldMedicUnit,
+      spriteCount: document.querySelectorAll('.unit-sprite').length,
+      fieldMedicSprite,
+    };
+  });
+
+  if (!result.hasNewCard || !result.starterHasNewCard || !result.shopHasNewCard) {
+    throw new Error(`Field Medic is not wired into card systems: ${JSON.stringify(result)}`);
+  }
+  if (!result.paused || !result.resumed || result.pauseButtonText !== 'Resume' || !result.timerFrozen) {
+    throw new Error(`Pause/resume did not freeze battle state correctly: ${JSON.stringify(result)}`);
+  }
+  if (!result.initialLogText.includes('Battle started') || !result.logText.includes('Deployed Field Medic') || !result.deployed) {
+    throw new Error(`Battle log or deployment did not update: ${JSON.stringify(result)}`);
+  }
+  if (result.spriteCount === 0 || !result.fieldMedicSprite.includes('assets/units/kenney-roguelike/field-medic.png')) {
+    throw new Error(`Kenney unit sprites did not render: ${JSON.stringify(result)}`);
+  }
+
+  console.log('Battle UX additions passed.\n');
 }
 
 async function runCustomHeroRegression(page) {

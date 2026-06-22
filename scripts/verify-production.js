@@ -55,6 +55,20 @@ assertIncludes(indexHtml, 'function startSelectedStage', 'stage start button han
 assertIncludes(indexHtml, 'stage-start-panel', 'stage start panel');
 assertIncludes(indexHtml, "exitBattle('stage')", 'reward returns to stage menu');
 assertIncludes(indexHtml, 'btn-speed-5', '5x speed button');
+assertIncludes(indexHtml, 'btn-pause', 'pause button');
+assertIncludes(indexHtml, 'battle-log', 'battle event log');
+assertIncludes(indexHtml, 'function toggleBattlePause', 'pause/resume handler');
+assertIncludes(indexHtml, "'field-medic'", 'field medic card');
+assertIncludes(indexHtml, 'unit-job-badge', 'unit job badge');
+assertIncludes(indexHtml, 'battle-alert', 'battle alert presentation');
+assertIncludes(indexHtml, 'function shakeBattlefield', 'battle impact shake');
+assertIncludes(indexHtml, 'impactRing', 'impact ring particle');
+assertIncludes(indexHtml, 'UNIT_SPRITE_MAP', 'unit sprite map');
+assertIncludes(indexHtml, 'assets/units/kenney-roguelike/', 'Kenney unit sprite path');
+assertIncludes(indexHtml, 'unit-sprite', 'unit sprite renderer');
+assertIncludes(indexHtml, 'perspective(1200px) rotateX(3deg)', '2.5D battlefield perspective');
+assertIncludes(indexHtml, 'unit-lunge', '2.5D attack lunge');
+assertIncludes(indexHtml, 'radial-gradient(ellipse at 50% 88%', '2.5D unit base');
 assertIncludes(indexHtml, 'G.player.gold -= price;', 'single-card purchase gold deduction');
 assertIncludes(indexHtml, 'G.player.gold -= cost;', 'pack or upgrade gold deduction');
 assertIncludes(testScript, 'pathToFileURL', 'local file test target');
@@ -65,6 +79,7 @@ assertIncludes(testScript, 'runCardCostRegression', 'card cost regression');
 assertIncludes(testScript, 'runSplitSpeedRegression', 'split speed regression');
 assertIncludes(testScript, 'runStageStartFlowRegression', 'stage start flow regression');
 assertIncludes(testScript, 'runBattleControlsRegression', 'battle controls regression');
+assertIncludes(testScript, 'runBattleUxFeatureRegression', 'battle UX feature regression');
 
 assertNotIncludes(indexHtml, 'const SYNERGIES', 'removed synergy table');
 assertNotIncludes(indexHtml, 'applySynergies();', 'removed synergy startup call');

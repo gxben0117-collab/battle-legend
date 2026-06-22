@@ -1,0 +1,15 @@
+node_modules
+.git
+.vercel
+*.log
+artifacts-*.png
+*.backup.*
+*.backup
+*.bak
+*.tmp
+test-*.html
+*-test.js
+playwright-test.js
+README*.md
+*.md
+象數參考

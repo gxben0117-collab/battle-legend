@@ -1131,6 +1131,30 @@ body {
   }
 }
 
+.unit-sprite {
+  width: min(46px, calc(var(--battle-cell, 64px) * 0.74));
+  height: min(46px, calc(var(--battle-cell, 64px) * 0.74));
+  object-fit: contain;
+  image-rendering: pixelated;
+  position: relative;
+  z-index: 1;
+  filter:
+    drop-shadow(0 0 8px rgba(255,255,255,0.22))
+    drop-shadow(0 4px 6px rgba(0,0,0,0.82));
+}
+
+.unit.casting .unit-sprite {
+  animation: cast-pulse 0.42s ease-out;
+}
+
+.boss-unit .unit-sprite {
+  width: min(104px, calc(var(--battle-cell, 64px) * 1.64));
+  height: min(104px, calc(var(--battle-cell, 64px) * 1.64));
+  filter:
+    drop-shadow(0 0 18px rgba(255,50,80,0.92))
+    drop-shadow(0 6px 10px rgba(0,0,0,0.9));
+}
+
 /* 單位圖標裝飾邊框 */
 .unit-icon::before {
   content: '⬡';
@@ -1196,6 +1220,108 @@ body {
 .enemy-unit .unit-name { color: #ff8a8a; }
 .commander-unit .unit-name { color: var(--gold-bright); }
 
+.unit-job-badge {
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  max-width: calc(100% - 30px);
+  padding: 1px 4px;
+  border-radius: 999px;
+  background: rgba(2,5,10,0.72);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.76);
+  font-size: 7px;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  z-index: 6;
+}
+
+.unit-rarity-R { box-shadow: 0 0 0 1px rgba(74,144,217,0.38), 0 0 18px rgba(74,144,217,0.26), inset 0 1px 0 rgba(255,255,255,0.14); }
+.unit-rarity-SR { box-shadow: 0 0 0 1px rgba(155,89,182,0.46), 0 0 22px rgba(155,89,182,0.32), inset 0 1px 0 rgba(255,255,255,0.16); }
+.unit-rarity-SSR { box-shadow: 0 0 0 1px rgba(243,156,18,0.62), 0 0 28px rgba(243,156,18,0.38), inset 0 1px 0 rgba(255,255,255,0.18); }
+
+.unit.attacking {
+  animation: unit-lunge 0.22s ease-out;
+}
+
+.unit.casting .unit-icon {
+  animation: cast-pulse 0.42s ease-out;
+}
+
+.unit.healing {
+  box-shadow: 0 0 0 2px rgba(87,255,171,0.62), 0 0 28px rgba(87,255,171,0.42), inset 0 1px 0 rgba(255,255,255,0.2) !important;
+}
+
+.unit.shielding {
+  box-shadow: 0 0 0 2px rgba(100,180,255,0.68), 0 0 32px rgba(100,180,255,0.48), inset 0 1px 0 rgba(255,255,255,0.2) !important;
+}
+
+.unit.dying {
+  animation: unit-collapse 0.55s forwards;
+  filter: saturate(1.4) brightness(1.15);
+}
+
+@keyframes unit-lunge {
+  0% { transform: translateY(0) scale(1) rotateX(0deg); }
+  35% { transform: translateY(-10px) scale(1.08) rotateX(8deg); }
+  65% { transform: translateY(-4px) scale(1.14) rotateX(-6deg); }
+  100% { transform: translateY(0) scale(1) rotateX(0deg); }
+}
+
+@keyframes cast-pulse {
+  0% { transform: scale(1); filter: drop-shadow(0 0 8px currentColor); }
+  45% { transform: scale(1.22); filter: drop-shadow(0 0 22px currentColor) drop-shadow(0 0 12px rgba(255,255,255,0.85)); }
+  100% { transform: scale(1); filter: drop-shadow(0 0 8px currentColor); }
+}
+
+@keyframes unit-collapse {
+  0% { opacity: 1; transform: scale(1) rotate(0deg); }
+  45% { opacity: 1; transform: scale(1.18) rotate(-4deg); }
+  100% { opacity: 0; transform: scale(0.35) rotate(12deg); }
+}
+
+.battle-main.impact-shake {
+  animation: battle-impact-shake 0.18s ease-out;
+}
+
+@keyframes battle-impact-shake {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(3px, -2px); }
+  50% { transform: translate(-3px, 2px); }
+  75% { transform: translate(2px, 1px); }
+}
+
+.battle-alert {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1200;
+  min-width: min(420px, calc(100% - 32px));
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: rgba(4,7,12,0.82);
+  border: 1px solid rgba(240,200,74,0.48);
+  color: rgba(255,255,255,0.92);
+  text-align: center;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0;
+  box-shadow: 0 18px 46px rgba(0,0,0,0.38), 0 0 28px rgba(240,200,74,0.18);
+  pointer-events: none;
+  animation: battle-alert-pop 1.05s ease-out forwards;
+}
+
+@keyframes battle-alert-pop {
+  0% { opacity: 0; transform: translate(-50%, -12px) scale(0.95); }
+  14% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  78% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -8px) scale(0.98); }
+}
+
 /* v0.3：HP 百分比文字顯示 */
 .unit-hp-text {
   position: absolute;
@@ -1223,13 +1349,40 @@ body {
 /* v0.3：BOSS 樣式 */
 .unit.boss-unit {
   border: 3px solid #ff2244;
-  background: linear-gradient(145deg, #3a0a0a 0%, #5a1010 60%, #7a1515 100%);
+  background:
+    radial-gradient(ellipse at 50% 100%, rgba(255,70,110,0.22), transparent 38%),
+    linear-gradient(145deg, #3a0a0a 0%, #5a1010 60%, #7a1515 100%);
   box-shadow:
     0 0 0 2px rgba(255,34,68,0.5),
     0 0 20px rgba(255,34,68,0.4),
     0 0 40px rgba(255,34,68,0.3),
     inset 0 2px 0 rgba(255,100,100,0.3);
   animation: boss-pulse 2s ease-in-out infinite;
+}
+
+.unit.boss-unit::before {
+  left: 2%;
+  right: 2%;
+  bottom: -14px;
+  height: 34px;
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(255,130,160,0.36), transparent 36%),
+    linear-gradient(180deg, rgba(126,18,38,0.92), rgba(32,3,9,0.98));
+  border-color: rgba(255,120,150,0.32);
+  box-shadow:
+    0 16px 28px rgba(0,0,0,0.58),
+    0 0 34px rgba(255,34,68,0.34),
+    inset 0 3px 0 rgba(255,255,255,0.18),
+    inset 0 -9px 12px rgba(0,0,0,0.46);
+}
+
+.unit.boss-unit::after {
+  left: 8%;
+  right: 8%;
+  bottom: -19px;
+  height: 20px;
+  background: rgba(0,0,0,0.62);
+  filter: blur(7px);
 }
 @keyframes boss-pulse {
   0%, 100% {
@@ -1502,9 +1655,10 @@ body {
 
 /* 受擊抖動 */
 @keyframes shake {
-  0%,100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
+  0%,100% { transform: translateX(0) scale(1); }
+  25% { transform: translateX(-4px) scale(1.04, 0.92); }
+  50% { transform: translateX(3px) scale(0.94, 1.06); }
+  75% { transform: translateX(4px) scale(1.02, 0.96); }
 }
 .unit.shaking { animation: shake 0.15s ease-in-out; }
 
@@ -2786,7 +2940,7 @@ body {
 
 .battle-content {
   display: grid;
-  grid-template-columns: 252px 1fr auto;
+  grid-template-columns: 252px minmax(0, 1fr);
   gap: 22px;
   padding: 24px;
   align-items: stretch;
@@ -2822,6 +2976,7 @@ body {
     linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
   border: 1px solid rgba(255,255,255,0.10);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 34px 90px rgba(0,0,0,0.44);
+  justify-content: flex-start;
   padding: 28px;
 }
 
@@ -2853,6 +3008,43 @@ body {
   min-width: 126px;
 }
 
+.battle-log {
+  width: min(760px, 100%);
+  max-height: 82px;
+  overflow-y: auto;
+  padding: 10px 14px;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 16px;
+  background: rgba(5,8,13,0.48);
+  color: rgba(255,255,255,0.72);
+  font-size: 12px;
+  line-height: 1.45;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.battle-log-entry {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  padding: 2px 0;
+  opacity: 0.56;
+}
+
+.battle-log-entry:first-child {
+  opacity: 1;
+  color: rgba(255,255,255,0.94);
+}
+
+.battle-log-time {
+  flex: 0 0 auto;
+  color: rgba(76,201,240,0.86);
+  font-variant-numeric: tabular-nums;
+}
+
+.battle-log-empty {
+  color: rgba(255,255,255,0.36);
+}
+
 .battle-main::before {
   content: '';
   position: absolute;
@@ -2876,27 +3068,45 @@ body {
     linear-gradient(145deg, rgba(255,255,255,0.11), rgba(255,255,255,0.03)),
     rgba(3,5,9,0.82);
   border: 1px solid rgba(255,255,255,0.13);
-  box-shadow: 0 34px 80px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.12);
+  box-shadow:
+    0 34px 80px rgba(0,0,0,0.55),
+    0 18px 0 rgba(0,0,0,0.18),
+    inset 0 1px 0 rgba(255,255,255,0.12);
+  transform: perspective(1200px) rotateX(3deg);
+  transform-origin: 50% 65%;
 }
 
 .cell {
-  background: rgba(255,255,255,0.035);
-  border-color: rgba(124,154,208,0.22);
-  border-radius: 6px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.080), rgba(255,255,255,0.018) 54%, rgba(0,0,0,0.16)),
+    rgba(255,255,255,0.035);
+  border-color: rgba(124,154,208,0.24);
+  border-radius: 7px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    inset 0 -5px 8px rgba(0,0,0,0.16),
+    0 5px 0 rgba(0,0,0,0.18);
+  transform: translateZ(0);
 }
 
 .cell.my-zone {
-  background: rgba(51,116,255,0.13);
+  background:
+    linear-gradient(145deg, rgba(91,152,255,0.20), rgba(28,72,145,0.13) 58%, rgba(0,0,0,0.12)),
+    rgba(51,116,255,0.13);
   border-color: rgba(92,154,255,0.36);
 }
 
 .cell.enemy-zone {
-  background: rgba(255,55,86,0.13);
+  background:
+    linear-gradient(145deg, rgba(255,85,111,0.20), rgba(145,28,48,0.13) 58%, rgba(0,0,0,0.12)),
+    rgba(255,55,86,0.13);
   border-color: rgba(255,85,111,0.36);
 }
 
 .cell.neutral-zone {
-  background: rgba(255,255,255,0.026);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.055), rgba(255,255,255,0.014) 58%, rgba(0,0,0,0.14)),
+    rgba(255,255,255,0.026);
 }
 
 .cell.commander-cell {
@@ -2991,7 +3201,71 @@ body {
 .unit {
   border-radius: 12px;
   clip-path: none;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.38);
+  background:
+    radial-gradient(ellipse at 50% 88%, rgba(255,255,255,0.14), transparent 32%),
+    linear-gradient(180deg, rgba(255,255,255,0.07), rgba(0,0,0,0.18));
+  box-shadow:
+    0 18px 28px rgba(0,0,0,0.34),
+    inset 0 1px 0 rgba(255,255,255,0.13);
+  transform-style: preserve-3d;
+}
+
+.unit::before {
+  content: '';
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: -8px;
+  top: auto;
+  width: auto;
+  height: 18px;
+  border-radius: 50%;
+  border-style: solid;
+  border-width: 1px;
+  background:
+    radial-gradient(ellipse at 50% 35%, rgba(255,255,255,0.18), transparent 34%),
+    linear-gradient(180deg, rgba(84,111,158,0.70), rgba(20,30,48,0.92));
+  border: 1px solid rgba(255,255,255,0.16);
+  box-shadow:
+    0 10px 18px rgba(0,0,0,0.44),
+    inset 0 2px 0 rgba(255,255,255,0.18),
+    inset 0 -5px 8px rgba(0,0,0,0.32);
+  z-index: -1;
+}
+
+.unit.unit.my-unit::before {
+  width: auto;
+  height: 18px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: rgba(133,185,255,0.28);
+  background:
+    radial-gradient(ellipse at 50% 35%, rgba(133,185,255,0.28), transparent 36%),
+    linear-gradient(180deg, rgba(48,111,201,0.78), rgba(11,31,72,0.94));
+}
+
+.unit.unit.enemy-unit::before {
+  width: auto;
+  height: 18px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: rgba(255,120,142,0.28);
+  background:
+    radial-gradient(ellipse at 50% 35%, rgba(255,120,142,0.26), transparent 36%),
+    linear-gradient(180deg, rgba(191,44,66,0.78), rgba(72,11,22,0.94));
+}
+
+.unit::after {
+  content: '';
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: -12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.48);
+  filter: blur(4px);
+  z-index: -2;
 }
 
 .unit.my-unit,
@@ -3001,6 +3275,11 @@ body {
 
 .unit-icon {
   animation: none;
+}
+
+.unit-sprite,
+.unit-icon {
+  transform: translateY(-8px);
 }
 
 .unit-icon::before,
@@ -3455,6 +3734,22 @@ body {
     font-size: clamp(12px, calc(var(--battle-cell) * 0.36), 18px);
   }
 
+  .unit-sprite {
+    width: min(36px, calc(var(--battle-cell) * 0.72));
+    height: min(36px, calc(var(--battle-cell) * 0.72));
+    transform: translateY(-5px);
+  }
+
+  .unit::before {
+    bottom: -5px;
+    height: 12px;
+  }
+
+  .unit::after {
+    bottom: -8px;
+    height: 8px;
+  }
+
   .unit-name,
   .unit-hp-text {
     font-size: clamp(5px, calc(var(--battle-cell) * 0.16), 7px);
@@ -3473,7 +3768,7 @@ body {
     grid-column: 1 / -1;
     grid-row: 3;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: repeat(4, 1fr);
     width: 100%;
     min-height: 0;
     gap: 5px;
@@ -3499,13 +3794,18 @@ body {
 
   #btn-auto { grid-column: 1; grid-row: 1; }
   #btn-manual { grid-column: 2; grid-row: 1; }
+  #btn-pause { grid-column: 3; grid-row: 1; }
   #btn-speed-1 { grid-column: 1; grid-row: 2; }
   #btn-speed-3 { grid-column: 2; grid-row: 2; }
-  #btn-speed-5 { grid-column: 3; grid-row: 2; }
+  #btn-speed-5 { grid-column: 3 / 5; grid-row: 2; }
   .battle-right .retreat-btn {
-    grid-column: 3;
+    grid-column: 4;
     grid-row: 1;
     flex-basis: auto;
+  }
+
+  .battle-log {
+    display: none;
   }
 
   .speed-indicator {
@@ -3687,6 +3987,7 @@ body {
       <canvas id="battleCanvas"></canvas>
       <div class="battle-mode-info" id="battle-mode-info"></div>
       <div class="battlefield" id="battlefield"></div>
+      <div class="battle-log" id="battle-log" aria-live="polite"></div>
       <div class="speed-indicator" id="speed-indicator" style="display:none">⚡ 1×</div>
     </div>
 
@@ -3695,6 +3996,7 @@ body {
       <div class="control-buttons">
         <button id="btn-auto" class="ctrl-btn">🤖 自動</button>
         <button id="btn-manual" class="ctrl-btn active">👆 手動</button>
+        <button id="btn-pause" class="ctrl-btn">Pause</button>
       </div>
       <div class="speed-controls">
         <button id="btn-speed-1" class="speed-btn active">1×</button>
@@ -4143,6 +4445,15 @@ const CARD_DB = {
     passive:'預言', passiveDesc:'每10秒隨機復活一個死亡友軍（50% HP）',
     skillMult:0, skillType:'aoe',
   },
+  'field-medic': {
+    id:'field-medic', name:'Field Medic', icon:'+', rarity:'R', cardType:'unit',
+    race:'Alliance', job:'Support', cost:2,
+    hp:48, patk:1, matk:11, pdef:4, mdef:9, spd:72, acc:88, crit:4, critDmg:130,
+    move:2, range:3, color:'#4a7a68', dmgType:'magic',
+    skill:'Rapid Aid', skillDesc:'Heals the weakest ally for 35% magic power.',
+    passive:'Triage', passiveDesc:'Low-cost support unit for longer battles.',
+    skillMult:0.35, skillType:'heal',
+  },
   'demon-hunter': {
     id:'demon-hunter', name:'惡魔獵手', icon:'😈', rarity:'SR', cardType:'unit',
     race:'半魔', job:'射手', cost:4,
@@ -4202,6 +4513,56 @@ const CARD_DB = {
     isBoss:true, bossSize:2,
   },
 };
+
+const KENNEY_UNIT_SPRITE_BASE = 'assets/units/kenney-roguelike/';
+const UNIT_SPRITE_MAP = {
+  fortress: 'fortress.png',
+  skeleton: 'skeleton.png',
+  knight: 'knight.png',
+  warrior: 'warrior.png',
+  archer: 'archer.png',
+  mage: 'mage.png',
+  assassin: 'assassin.png',
+  tank: 'tank.png',
+  priest: 'priest.png',
+  necro: 'necro.png',
+  'shield-guard': 'shield-guard.png',
+  'light-cavalry': 'light-cavalry.png',
+  sniper: 'sniper.png',
+  'sword-master': 'sword-master.png',
+  'aerial-archer': 'aerial-archer.png',
+  'novice-monk': 'novice-monk.png',
+  'thunder-mage': 'thunder-mage.png',
+  'ice-mage': 'ice-mage.png',
+  'wind-walker': 'wind-walker.png',
+  'inferno-mage': 'inferno-mage.png',
+  berserker: 'berserker.png',
+  paladin: 'paladin.png',
+  ranger: 'ranger.png',
+  'battle-mage': 'battle-mage.png',
+  'shadow-blade': 'shadow-blade.png',
+  'frost-knight': 'frost-knight.png',
+  oracle: 'oracle.png',
+  'field-medic': 'field-medic.png',
+  'demon-hunter': 'demon-hunter.png',
+  'earth-shaman': 'earth-shaman.png',
+  'void-walker': 'void-walker.png',
+  'boss-shadow-lord': 'boss-shadow-lord.png',
+  'boss-inferno-dragon': 'boss-inferno-dragon.png',
+  'boss-frost-titan': 'boss-frost-titan.png',
+  'boss-thunder-behemoth': 'boss-thunder-behemoth.png',
+  'boss-void-emperor': 'boss-void-emperor.png',
+  'custom-hero': 'field-medic.png',
+};
+
+function getUnitSpritePath(template) {
+  if (!template) return '';
+  if (template.sprite) return template.sprite;
+  const rawId = String(template.id || '');
+  const cardId = rawId.startsWith('tower-') ? rawId.slice('tower-'.length) : rawId;
+  const file = UNIT_SPRITE_MAP[cardId] || UNIT_SPRITE_MAP[rawId];
+  return file ? KENNEY_UNIT_SPRITE_BASE + file : '';
+}
 
 // 骷髏士兵（臨時單位）
 const SKELETON_TEMPLATE = {
@@ -4813,7 +5174,7 @@ function initStarterCards() {
   G.collection = {
     knight:3, warrior:3, archer:3, mage:1, assassin:1, tank:1,
     'shield-guard':2, 'light-cavalry':2, 'sniper':1, 'sword-master':1, 'aerial-archer':1,
-    'novice-monk':2, 'thunder-mage':1, 'ice-mage':1, 'wind-walker':1, 'inferno-mage':0,
+    'novice-monk':2, 'thunder-mage':1, 'ice-mage':1, 'wind-walker':1, 'field-medic':1, 'inferno-mage':0,
     [CUSTOM_HERO_ID]:1
   };
   // v0.3：初始牌組（只用初始收藏的卡片，不足 30 張）
@@ -4833,6 +5194,7 @@ function initStarterCards() {
     'thunder-mage',                        // 雷法師 x1
     'ice-mage',                            // 冰法師 x1
     'wind-walker',                         // 風行者 x1
+    'field-medic',                          // Field Medic x1
     CUSTOM_HERO_ID,                         // 自訂角色 x1
   ];
   // 共 22 張，玩家需要通過抽卡/購買來補滿 30 張
@@ -5229,6 +5591,42 @@ function getChapterForStage(stageId, isBossRaid = false) {
   return CHAPTERS.find(c => c.stagePrefix && stageId.startsWith(c.stagePrefix)) || lastStageChapter;
 }
 
+function ensureBattleControlsLayout() {
+  const main = document.querySelector('.battle-main');
+  const controls = document.querySelector('.battle-right');
+  if (main && controls && controls.parentElement !== main) {
+    main.appendChild(controls);
+  }
+}
+
+function formatBattleTime(ms = 0) {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+}
+
+function logBattleEvent(message) {
+  if (!B || !message) return;
+  const cleanMessage = String(message).replace(/\s+/g, ' ').slice(0, 58);
+  B.log.unshift({ time: B.timer || 0, message: cleanMessage });
+  B.log = B.log.slice(0, 8);
+  renderBattleLog();
+}
+
+function renderBattleLog() {
+  const el = document.getElementById('battle-log');
+  if (!el) return;
+  if (!B || !B.log || B.log.length === 0) {
+    el.innerHTML = '<div class="battle-log-empty">Battle events will appear here.</div>';
+    return;
+  }
+  el.innerHTML = B.log.map(item => `
+    <div class="battle-log-entry">
+      <span class="battle-log-time">${formatBattleTime(item.time)}</span>
+      <span>${item.message}</span>
+    </div>
+  `).join('');
+}
+
 // ============================================================
 // 戰鬥系統
 // ============================================================
@@ -5266,28 +5664,37 @@ function startBattle(stageId, isBossRaid = false, battleMode = 'normal') {
 
   B = createBattleState(stage, raid, battleMode);
   showScreen('battle');
+  ensureBattleControlsLayout();
   setupBattlefield();
   const modeInfo = document.getElementById('battle-mode-info');
   if (modeInfo) modeInfo.textContent = B.isEventTower ? '無限塔  第 1/100 波' : '';
   renderHand();
   renderEnergy();
+  renderBattleLog();
+  logBattleEvent(`Battle started: ${stage.name || stage.id}`);
+  showBattleAlert(`Battle Start: ${stage.name || stage.id}`);
 
   // v0.7.4：綁定新佈局的按鈕事件
   document.getElementById('btn-auto').onclick = () => {
     B.autoPlay = true;
     document.getElementById('btn-auto').classList.add('active');
     document.getElementById('btn-manual').classList.remove('active');
+    logBattleEvent('Auto deploy enabled');
     renderHand(); // v0.8.4：重新渲染手牌以更新點擊事件
   };
   document.getElementById('btn-manual').onclick = () => {
     B.autoPlay = false;
     document.getElementById('btn-manual').classList.add('active');
     document.getElementById('btn-auto').classList.remove('active');
+    logBattleEvent('Manual deploy enabled');
     renderHand(); // v0.8.4：重新渲染手牌以綁定點擊事件
   };
   document.getElementById('btn-speed-1').onclick = () => setSpeed(1);
   document.getElementById('btn-speed-3').onclick = () => setSpeed(3);
   document.getElementById('btn-speed-5').onclick = () => setSpeed(5);
+  document.getElementById('btn-pause').textContent = 'Pause';
+  document.getElementById('btn-pause').classList.remove('active');
+  document.getElementById('btn-pause').onclick = () => toggleBattlePause();
   document.getElementById('btn-retreat').onclick = () => exitBattle();
 
   startBattleLoop();
@@ -5310,10 +5717,12 @@ function createBattleState(stage, raid = null, battleMode = 'normal') {
     timer: 0,
     round: 1,
     running: true,
+    paused: false,
     lastTime: null,
     animFrameId: null,
     skillCooldowns: {},
     autoPlay: true, // v0.3：自動/手動模式（true=自動出牌，false=手動點擊）
+    log: [],
     particles: [],
     unitIdCounter: 0,
     obstacles: stage.obstacles || [], // v0.2：地形障礙
@@ -5453,6 +5862,10 @@ function makeUnit(uid, template, x, y, isMy, isCommander) {
     cardId: template.id,
     name: template.name,
     icon: template.icon,
+    sprite: getUnitSpritePath(template),
+    rarity: template.rarity || 'N',
+    job: template.job || '',
+    race: template.race || '',
     x, y,
     isMy,
     isCommander,
@@ -5594,6 +6007,7 @@ function placeUnit(u) {
     el = document.createElement('div');
     el.id = 'unit-' + u.uid;
     el.className = 'unit ' + (u.isMy ? 'my-unit' : 'enemy-unit') + (u.isCommander ? ' commander-unit' : '');
+    el.classList.add('unit-rarity-' + (u.rarity || 'N'));
 
     // v0.3：BOSS 特殊處理
     if (u.isBoss) {
@@ -5604,8 +6018,12 @@ function placeUnit(u) {
       .replace('聖光','').replace('狂野','').replace('翠林','')
       .replace('星穹','').replace('影刃','').replace('鐵壁','')
       .replace('神聖','').replace('死靈術士','術士');
+    const visual = u.sprite
+      ? `<img class="unit-sprite" src="${u.sprite}" alt="">`
+      : `<span class="unit-icon">${u.icon}</span>`;
     el.innerHTML = `
-      <span class="unit-icon">${u.icon}</span>
+      <span class="unit-job-badge">${u.isCommander ? 'BASE' : (u.job || 'UNIT')}</span>
+      ${visual}
       <span class="unit-name">${shortName}</span>
       <span class="unit-hp-text" id="uhp-text-${u.uid}">${Math.round(u.hp)}/${u.maxHp}</span>
       <div class="unit-hp-bar"><div class="unit-hp-fill" id="uhp-${u.uid}"></div></div>
@@ -5695,6 +6113,10 @@ function startBattleLoop() {
       if (!B || !B.running) return;
       const rawDt = Math.min(now - B.lastTime, 100);
       B.lastTime = now;
+      if (B.paused) {
+        B.animFrameId = requestAnimationFrame(loop);
+        return;
+      }
       const dt = rawDt * B.speed;
 
       // v0.8.3：計時器受倍速影響
@@ -5839,6 +6261,7 @@ function spawnTowerWave(state) {
   if (state === B) {
     const waveLabel = isEasyWave ? `無限塔 第 ${wave} 波來襲 [簡單模式]` : `無限塔 第 ${wave} 波來襲`;
     showToast(waveLabel);
+    logBattleEvent(waveLabel);
   }
 }
 
@@ -5967,6 +6390,7 @@ function getDistanceToUnit(from, to) {
 }
 
 function attack(attacker, target) {
+  flashUnitState(attacker, attacker.dmgType === 'magic' ? 'casting' : 'attacking', 360);
   // v0.7：添加攻擊特效
   showAttackEffect(attacker, target);
 
@@ -6004,6 +6428,9 @@ function attack(attacker, target) {
   dmg = Math.round(dmg);
   applyDamage(target, dmg, isCrit);
   shakeUnit(target);
+  if (isCrit || dmg >= Math.max(18, target.maxHp * 0.22)) {
+    shakeBattlefield();
+  }
 
   // v0.2：物理/魔法傷害數字顏色區分
   if (isCrit) showFloatNumber(target, `💥${dmg}`, 'crit');
@@ -6033,6 +6460,7 @@ function attack(attacker, target) {
 }
 
 function executeSkill(u, target, allies, enemies) {
+  flashUnitState(u, 'casting', 420);
   switch (u.skillType) {
     case 'melee':
     case 'ranged': {
@@ -6062,6 +6490,7 @@ function executeSkill(u, target, allies, enemies) {
     case 'aoe': {
       // 火球：3×3範圍
       spawnFireball(u, target, true);
+      showBattleAlert(`${u.name} casts an area skill`);
       const aoeTargets = enemies.filter(e => Math.abs(e.x-target.x)<=1 && Math.abs(e.y-target.y)<=1);
       aoeTargets.forEach(t => {
         // v0.2：物魔分離範圍傷害
@@ -6084,6 +6513,8 @@ function executeSkill(u, target, allies, enemies) {
       healTarget.hp = Math.min(healTarget.maxHp, healTarget.hp + healAmt);
       updateUnitBar(healTarget);
       showFloatNumber(healTarget, `+${healAmt}`, 'heal');
+      flashUnitState(healTarget, 'healing', 520);
+      showBattleAlert(`${u.name} heals ${healTarget.name}`);
       spawnHealEffect(healTarget);
       break;
     }
@@ -6091,6 +6522,8 @@ function executeSkill(u, target, allies, enemies) {
       // 護盾 + 嘲諷
       u.shield = Math.round(u.maxHp * 0.25);
       showFloatNumber(u, '🛡護盾', 'heal');
+      flashUnitState(u, 'shielding', 620);
+      showBattleAlert(`${u.name} raises a shield`);
       spawnShieldEffect(u);
       break;
     }
@@ -6167,7 +6600,12 @@ function showFloatingDamage(unit, dmg, isCrit = false) {
 function killUnit(unit) {
   unit.alive = false;
   unit.hp = 0;
+  spawnDefeatBurst(unit);
+  if (!unit.isCommander) {
+    showBattleAlert(`${unit.name} has fallen`);
+  }
   removeUnitEl(unit);
+  logBattleEvent(`${unit.isMy ? 'Ally' : 'Enemy'} down: ${unit.name}`);
   if (B && B.isEventTower && unit.isMy && !unit.isCommander && !unit.isSummon && unit.cardId) {
     B.hand.push(unit.cardId);
     renderHand();
@@ -6459,6 +6897,7 @@ function playCardById(cardId) {
   const u = makeUnit('my'+B.unitIdCounter++, card, freeCell.x, freeCell.y, true, false);
   B.units.push(u);
   placeUnit(u);
+  logBattleEvent(`Deployed ${card.name}`);
   renderHand();
   renderEnergy();
 }
@@ -6622,6 +7061,30 @@ function setSpeed(n) {
       ind.style.display = 'none';
     }
   }
+  logBattleEvent(`Speed set to ${n}x`);
+}
+
+function toggleBattlePause() {
+  if (!B) return;
+  B.paused = !B.paused;
+  const btn = document.getElementById('btn-pause');
+  if (btn) {
+    btn.classList.toggle('active', B.paused);
+    btn.textContent = B.paused ? 'Resume' : 'Pause';
+  }
+  const ind = document.getElementById('speed-indicator');
+  if (ind && B.paused) {
+    ind.style.display = 'block';
+    ind.textContent = 'Paused';
+  } else if (ind) {
+    if (B.speed > 1) {
+      ind.style.display = 'block';
+      ind.textContent = `⚡ ${B.speed}×`;
+    } else {
+      ind.style.display = 'none';
+    }
+  }
+  logBattleEvent(B.paused ? 'Battle paused' : 'Battle resumed');
 }
 
 // v0.4：切換手動/自動模式（優化視覺效果）
@@ -6647,6 +7110,7 @@ function toggleAutoPlay() {
 function endBattle(result) {
   B.running = false;
   B.result = result;
+  logBattleEvent(`Battle ended: ${result}`);
   if (B.animFrameId) cancelAnimationFrame(B.animFrameId);
 
   const isWin = result === 'win';
@@ -6701,6 +7165,35 @@ function shakeUnit(u) {
   setTimeout(() => u.el && u.el.classList.remove('shaking'), 200);
 }
 
+function flashUnitState(u, className, ms = 320) {
+  if (!u || !u.el) return;
+  u.el.classList.remove(className);
+  void u.el.offsetWidth;
+  u.el.classList.add(className);
+  setTimeout(() => u.el && u.el.classList.remove(className), ms);
+}
+
+function shakeBattlefield() {
+  const main = document.querySelector('.battle-main');
+  if (!main) return;
+  main.classList.remove('impact-shake');
+  void main.offsetWidth;
+  main.classList.add('impact-shake');
+  setTimeout(() => main.classList.remove('impact-shake'), 220);
+}
+
+function showBattleAlert(text) {
+  const main = document.querySelector('.battle-main');
+  if (!main || !text) return;
+  const old = main.querySelector('.battle-alert');
+  if (old) old.remove();
+  const div = document.createElement('div');
+  div.className = 'battle-alert';
+  div.textContent = text;
+  main.appendChild(div);
+  setTimeout(() => div.remove(), 1100);
+}
+
 function showFloatNumber(u, text, type) {
   if (!u.el) return;
   const rect = u.el.getBoundingClientRect();
@@ -6727,12 +7220,11 @@ function showAttackEffect(attacker, target) {
   const toX = toRect.left - mainRect.left + toRect.width / 2;
   const toY = toRect.top - mainRect.top + toRect.height / 2;
 
-  // v0.7.1：簡化特效邏輯
   if (attacker.range <= 1) {
-    // 近戰：統一揮刀特效
     showMeleeSlash(fromX, fromY, toX, toY);
+  } else if (attacker.dmgType === 'physical') {
+    showArrowEffect(fromX, fromY, toX, toY);
   } else {
-    // 遠程：統一光球特效（不分物理魔法）
     showMagicBolt(fromX, fromY, toX, toY);
   }
 }
@@ -6879,9 +7371,10 @@ function spawnShieldEffect(u) {
 function spawnHitParticle(target) {
   if (!B) return;
   const pos = getCellCenter(target.x, target.y);
-  for (let i = 0; i < 5; i++) {
+  B.particles.push({ type:'impactRing', x:pos.x, y:pos.y, life:0.28, maxLife:0.28, color:'255,210,80' });
+  for (let i = 0; i < 10; i++) {
     const angle = Math.random() * Math.PI * 2;
-    const spd = 1 + Math.random() * 2;
+    const spd = 1.4 + Math.random() * 3.2;
     B.particles.push({
       type: 'hitSpark',
       x: pos.x, y: pos.y,
@@ -6891,6 +7384,25 @@ function spawnHitParticle(target) {
       maxLife: 0.5,
     });
   }
+}
+
+function spawnDefeatBurst(unit) {
+  if (!B) return;
+  const pos = getCellCenter(unit.x, unit.y);
+  B.particles.push({ type:'impactRing', x:pos.x, y:pos.y, life:0.5, maxLife:0.5, color: unit.isMy ? '80,160,255' : '255,80,110' });
+  for (let i = 0; i < 18; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const spd = 1.8 + Math.random() * 4.4;
+    B.particles.push({
+      type: 'hitSpark',
+      x: pos.x, y: pos.y,
+      vx: Math.cos(angle) * spd,
+      vy: Math.sin(angle) * spd,
+      life: 0.45 + Math.random()*0.25,
+      maxLife: 0.7,
+    });
+  }
+  shakeBattlefield();
 }
 
 function renderCanvas(dt) {
@@ -6982,6 +7494,20 @@ function renderCanvas(dt) {
         ctx.arc(p.x, p.y, 2, 0, Math.PI*2);
         ctx.fillStyle = `rgba(255,150,50,${alpha})`;
         ctx.fill();
+        return p.life > 0;
+      }
+      case 'impactRing': {
+        p.life -= dtSec;
+        const progress = 1 - p.life / p.maxLife;
+        const alpha = Math.max(0, p.life / p.maxLife);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 8 + progress * 34, 0, Math.PI*2);
+        ctx.strokeStyle = `rgba(${p.color || '255,220,100'},${alpha})`;
+        ctx.lineWidth = 2 + alpha * 4;
+        ctx.shadowColor = `rgba(${p.color || '255,220,100'},${alpha})`;
+        ctx.shadowBlur = 18;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
         return p.life > 0;
       }
       case 'shield': {
